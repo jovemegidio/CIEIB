@@ -217,6 +217,27 @@ async function seed() {
             `, [mId]);
         }
 
+        // --- Diretoria e Conselho Fiscal ---
+        const diretoriaMembers = [
+            { nome: 'Ap. Osni Egidio', cargo: 'Presidente', tipo: 'diretoria', descricao: 'Apóstolo presidente da CIEIB, liderando a convenção desde sua fundação com visão missionária e compromisso com a formação ministerial.', ordem: 1 },
+            { nome: 'Pra. Alessandra Egidio', cargo: 'Vice-Presidente', tipo: 'diretoria', descricao: 'Pastora e vice-presidente, responsável pela coordenação dos projetos sociais e pelo fortalecimento das igrejas filiadas.', ordem: 2 },
+            { nome: 'Pr. Jonathan Egidio', cargo: '1º Secretário', tipo: 'diretoria', descricao: 'Pastor e primeiro secretário da convenção, gerenciando a comunicação institucional e os registros oficiais.', ordem: 3 },
+            { nome: 'Miss. Rafael Egidio', cargo: '2º Secretário', tipo: 'diretoria', descricao: 'Missionário e segundo secretário, auxiliando nas atividades administrativas e na organização de eventos.', ordem: 4 },
+            { nome: 'Pr. Vitor Hugo', cargo: '1º Tesoureiro', tipo: 'diretoria', descricao: 'Pastor e primeiro tesoureiro, responsável pela gestão financeira e pela transparência das contas da convenção.', ordem: 5 },
+            { nome: 'Pr. Willian Egidio', cargo: '2º Tesoureiro', tipo: 'diretoria', descricao: 'Pastor e segundo tesoureiro, auxiliando na administração financeira e no planejamento orçamentário.', ordem: 6 },
+            { nome: 'Pr. Marcus Vinicius', cargo: 'Membro', tipo: 'conselho_fiscal', descricao: '', ordem: 1 },
+            { nome: 'Pr. Marcos Egidio', cargo: 'Membro', tipo: 'conselho_fiscal', descricao: '', ordem: 2 },
+            { nome: 'Pr. Lucas Egidio', cargo: 'Membro', tipo: 'conselho_fiscal', descricao: '', ordem: 3 },
+        ];
+
+        for (const d of diretoriaMembers) {
+            await pool.query(`
+                INSERT INTO diretoria (nome, cargo, tipo, descricao, ordem, ativo)
+                VALUES ($1, $2, $3, $4, $5, true)
+                ON CONFLICT DO NOTHING
+            `, [d.nome, d.cargo, d.tipo, d.descricao, d.ordem]);
+        }
+
         // --- Admin padrão ---
         const adminSenha = await bcrypt.hash('admin123', 10);
         await pool.query(`

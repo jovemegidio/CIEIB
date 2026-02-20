@@ -431,10 +431,10 @@ router.get('/diretoria', adminAuth, async (req, res) => {
 
 router.post('/diretoria', adminAuth, async (req, res) => {
     try {
-        const { nome, cargo, descricao, foto_url, email, ordem } = req.body;
+        const { nome, cargo, tipo, descricao, foto_url, email, ordem } = req.body;
         const r = await pool.query(
-            'INSERT INTO diretoria (nome, cargo, descricao, foto_url, email, ordem) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *',
-            [nome, cargo, descricao, foto_url, email, ordem || 0]
+            'INSERT INTO diretoria (nome, cargo, tipo, descricao, foto_url, email, ordem) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *',
+            [nome, cargo, tipo || 'diretoria', descricao, foto_url, email, ordem || 0]
         );
         res.status(201).json(r.rows[0]);
     } catch (err) { res.status(500).json({ error: err.message }); }
@@ -442,10 +442,10 @@ router.post('/diretoria', adminAuth, async (req, res) => {
 
 router.put('/diretoria/:id', adminAuth, async (req, res) => {
     try {
-        const { nome, cargo, descricao, foto_url, email, ordem, ativo } = req.body;
+        const { nome, cargo, tipo, descricao, foto_url, email, ordem, ativo } = req.body;
         const r = await pool.query(
-            'UPDATE diretoria SET nome=$1, cargo=$2, descricao=$3, foto_url=$4, email=$5, ordem=$6, ativo=$7 WHERE id=$8 RETURNING *',
-            [nome, cargo, descricao, foto_url, email, ordem, ativo, req.params.id]
+            'UPDATE diretoria SET nome=$1, cargo=$2, tipo=$3, descricao=$4, foto_url=$5, email=$6, ordem=$7, ativo=$8 WHERE id=$9 RETURNING *',
+            [nome, cargo, tipo || 'diretoria', descricao, foto_url, email, ordem, ativo, req.params.id]
         );
         res.json(r.rows[0]);
     } catch (err) { res.status(500).json({ error: err.message }); }

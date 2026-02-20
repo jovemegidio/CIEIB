@@ -63,10 +63,15 @@ const AdminAPI = {
             total: 5, page: 1, totalPages: 1
         },
         '/diretoria': [
-            { id: 1, nome: 'Pr. José Antônio Ferreira', cargo: 'Presidente', email: 'presidente@cieib.org.br', descricao: 'Líder da convenção desde 2020, com mais de 30 anos de ministério pastoral.', foto_url: '', ordem: 1 },
-            { id: 2, nome: 'Pr. Marcos Ribeiro', cargo: 'Vice-Presidente', email: 'vice@cieib.org.br', descricao: 'Coordena as ações regionais e representa a convenção em eventos nacionais.', foto_url: '', ordem: 2 },
-            { id: 3, nome: 'Pra. Luciana Almeida', cargo: 'Secretária Geral', email: 'secretaria@cieib.org.br', descricao: 'Responsável pela documentação e comunicação oficial da convenção.', foto_url: '', ordem: 3 },
-            { id: 4, nome: 'Dc. Fernando Costa', cargo: 'Tesoureiro', email: 'tesouraria@cieib.org.br', descricao: 'Gestão financeira e prestação de contas da convenção.', foto_url: '', ordem: 4 }
+            { id: 1, nome: 'Pr. Nome do Presidente', cargo: 'Presidente', tipo: 'diretoria', email: 'presidente@cieib.org.br', descricao: 'Líder da convenção e responsável pela condução dos trabalhos e representação institucional.', foto_url: '', ordem: 1 },
+            { id: 2, nome: 'Pr. Nome do Vice-Presidente', cargo: '1º Vice-Presidente', tipo: 'diretoria', email: 'vice@cieib.org.br', descricao: 'Auxiliar direto do presidente e responsável por substituí-lo em suas ausências.', foto_url: '', ordem: 2 },
+            { id: 3, nome: 'Pr. Nome do 2º Vice', cargo: '2º Vice-Presidente', tipo: 'diretoria', email: '', descricao: 'Membro da diretoria executiva com atribuições de apoio à presidência.', foto_url: '', ordem: 3 },
+            { id: 4, nome: 'Pr. Nome do Secretário', cargo: 'Secretário Geral', tipo: 'diretoria', email: 'secretaria@cieib.org.br', descricao: 'Responsável pela administração, documentação e comunicação oficial da convenção.', foto_url: '', ordem: 4 },
+            { id: 5, nome: 'Pr. Nome do 1º Secretário', cargo: '1º Secretário', tipo: 'diretoria', email: '', descricao: 'Auxiliar do Secretário Geral nas funções administrativas e burocráticas.', foto_url: '', ordem: 5 },
+            { id: 6, nome: 'Pr. Nome do Tesoureiro', cargo: 'Tesoureiro Geral', tipo: 'diretoria', email: 'tesouraria@cieib.org.br', descricao: 'Responsável pela gestão financeira e prestação de contas da convenção.', foto_url: '', ordem: 6 },
+            { id: 7, nome: 'Pr. Nome do Conselheiro', cargo: 'Presidente do Conselho', tipo: 'conselho_fiscal', email: '', descricao: 'Presidente do Conselho Fiscal da convenção.', foto_url: '', ordem: 1 },
+            { id: 8, nome: 'Pr. Nome do Conselheiro', cargo: 'Membro', tipo: 'conselho_fiscal', email: '', descricao: 'Membro do Conselho Fiscal.', foto_url: '', ordem: 2 },
+            { id: 9, nome: 'Pr. Nome do Conselheiro', cargo: 'Membro', tipo: 'conselho_fiscal', email: '', descricao: 'Membro do Conselho Fiscal.', foto_url: '', ordem: 3 }
         ],
         '/contatos': [
             { id: 1, nome: 'Carlos Eduardo Oliveira', email: 'carlos@email.com', telefone: '(11) 99999-0001', assunto: 'Filiação de Igreja', mensagem: 'Gostaria de saber os requisitos para filiar nossa igreja à CIEIB. Somos uma igreja independente localizada em Guarulhos/SP com 150 membros.', lida: false, created_at: '2025-07-05T10:30:00' },
@@ -772,10 +777,11 @@ async function loadAdminDiretoria() {
 function renderDiretoriaTable() {
     const el = document.getElementById('diretoriaTable');
     if (allDiretoria.length === 0) { el.innerHTML = '<p style="text-align:center;color:#aaa;padding:40px;">Nenhum membro cadastrado</p>'; return; }
-    el.innerHTML = `<table class="admin-table"><thead><tr><th>Nome</th><th>Cargo</th><th>Email</th><th>Ações</th></tr></thead><tbody>
+    el.innerHTML = `<table class="admin-table"><thead><tr><th>Nome</th><th>Cargo</th><th>Grupo</th><th>Email</th><th>Ações</th></tr></thead><tbody>
         ${allDiretoria.map(d => `<tr>
             <td>${d.nome}</td>
             <td>${d.cargo}</td>
+            <td><span class="badge ${d.tipo === 'conselho_fiscal' ? 'badge-aberto' : 'badge-ativo'}">${d.tipo === 'conselho_fiscal' ? 'Conselho Fiscal' : 'Diretoria'}</span></td>
             <td>${d.email || '-'}</td>
             <td class="actions-cell">
                 <button class="btn-table-action btn-table-edit" onclick="openDiretoriaModal(${d.id})"><i class="fas fa-edit"></i></button>
@@ -792,6 +798,12 @@ function openDiretoriaModal(id) {
         <div class="form-grid">
             <div class="admin-form-group"><label>Nome</label><input type="text" id="mDirNome" value="${item?.nome || ''}"></div>
             <div class="admin-form-group"><label>Cargo</label><input type="text" id="mDirCargo" value="${item?.cargo || ''}"></div>
+            <div class="admin-form-group"><label>Grupo</label>
+                <select id="mDirTipo">
+                    <option value="diretoria" ${(!item || item?.tipo === 'diretoria') ? 'selected' : ''}>Diretoria</option>
+                    <option value="conselho_fiscal" ${item?.tipo === 'conselho_fiscal' ? 'selected' : ''}>Conselho Fiscal</option>
+                </select>
+            </div>
             <div class="admin-form-group"><label>Email</label><input type="email" id="mDirEmail" value="${item?.email || ''}"></div>
             <div class="admin-form-group"><label>Ordem</label><input type="number" id="mDirOrdem" value="${item?.ordem || 0}"></div>
         </div>
@@ -809,6 +821,7 @@ async function saveDiretoria(id) {
     const body = {
         nome: document.getElementById('mDirNome').value,
         cargo: document.getElementById('mDirCargo').value,
+        tipo: document.getElementById('mDirTipo').value,
         email: document.getElementById('mDirEmail').value,
         ordem: parseInt(document.getElementById('mDirOrdem').value) || 0,
         descricao: document.getElementById('mDirDesc').value,

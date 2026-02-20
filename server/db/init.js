@@ -354,6 +354,7 @@ CREATE TABLE IF NOT EXISTS diretoria (
     id SERIAL PRIMARY KEY,
     nome VARCHAR(200) NOT NULL,
     cargo VARCHAR(100) NOT NULL,
+    tipo VARCHAR(30) DEFAULT 'diretoria',
     descricao TEXT,
     foto_url VARCHAR(500),
     email VARCHAR(200),
@@ -361,6 +362,12 @@ CREATE TABLE IF NOT EXISTS diretoria (
     ativo BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT NOW()
 );
+
+-- Adicionar coluna tipo se tabela já existir
+DO $$ BEGIN
+    ALTER TABLE diretoria ADD COLUMN IF NOT EXISTS tipo VARCHAR(30) DEFAULT 'diretoria';
+EXCEPTION WHEN OTHERS THEN NULL;
+END $$;
 
 `;
 

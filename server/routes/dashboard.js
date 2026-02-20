@@ -69,4 +69,17 @@ router.get('/eventos-proximos', async (req, res) => {
     }
 });
 
+// GET /api/dashboard/diretoria — Diretoria pública do site
+router.get('/diretoria', async (req, res) => {
+    try {
+        const result = await pool.query(
+            `SELECT id, nome, cargo, tipo, descricao, foto_url, email, ordem
+             FROM diretoria WHERE ativo = true ORDER BY tipo, ordem, nome`
+        );
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: 'Erro ao buscar diretoria' });
+    }
+});
+
 module.exports = router;

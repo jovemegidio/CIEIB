@@ -26,6 +26,17 @@ const API = {
             ],
             total: 4, page: 1, totalPages: 1
         },
+        '/dashboard/diretoria': [
+            { id:1, nome:'Ap. Osni Egidio', cargo:'Presidente', tipo:'diretoria', descricao:'Apóstolo presidente da CIEIB, liderando a convenção desde sua fundação com visão missionária e compromisso com a formação ministerial.', foto_url:null, ordem:1, ativo:true },
+            { id:2, nome:'Pra. Alessandra Egidio', cargo:'Vice-Presidente', tipo:'diretoria', descricao:'Pastora e vice-presidente, responsável pela coordenação dos projetos sociais e pelo fortalecimento das igrejas filiadas.', foto_url:null, ordem:2, ativo:true },
+            { id:3, nome:'Pr. Jonathan Egidio', cargo:'1º Secretário', tipo:'diretoria', descricao:'Pastor e primeiro secretário da convenção, gerenciando a comunicação institucional e os registros oficiais.', foto_url:null, ordem:3, ativo:true },
+            { id:4, nome:'Miss. Rafael Egidio', cargo:'2º Secretário', tipo:'diretoria', descricao:'Missionário e segundo secretário, auxiliando nas atividades administrativas e na organização de eventos.', foto_url:null, ordem:4, ativo:true },
+            { id:5, nome:'Pr. Vitor Hugo', cargo:'1º Tesoureiro', tipo:'diretoria', descricao:'Pastor e primeiro tesoureiro, responsável pela gestão financeira e pela transparência das contas da convenção.', foto_url:null, ordem:5, ativo:true },
+            { id:6, nome:'Pr. Willian Egidio', cargo:'2º Tesoureiro', tipo:'diretoria', descricao:'Pastor e segundo tesoureiro, auxiliando na administração financeira e no planejamento orçamentário.', foto_url:null, ordem:6, ativo:true },
+            { id:7, nome:'Pr. Marcus Vinicius', cargo:'Membro', tipo:'conselho_fiscal', descricao:'', foto_url:null, ordem:1, ativo:true },
+            { id:8, nome:'Pr. Marcos Egidio', cargo:'Membro', tipo:'conselho_fiscal', descricao:'', foto_url:null, ordem:2, ativo:true },
+            { id:9, nome:'Pr. Lucas Egidio', cargo:'Membro', tipo:'conselho_fiscal', descricao:'', foto_url:null, ordem:3, ativo:true }
+        ],
         '/notificacoes/site': [
             { id: 1, titulo: '15ª Convenção Nacional', mensagem: 'Inscrições abertas até 30 de agosto!', tipo: 'evento', link: '#eventos', ativa: true },
             { id: 2, titulo: 'Novo Curso de Teologia', mensagem: 'Matrículas abertas para o segundo semestre.', tipo: 'curso', link: '#cursos', ativa: true }
@@ -182,6 +193,7 @@ const API = {
     getStats() { return this.get('/dashboard/stats'); },
     getConfig() { return this.get('/dashboard/config'); },
     getEventosProximos() { return this.get('/dashboard/eventos-proximos'); },
+    getDiretoria() { return this.get('/dashboard/diretoria'); },
 
     // =============== ALTERAR SENHA ===============
     alterarSenha(senhaAtual, novaSenha) {

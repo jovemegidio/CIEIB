@@ -1,6 +1,6 @@
 /* ==============================================================
    CIEIB — Server Principal (Express + PostgreSQL)
-   Deploy-ready para Railway
+   Deploy: VPS Hostinger com PM2 + Nginx
    ============================================================== */
 require('dotenv').config();
 const express = require('express');
@@ -11,6 +11,10 @@ const rateLimit = require('express-rate-limit');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const isProd = process.env.NODE_ENV === 'production';
+
+// ---- Trust proxy (Nginx) ----
+if (isProd) app.set('trust proxy', 1);
 
 // ---- Middlewares ----
 app.use(helmet({
@@ -83,23 +87,33 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// ---- Health Check (Railway) ----
+// ---- Health Check ----
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+    res.json({ status: 'ok', env: process.env.NODE_ENV || 'dev', timestamp: new Date().toISOString() });
 });
 
 // ---- Error Handler ----
 app.use((err, req, res, next) => {
     console.error('Erro:', err.message);
     res.status(err.status || 500).json({
-        error: process.env.NODE_ENV === 'production'
+        error: isProd
             ? 'Erro interno do servidor'
             : err.message
     });
 });
 
 // ---- Start ----
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`✅ CIEIB Server rodando na porta ${PORT}`);
-    console.log(`🌐 http://localhost:${PORT}`);
+const server = app.listen(PORT, '0.0.0.0', () => {
+    console.log(`✅ CIEIB Server rodando na porta ${PORT} [${process.env.NODE_ENV || 'dev'}]`);
+    if (!isProd) console.log(`🌐 http://localhost:${PORT}`);
+});
+
+// ---- Graceful Shutdown (PM2 cluster) ----
+process.on('SIGINT', () => {
+    console.log('\n⏳ Encerrando servidor...');
+    server.close(() => { process.exit(0); });
+});
+process.on('SIGTERM', () => {
+    console.log('\n⏳ SIGTERM recebido, encerrando...');
+    server.close(() => { process.exit(0); });
 });

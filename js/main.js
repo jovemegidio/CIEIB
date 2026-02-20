@@ -261,9 +261,17 @@ document.addEventListener('DOMContentLoaded', () => {
 // ---- Push Notification Bar para o site público ----
 async function loadSiteNotifications() {
     try {
-        const res = await fetch('/api/notificacoes/site');
-        if (!res.ok) return;
-        const notifs = await res.json();
+        let notifs;
+        // Usar API client com fallback mock (quando disponível)
+        if (typeof API !== 'undefined' && API.getNotificacoesSite) {
+            notifs = await API.getNotificacoesSite();
+        } else {
+            const res = await fetch('/api/notificacoes/site');
+            if (!res.ok) return;
+            const ct = res.headers.get('content-type') || '';
+            if (!ct.includes('application/json')) return;
+            notifs = await res.json();
+        }
         if (!notifs || notifs.length === 0) return;
 
         // Verificar se já foram descartadas nesta sessão

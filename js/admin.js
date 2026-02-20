@@ -12,31 +12,91 @@ const AdminAPI = {
         'Authorization': `Bearer ${AdminAPI.token()}`
     }),
 
-    // Mock data for dev/visualization mode
+    // Mock data for dev/visualization mode (dados de demonstração)
     _mockData: {
         '/dashboard': {
             stats: { ministros: 128, eventos: 5, noticias: 24, cursos: 8, contatos_pendentes: 3, matriculas: 47 },
             recentMinistros: [
-                { nome: 'Pr. João Silva', cargo: 'Pastor Presidente', status: 'ATIVO' },
-                { nome: 'Pr. Maria Souza', cargo: 'Missionária', status: 'ATIVO' },
-                { nome: 'Ev. Pedro Lima', cargo: 'Evangelista', status: 'PENDENTE' }
+                { nome: 'Pr. João Carlos da Silva', cargo: 'Pastor Presidente', status: 'ATIVO' },
+                { nome: 'Pra. Maria Aparecida Souza', cargo: 'Missionária', status: 'ATIVO' },
+                { nome: 'Ev. Pedro Henrique Lima', cargo: 'Evangelista', status: 'PENDENTE' }
             ],
             recentContatos: [
-                { nome: 'Carlos Oliveira', assunto: 'Filiação de Igreja', lida: false },
-                { nome: 'Ana Santos', assunto: 'Credenciamento', lida: true }
+                { nome: 'Carlos Eduardo Oliveira', assunto: 'Filiação de Igreja', lida: false },
+                { nome: 'Ana Paula Santos', assunto: 'Credenciamento Ministerial', lida: true },
+                { nome: 'Roberto da Silva', assunto: 'Eventos e Convenções', lida: false }
             ]
         },
-        '/noticias': [],
-        '/eventos': [],
-        '/cursos': [],
-        '/conteudos': [],
-        '/ministros': { ministros: [], total: 0, page: 1, totalPages: 0 },
-        '/diretoria': [],
-        '/contatos': [],
-        '/configuracoes': [],
-        '/redes-sociais': [],
-        '/midias': [],
-        '/notificacoes-site': [],
+        '/noticias': [
+            { id: 1, titulo: 'CIEIB Realiza 15ª Convenção Nacional em Brasília', categoria: 'Institucional', destaque: true, data_publicacao: '2025-07-01', resumo: 'O evento reunirá líderes de todo o Brasil para discutir os rumos da convenção e eleger a nova diretoria.', conteudo: 'A Convenção de Igrejas Evangélicas Independentes do Brasil realizará sua 15ª edição na capital federal, reunindo pastores, missionários e líderes eclesiásticos de todos os estados.', imagem_url: '' },
+            { id: 2, titulo: 'Programa de Capacitação Ministerial 2025 Abre Inscrições', categoria: 'Educação', destaque: false, data_publicacao: '2025-06-28', resumo: 'Nova turma do programa oferece cursos de teologia, liderança e aconselhamento bíblico com certificação.', conteudo: 'O programa de capacitação ministerial da CIEIB abre inscrições para o segundo semestre de 2025 com diversas modalidades de cursos.', imagem_url: '' },
+            { id: 3, titulo: 'Campanha Nacional de Missões Urbanas é Lançada', categoria: 'Missões', destaque: true, data_publicacao: '2025-06-25', resumo: 'A CIEIB convoca igrejas afiliadas para a maior ação missionária do ano nas capitais brasileiras.', conteudo: 'A campanha visa alcançar comunidades em situação de vulnerabilidade social nas principais capitais do Brasil.', imagem_url: '' },
+            { id: 4, titulo: 'Encontro Nacional de Jovens Reunirá 500 Participantes', categoria: 'Juventude', destaque: false, data_publicacao: '2025-06-20', resumo: 'O encontro acontecerá em agosto com palestras, oficinas e momentos de louvor e adoração.', conteudo: 'O Encontro Nacional de Jovens da CIEIB promete ser o maior já realizado, com palestrantes renomados e atividades para todas as idades.', imagem_url: '' },
+            { id: 5, titulo: 'Nova Sede Regional Inaugurada em Minas Gerais', categoria: 'Expansão', destaque: false, data_publicacao: '2025-06-15', resumo: 'A nova sede fortalece a presença da CIEIB na região sudeste do país.', conteudo: 'Foi inaugurada nesta semana a nova sede regional da CIEIB em Belo Horizonte, que atenderá igrejas de Minas Gerais e Espírito Santo.', imagem_url: '' }
+        ],
+        '/eventos': [
+            { id: 1, titulo: '15ª Convenção Nacional CIEIB', data_evento: '2025-09-15', data_termino: '2025-09-18', hora_inicio: '09:00', local: 'Centro de Convenções — Brasília/DF', status: 'ABERTO', valor: 250.00, descricao: 'Principal evento anual da convenção com assembleias, palestras e eleição da nova diretoria.' },
+            { id: 2, titulo: 'Seminário de Liderança Pastoral', data_evento: '2025-08-20', data_termino: '2025-08-21', hora_inicio: '14:00', local: 'Igreja Sede — São Paulo/SP', status: 'ABERTO', valor: 80.00, descricao: 'Capacitação intensiva para líderes e pastores com foco em gestão eclesiástica.' },
+            { id: 3, titulo: 'Retiro de Obreiros 2025', data_evento: '2025-07-25', data_termino: '2025-07-27', hora_inicio: '08:00', local: 'Sítio Betel — Campinas/SP', status: 'CONFIRMADO', valor: 180.00, descricao: 'Retiro espiritual para obreiros com momentos de oração, louvor e comunhão.' },
+            { id: 4, titulo: 'Congresso de Missões', data_evento: '2025-10-10', data_termino: '2025-10-12', hora_inicio: '19:00', local: 'Auditório Central — Belo Horizonte/MG', status: 'EM BREVE', valor: 0, descricao: 'Congresso missionário com palestrantes nacionais e internacionais. Entrada gratuita.' }
+        ],
+        '/cursos': [
+            { id: 1, titulo: 'Teologia Básica', categoria: 'Teologia', nivel: 'Básico', carga_horaria: 120, total_modulos: 12, total_matriculas: 35, certificado: true, imagem_url: '' },
+            { id: 2, titulo: 'Liderança Pastoral Avançada', categoria: 'Liderança', nivel: 'Avançado', carga_horaria: 80, total_modulos: 8, total_matriculas: 22, certificado: true, imagem_url: '' },
+            { id: 3, titulo: 'Aconselhamento Bíblico', categoria: 'Pastoral', nivel: 'Intermediário', carga_horaria: 60, total_modulos: 6, total_matriculas: 18, certificado: true, imagem_url: '' },
+            { id: 4, titulo: 'Missões Transculturais', categoria: 'Missões', nivel: 'Intermediário', carga_horaria: 40, total_modulos: 4, total_matriculas: 12, certificado: false, imagem_url: '' }
+        ],
+        '/conteudos': [
+            { id: 1, pagina: 'home', secao: 'hero', titulo: 'Bem-vindo à CIEIB', conteudo: 'Convenção de Igrejas Evangélicas Independentes do Brasil — Servindo ao Reino de Deus desde 1990.', imagem_url: '' },
+            { id: 2, pagina: 'quem-somos', secao: 'introducao', titulo: 'Nossa História', conteudo: 'Fundada em 1990, a CIEIB nasceu do desejo de unir igrejas evangélicas independentes em torno de uma missão comum de edificação e expansão do evangelho.', imagem_url: '' },
+            { id: 3, pagina: 'home', secao: 'sobre', titulo: 'Sobre a CIEIB', conteudo: 'Somos uma convenção que preza pela autonomia das igrejas locais, oferecendo suporte jurídico, educacional e ministerial aos nossos filiados.', imagem_url: '' },
+            { id: 4, pagina: 'contato', secao: 'info', titulo: 'Fale Conosco', conteudo: 'Entre em contato com nossa equipe para tirar dúvidas sobre filiação, credenciamento e eventos da convenção.', imagem_url: '' }
+        ],
+        '/ministros': {
+            ministros: [
+                { id: 1, nome: 'Pr. João Carlos da Silva', cpf: '123.456.789-00', cargo: 'Pastor Presidente', registro: 'CIEIB-2020-001', status: 'ATIVO' },
+                { id: 2, nome: 'Pra. Maria Aparecida Souza', cpf: '234.567.890-11', cargo: 'Missionária', registro: 'CIEIB-2019-015', status: 'ATIVO' },
+                { id: 3, nome: 'Ev. Pedro Henrique Lima', cpf: '345.678.901-22', cargo: 'Evangelista', registro: 'CIEIB-2021-032', status: 'ATIVO' },
+                { id: 4, nome: 'Dc. Ana Paula Santos', cpf: '456.789.012-33', cargo: 'Diaconisa', registro: 'CIEIB-2023-048', status: 'PENDENTE' },
+                { id: 5, nome: 'Pb. Roberto Oliveira', cpf: '567.890.123-44', cargo: 'Presbítero', registro: 'CIEIB-2022-027', status: 'ATIVO' }
+            ],
+            total: 5, page: 1, totalPages: 1
+        },
+        '/diretoria': [
+            { id: 1, nome: 'Pr. José Antônio Ferreira', cargo: 'Presidente', email: 'presidente@cieib.org.br', descricao: 'Líder da convenção desde 2020, com mais de 30 anos de ministério pastoral.', foto_url: '', ordem: 1 },
+            { id: 2, nome: 'Pr. Marcos Ribeiro', cargo: 'Vice-Presidente', email: 'vice@cieib.org.br', descricao: 'Coordena as ações regionais e representa a convenção em eventos nacionais.', foto_url: '', ordem: 2 },
+            { id: 3, nome: 'Pra. Luciana Almeida', cargo: 'Secretária Geral', email: 'secretaria@cieib.org.br', descricao: 'Responsável pela documentação e comunicação oficial da convenção.', foto_url: '', ordem: 3 },
+            { id: 4, nome: 'Dc. Fernando Costa', cargo: 'Tesoureiro', email: 'tesouraria@cieib.org.br', descricao: 'Gestão financeira e prestação de contas da convenção.', foto_url: '', ordem: 4 }
+        ],
+        '/contatos': [
+            { id: 1, nome: 'Carlos Eduardo Oliveira', email: 'carlos@email.com', telefone: '(11) 99999-0001', assunto: 'Filiação de Igreja', mensagem: 'Gostaria de saber os requisitos para filiar nossa igreja à CIEIB. Somos uma igreja independente localizada em Guarulhos/SP com 150 membros.', lida: false, created_at: '2025-07-05T10:30:00' },
+            { id: 2, nome: 'Ana Paula Santos', email: 'ana.santos@email.com', telefone: '(21) 98888-0002', assunto: 'Credenciamento Ministerial', mensagem: 'Sou pastora há 8 anos e gostaria de informações sobre o processo de credenciamento junto à convenção.', lida: true, created_at: '2025-07-03T14:15:00' },
+            { id: 3, nome: 'Roberto da Silva', email: 'roberto.silva@email.com', telefone: '(31) 97777-0003', assunto: 'Eventos e Convenções', mensagem: 'Quando será a próxima convenção nacional? Gostaria de inscrever uma delegação de 20 pessoas da nossa igreja.', lida: false, created_at: '2025-07-01T09:00:00' }
+        ],
+        '/configuracoes': [
+            { chave: 'nome_site', valor: 'CIEIB — Convenção de Igrejas Evangélicas Independentes do Brasil', descricao: 'Nome do Site' },
+            { chave: 'email_contato', valor: 'contato@cieib.org.br', descricao: 'Email de Contato' },
+            { chave: 'telefone', valor: '(11) 3000-0000', descricao: 'Telefone Principal' },
+            { chave: 'endereco', valor: 'Rua da Convenção, 123 — Centro, São Paulo/SP', descricao: 'Endereço da Sede' },
+            { chave: 'horario_funcionamento', valor: 'Seg a Sex — 9h às 18h', descricao: 'Horário de Funcionamento' },
+            { chave: 'meta_description', valor: 'CIEIB é uma convenção que reúne igrejas evangélicas independentes em todo o Brasil.', descricao: 'Meta Description (SEO)' }
+        ],
+        '/redes-sociais': [
+            { id: 1, nome: 'Facebook', url: 'https://facebook.com/cieib', icone: 'fab fa-facebook-f', ordem: 1, ativa: true },
+            { id: 2, nome: 'Instagram', url: 'https://instagram.com/cieib', icone: 'fab fa-instagram', ordem: 2, ativa: true },
+            { id: 3, nome: 'YouTube', url: 'https://youtube.com/@cieib', icone: 'fab fa-youtube', ordem: 3, ativa: true },
+            { id: 4, nome: 'WhatsApp', url: 'https://wa.me/5511900000000', icone: 'fab fa-whatsapp', ordem: 4, ativa: true }
+        ],
+        '/midias': [
+            { id: 1, titulo: 'Logo CIEIB', tipo: 'imagem', url: '/uploads/logo-cieib.png', tamanho: 45056 },
+            { id: 2, titulo: 'Banner Convenção 2025', tipo: 'imagem', url: '/uploads/banner-convencao.jpg', tamanho: 256000 },
+            { id: 3, titulo: 'Regimento Interno PDF', tipo: 'documento', url: '/uploads/regimento-interno.pdf', tamanho: 1024000 }
+        ],
+        '/notificacoes-site': [
+            { id: 1, titulo: '15ª Convenção Nacional', mensagem: 'Inscrições abertas até 30 de agosto de 2025!', tipo: 'evento', link: '#eventos', ativa: true },
+            { id: 2, titulo: 'Novo Curso de Teologia Básica', mensagem: 'Matrículas abertas para o segundo semestre.', tipo: 'curso', link: '#cursos', ativa: true },
+            { id: 3, titulo: 'Horário de Atendimento', mensagem: 'Secretaria funciona de segunda a sexta, das 9h às 18h.', tipo: 'info', link: '', ativa: false }
+        ],
     },
 
     _getMockResponse(method, endpoint) {

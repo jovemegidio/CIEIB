@@ -441,6 +441,7 @@
     position: relative;
     z-index: 1;
     letter-spacing: 0.3px;
+    color: #fff;
 }
 
 .panel-card-header h3 i {

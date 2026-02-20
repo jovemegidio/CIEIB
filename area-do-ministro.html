@@ -325,10 +325,13 @@
     </a>
 
     <script src="js/main.js"></script>
+    <script src="js/api.js"></script>
     <script>
         // Se já estiver logado, redirecionar direto
-        if (sessionStorage.getItem('cieib_logado')) {
-            window.location.href = 'painel-ministro.html';
+        if (API.isLoggedIn()) {
+            API.verifyToken().then(valid => {
+                if (valid) window.location.href = 'painel-ministro.html';
+            });
         }
 
         function togglePassword() {
@@ -343,30 +346,16 @@
             }
         }
 
-        // Credenciais de teste
-        const USUARIOS = [
-            {
-                cpf: '11368992862',
-                senha: 'nana2504',
-                nome: 'OSNI EGIDIO'
-            }
-        ];
-
-        function formatCPF(value) {
-            return value.replace(/\D/g, '');
-        }
-
         const loginForm = document.getElementById('ministerLoginForm');
         if (loginForm) {
-            // Máscara de erro
             const cpfInput = loginForm.querySelector('input[type="text"]');
             const senhaInput = document.getElementById('loginPassword');
 
-            loginForm.addEventListener('submit', (e) => {
+            loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const btn = loginForm.querySelector('button[type="submit"]');
                 const original = btn.innerHTML;
-                const cpf = formatCPF(cpfInput.value);
+                const cpf = cpfInput.value.replace(/\D/g, '');
                 const senha = senhaInput.value;
 
                 // Remove mensagens anteriores
@@ -376,38 +365,29 @@
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Autenticando...';
                 btn.disabled = true;
 
-                setTimeout(() => {
-                    const usuario = USUARIOS.find(u => u.cpf === cpf && u.senha === senha);
+                try {
+                    const data = await API.login(cpf, senha);
 
-                    if (usuario) {
-                        // Login bem-sucedido
-                        sessionStorage.setItem('cieib_logado', 'true');
-                        sessionStorage.setItem('cieib_usuario', usuario.nome);
-                        sessionStorage.setItem('cieib_cpf', usuario.cpf);
+                    btn.innerHTML = '<i class="fas fa-check"></i> Bem-vindo, ' + data.ministro.nome + '!';
+                    btn.style.background = '#28a745';
+                    btn.style.borderColor = '#28a745';
 
-                        btn.innerHTML = '<i class="fas fa-check"></i> Bem-vindo, ' + usuario.nome + '!';
-                        btn.style.background = '#28a745';
-                        btn.style.borderColor = '#28a745';
+                    setTimeout(() => {
+                        window.location.href = 'painel-ministro.html';
+                    }, 1200);
+                } catch (err) {
+                    btn.innerHTML = original;
+                    btn.disabled = false;
 
-                        setTimeout(() => {
-                            window.location.href = 'painel-ministro.html';
-                        }, 1200);
-                    } else {
-                        // Login falhou
-                        btn.innerHTML = original;
-                        btn.disabled = false;
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'login-error';
+                    errorDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + (err.message || 'CPF ou senha incorretos. Verifique seus dados e tente novamente.');
+                    errorDiv.style.cssText = 'background:#fef2f2;color:#d93025;padding:12px 16px;border-radius:8px;font-size:0.85rem;margin-top:12px;display:flex;align-items:center;gap:8px;border:1px solid #fecdd3;';
+                    loginForm.appendChild(errorDiv);
 
-                        const errorDiv = document.createElement('div');
-                        errorDiv.className = 'login-error';
-                        errorDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> CPF ou senha incorretos. Verifique seus dados e tente novamente.';
-                        errorDiv.style.cssText = 'background:#fef2f2;color:#d93025;padding:12px 16px;border-radius:8px;font-size:0.85rem;margin-top:12px;display:flex;align-items:center;gap:8px;border:1px solid #fecdd3;';
-                        loginForm.appendChild(errorDiv);
-
-                        // Shake animation
-                        loginForm.style.animation = 'shake 0.5s ease';
-                        setTimeout(() => loginForm.style.animation = '', 500);
-                    }
-                }, 1500);
+                    loginForm.style.animation = 'shake 0.5s ease';
+                    setTimeout(() => loginForm.style.animation = '', 500);
+                }
             });
         }
     </script>

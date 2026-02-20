@@ -283,6 +283,45 @@
         <i class="fab fa-whatsapp"></i>
     </a>
 
+    <script src="js/api.js"></script>
     <script src="js/main.js"></script>
+    <script>
+        // Formulário de contato com integração API
+        const contactForm = document.getElementById('contactForm');
+        if (contactForm) {
+            contactForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const btn = contactForm.querySelector('button[type="submit"]');
+                const original = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+                btn.disabled = true;
+
+                try {
+                    const dados = {
+                        nome: document.getElementById('name').value,
+                        email: document.getElementById('email').value,
+                        telefone: document.getElementById('phone').value,
+                        assunto: document.getElementById('subject').value,
+                        mensagem: document.getElementById('message').value
+                    };
+
+                    await API.enviarContato(dados);
+                    btn.innerHTML = '<i class="fas fa-check"></i> Enviado com sucesso!';
+                    btn.style.background = '#28a745';
+                    contactForm.reset();
+                    setTimeout(() => {
+                        btn.innerHTML = original;
+                        btn.style.background = '';
+                        btn.disabled = false;
+                    }, 3000);
+                } catch (err) {
+                    console.error('Erro ao enviar contato:', err);
+                    btn.innerHTML = original;
+                    btn.disabled = false;
+                    alert('Erro ao enviar mensagem. Tente novamente.');
+                }
+            });
+        }
+    </script>
 </body>
 </html>

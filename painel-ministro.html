@@ -35,7 +35,7 @@
                         </div>
                     </div>
                     <a href="#" class="pnav-link"><i class="fas fa-headset"></i> Suporte</a>
-                    <a href="#" class="pnav-link pnav-sair" onclick="sessionStorage.clear(); window.location.href='area-do-ministro.html';"><i class="fas fa-sign-out-alt"></i> Sair</a>
+                    <a href="#" class="pnav-link pnav-sair" onclick="API.logout();"><i class="fas fa-sign-out-alt"></i> Sair</a>
                 </div>
                 <div class="painel-right-group">
                     <div class="painel-user-name" id="painelUserName">
@@ -648,6 +648,7 @@
         </div>
     </div>
 
+    <script src="js/api.js"></script>
     <script src="js/main.js"></script>
     <script src="js/painel.js"></script>
 </body>

@@ -498,12 +498,13 @@
         <i class="fab fa-whatsapp"></i>
     </a>
 
+    <script src="js/api.js"></script>
     <script src="js/main.js"></script>
     <script>
-        // Homepage quick login
+        // ---- Login rápido da Home (via API) ----
         const homeForm = document.getElementById('homeLoginForm');
         if (homeForm) {
-            homeForm.addEventListener('submit', function(e) {
+            homeForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 const cpf = document.getElementById('homeCpf').value.replace(/\D/g, '');
                 const senha = document.getElementById('homeSenha').value;
@@ -515,23 +516,132 @@
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Autenticando...';
                 btn.disabled = true;
 
-                setTimeout(function() {
-                    if (cpf === '11368992862' && senha === 'nana2504') {
-                        sessionStorage.setItem('cieib_logado', 'true');
-                        sessionStorage.setItem('cieib_usuario', 'OSNI EGIDIO');
-                        sessionStorage.setItem('cieib_cpf', cpf);
-                        btn.innerHTML = '<i class="fas fa-check"></i> Bem-vindo!';
-                        btn.style.background = '#28a745';
-                        setTimeout(function() { window.location.href = 'painel-ministro.html'; }, 1000);
-                    } else {
-                        btn.innerHTML = original;
-                        btn.disabled = false;
-                        errDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> CPF ou senha incorretos.';
-                        errDiv.style.display = 'block';
-                    }
-                }, 1200);
+                try {
+                    await API.login(cpf, senha);
+                    btn.innerHTML = '<i class="fas fa-check"></i> Bem-vindo!';
+                    btn.style.background = '#28a745';
+                    setTimeout(function() { window.location.href = 'painel-ministro.html'; }, 1000);
+                } catch (err) {
+                    btn.innerHTML = original;
+                    btn.disabled = false;
+                    errDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + (err.message || 'CPF ou senha incorretos.');
+                    errDiv.style.display = 'block';
+                }
             });
         }
+
+        // ---- Carregar estatísticas do banco de dados ----
+        async function loadStats() {
+            try {
+                const stats = await API.getStats();
+                if (stats) {
+                    const mapping = {
+                        'Igrejas Afiliadas': stats.igrejas,
+                        'Ministros Credenciados': stats.ministros,
+                        'Estados Alcançados': stats.estados,
+                        'Convenções Regionais': stats.convencoes
+                    };
+                    document.querySelectorAll('.stat-item').forEach(item => {
+                        const label = item.querySelector('.stat-label');
+                        const number = item.querySelector('.stat-number');
+                        if (label && number && mapping[label.textContent] !== undefined) {
+                            number.setAttribute('data-target', mapping[label.textContent]);
+                        }
+                    });
+                }
+            } catch (err) {
+                console.log('Stats carregadas do HTML estático (fallback)');
+            }
+        }
+
+        // ---- Carregar próximos eventos do banco ----
+        async function loadEventos() {
+            try {
+                const eventos = await API.getEventosProximos();
+                if (!eventos || eventos.length === 0) return;
+
+                const grid = document.querySelector('.eventos-grid');
+                if (!grid) return;
+
+                const meses = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+
+                grid.innerHTML = eventos.slice(0, 3).map(ev => {
+                    const d = new Date(ev.data_evento);
+                    return `
+                        <div class="evento-card">
+                            <div class="evento-date">
+                                <span class="evento-day">${String(d.getDate()).padStart(2, '0')}</span>
+                                <span class="evento-month">${meses[d.getMonth()]}</span>
+                                <span class="evento-year">${d.getFullYear()}</span>
+                            </div>
+                            <div class="evento-info">
+                                <span class="evento-category">${ev.tipo || 'Evento'}</span>
+                                <h3>${ev.titulo}</h3>
+                                <p><i class="fas fa-map-marker-alt"></i> ${ev.local || ''}</p>
+                                <p><i class="fas fa-clock"></i> ${ev.hora_inicio || ''} às ${ev.hora_fim || ''}</p>
+                                <a href="#" class="btn-link">Saiba mais <i class="fas fa-arrow-right"></i></a>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) {
+                console.log('Eventos carregados do HTML estático (fallback)');
+            }
+        }
+
+        // ---- Carregar notícias recentes ----
+        async function loadNoticiasHome() {
+            try {
+                const data = await API.getNoticias(1, 4);
+                const noticias = data.noticias || data;
+                if (!noticias || noticias.length === 0) return;
+
+                const grid = document.querySelector('.noticias-grid');
+                if (!grid) return;
+
+                const categoryIcons = {
+                    'Institucional': 'fa-newspaper', 'Social': 'fa-handshake',
+                    'Educação': 'fa-graduation-cap', 'Missões': 'fa-globe-americas',
+                    'Juventude': 'fa-users', 'Expansão': 'fa-church',
+                    'Devocional': 'fa-pray', 'Cultura': 'fa-music',
+                    'Resolução': 'fa-file-signature'
+                };
+
+                grid.innerHTML = noticias.map((n, i) => {
+                    const icon = categoryIcons[n.categoria] || 'fa-newspaper';
+                    const date = new Date(n.data_publicacao).toLocaleDateString('pt-BR', {
+                        day: 'numeric', month: 'long', year: 'numeric'
+                    });
+                    return `
+                        <div class="noticia-card${i === 0 ? ' featured' : ''}">
+                            <div class="noticia-image">
+                                ${n.imagem_url
+                                    ? `<img src="${n.imagem_url}" alt="${n.titulo}" style="width:100%;height:100%;object-fit:cover;">`
+                                    : `<div class="noticia-img-placeholder"><i class="fas ${icon}"></i></div>`
+                                }
+                                ${n.destaque ? '<span class="noticia-badge">Destaque</span>' : ''}
+                            </div>
+                            <div class="noticia-content">
+                                <div class="noticia-meta">
+                                    <span><i class="fas fa-calendar"></i> ${date}</span>
+                                    ${n.categoria ? `<span><i class="fas fa-tag"></i> ${n.categoria}</span>` : ''}
+                                </div>
+                                <h3>${n.titulo}</h3>
+                                <p>${n.resumo || (n.conteudo || '').substring(0, 150) + '...'}</p>
+                                <a href="#" class="btn-link">Leia mais <i class="fas fa-arrow-right"></i></a>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) {
+                console.log('Notícias carregadas do HTML estático (fallback)');
+            }
+        }
+
+        // Carregar dados dinâmicos
+        loadStats();
+        loadEventos();
+        loadNoticiasHome();
     </script>
 </body>
 </html>

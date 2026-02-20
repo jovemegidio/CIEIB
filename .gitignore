@@ -11,3 +11,15 @@ desktop.ini
 
 # Logs
 *.log
+
+# Node.js
+node_modules/
+npm-debug.log*
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Uploads
+uploads/

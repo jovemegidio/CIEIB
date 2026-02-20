@@ -414,10 +414,21 @@
 
 .panel-card-header {
     background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
-    color: #fff;
+    color: #fff !important;
     padding: 14px 20px;
     position: relative;
     overflow: hidden;
+}
+
+.panel-card-header h1,
+.panel-card-header h2,
+.panel-card-header h3,
+.panel-card-header h4,
+.panel-card-header h5,
+.panel-card-header h6,
+.panel-card-header p,
+.panel-card-header span {
+    color: #fff !important;
 }
 
 .panel-card-header::after {
@@ -441,11 +452,11 @@
     position: relative;
     z-index: 1;
     letter-spacing: 0.3px;
-    color: #fff;
+    color: #fff !important;
 }
 
 .panel-card-header h3 i {
-    color: var(--secondary);
+    color: var(--secondary) !important;
     font-size: 1rem;
 }
 

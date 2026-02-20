@@ -29,6 +29,28 @@ router.post('/', async (req, res) => {
     }
 });
 
+// POST /api/contato/newsletter — Cadastrar e-mail na newsletter (público)
+router.post('/newsletter', async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) {
+            return res.status(400).json({ error: 'E-mail é obrigatório' });
+        }
+
+        // Upsert - se já existe, não duplica
+        await pool.query(`
+            INSERT INTO contatos (nome, email, assunto, mensagem)
+            VALUES ($1, $2, $3, $4)
+            ON CONFLICT DO NOTHING
+        `, ['Newsletter', email, 'Newsletter', 'Cadastro na newsletter']);
+
+        res.json({ message: 'E-mail cadastrado com sucesso!' });
+    } catch (err) {
+        console.error('Erro na newsletter:', err);
+        res.status(500).json({ error: 'Erro ao cadastrar e-mail' });
+    }
+});
+
 // GET /api/contato — Listar mensagens (protegido - futuro admin)
 router.get('/', async (req, res) => {
     try {

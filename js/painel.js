@@ -44,6 +44,14 @@ async function loadMinistroData() {
         // Preencher nome do usuário
         displayUserName(ministro.nome);
 
+        // Preencher cabeçalho com CPF do usuário logado
+        const headerUsuario = document.getElementById('headerUsuario');
+        if (headerUsuario) headerUsuario.textContent = 'Usuário: ' + (ministro.cpf || '');
+
+        // Preencher label de convenção
+        const convLabel = document.getElementById('convLabel');
+        if (convLabel) convLabel.textContent = 'Convenção => ' + (ministro.conv_estadual || 'CIEIB');
+
         // Preencher dados pessoais
         fillDadosPessoais(ministro);
 

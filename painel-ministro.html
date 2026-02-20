@@ -124,13 +124,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td><strong>CIEIB</strong></td>
-                                                <td>5.131</td>
-                                                <td><span class="status-badge status-ativo">ATIVO</span></td>
-                                                <td><span class="status-badge status-ativo">ATIVO</span></td>
-                                                <td><button class="btn-icon" title="Detalhar"><i class="fas fa-info-circle"></i></button></td>
-                                            </tr>
+                                            <!-- Preenchido dinamicamente via API -->
                                         </tbody>
                                     </table>
                                 </div>
@@ -143,7 +137,7 @@
                                 <h3 style="color:#fff"><i class="fas fa-file-invoice-dollar"></i> Contas a Receber</h3>
                             </div>
                             <div class="panel-card-body">
-                                <p class="conv-label">Convenção => CIEIB</p>
+                                <p class="conv-label" id="convLabel">Convenção => ...</p>
                                 <div class="table-responsive">
                                     <table class="painel-table">
                                         <thead>
@@ -156,34 +150,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td>ANUIDADE CONVENCIONAL</td>
-                                                <td>R$144,00</td>
-                                                <td>R$0,00</td>
-                                                <td>R$0,00</td>
-                                                <td class="valor-aberto">R$144,00</td>
-                                            </tr>
-                                            <tr>
-                                                <td>ANUIDADE CONVENCIONAL</td>
-                                                <td>R$144,00</td>
-                                                <td>R$0,00</td>
-                                                <td>R$0,00</td>
-                                                <td class="valor-aberto">R$144,00</td>
-                                            </tr>
-                                            <tr>
-                                                <td>ANUIDADE CONVENCIONAL</td>
-                                                <td>R$216,00</td>
-                                                <td>R$0,00</td>
-                                                <td>R$0,00</td>
-                                                <td class="valor-aberto">R$216,00</td>
-                                            </tr>
-                                            <tr>
-                                                <td>CREDENCIAL / ENVIO</td>
-                                                <td>R$15,00</td>
-                                                <td>R$0,00</td>
-                                                <td>R$0,00</td>
-                                                <td class="valor-aberto">R$15,00</td>
-                                            </tr>
+                                            <!-- Preenchido dinamicamente via API -->
                                         </tbody>
                                     </table>
                                 </div>
@@ -201,15 +168,15 @@
                                 <div class="dados-grid">
                                     <div class="dado-group">
                                         <label>CPF</label>
-                                        <input type="text" id="campo-cpf" value="113.689.928-62" readonly class="dado-readonly">
+                                        <input type="text" id="campo-cpf" value="" readonly class="dado-readonly">
                                     </div>
                                     <div class="dado-group">
                                         <label>Nome</label>
-                                        <input type="text" id="campo-nome" value="OSNI EGIDIO">
+                                        <input type="text" id="campo-nome" value="">
                                     </div>
                                     <div class="dado-group">
                                         <label>Nome Social</label>
-                                        <input type="text" id="campo-nomesocial" value="OSNI EGIDIO">
+                                        <input type="text" id="campo-nomesocial" value="">
                                     </div>
                                     <div class="dado-group">
                                         <label>Doc Estrangeiro</label>
@@ -217,34 +184,36 @@
                                     </div>
                                     <div class="dado-group">
                                         <label>Cargo</label>
-                                        <input type="text" id="campo-cargo" value="PASTOR" readonly class="dado-readonly">
+                                        <input type="text" id="campo-cargo" value="" readonly class="dado-readonly">
                                     </div>
                                     <div class="dado-group">
                                         <label>Conv. Est./Int.</label>
-                                        <input type="text" id="campo-conv" value="CIEIB" readonly class="dado-readonly">
+                                        <input type="text" id="campo-conv" value="" readonly class="dado-readonly">
                                     </div>
                                     <div class="dado-group">
                                         <label>Sexo</label>
                                         <select id="campo-sexo">
-                                            <option value="M" selected>Masculino</option>
+                                            <option value="">Selecione</option>
+                                            <option value="M">Masculino</option>
                                             <option value="F">Feminino</option>
                                         </select>
                                     </div>
                                     <div class="dado-group">
                                         <label>Data de Nascimento</label>
-                                        <input type="date" id="campo-nascimento" value="1972-11-20">
+                                        <input type="date" id="campo-nascimento" value="">
                                     </div>
                                     <div class="dado-group">
                                         <label>País de Nascimento</label>
-                                        <input type="text" id="campo-pais" value="BRASIL">
+                                        <input type="text" id="campo-pais" value="">
                                     </div>
                                     <div class="dado-group">
                                         <label>Estado Nascimento</label>
                                         <select id="campo-estado">
+                                            <option value="">Selecione</option>
                                             <option value="SP">SP</option>
                                             <option value="RJ">RJ</option>
                                             <option value="MG">MG</option>
-                                            <option value="ES" selected>ES</option>
+                                            <option value="ES">ES</option>
                                             <option value="BA">BA</option>
                                             <option value="PR">PR</option>
                                             <option value="SC">SC</option>
@@ -272,24 +241,25 @@
                                     </div>
                                     <div class="dado-group">
                                         <label>Cidade Nascimento</label>
-                                        <input type="text" id="campo-cidade" value="CONCEICAO DA BARRA">
+                                        <input type="text" id="campo-cidade" value="">
                                     </div>
                                     <div class="dado-group">
                                         <label>Nacionalidade</label>
-                                        <input type="text" id="campo-nacionalidade" value="BRASILEIRO">
+                                        <input type="text" id="campo-nacionalidade" value="">
                                     </div>
                                     <div class="dado-group">
                                         <label>Estado Civil</label>
                                         <select id="campo-estadocivil">
+                                            <option value="">Selecione</option>
                                             <option value="solteiro">Solteiro(a)</option>
-                                            <option value="casado" selected>Casado(a)</option>
+                                            <option value="casado">Casado(a)</option>
                                             <option value="divorciado">Divorciado(a)</option>
                                             <option value="viuvo">Viúvo(a)</option>
                                         </select>
                                     </div>
                                     <div class="dado-group">
                                         <label>Nome do Cônjuge</label>
-                                        <input type="text" id="campo-conjuge" value="ALESSANDRA DE OLIVEIRA EGIDIO">
+                                        <input type="text" id="campo-conjuge" value="">
                                     </div>
                                     <div class="dado-group full-width">
                                         <label>Data Nascimento do Cônjuge</label>
@@ -297,31 +267,31 @@
                                     </div>
                                     <div class="dado-group">
                                         <label>Pai</label>
-                                        <input type="text" id="campo-pai" value="ANTONIO EGIDIO">
+                                        <input type="text" id="campo-pai" value="">
                                     </div>
                                     <div class="dado-group">
                                         <label>Mãe</label>
-                                        <input type="text" id="campo-mae" value="MARIA DUARTE EGIDIO">
+                                        <input type="text" id="campo-mae" value="">
                                     </div>
                                     <div class="dado-group">
                                         <label>RG</label>
-                                        <input type="text" id="campo-rg" value="214692942">
+                                        <input type="text" id="campo-rg" value="">
                                     </div>
                                     <div class="dado-group">
                                         <label>Órgão Expedidor</label>
-                                        <input type="text" id="campo-orgao" value="SSP SP">
+                                        <input type="text" id="campo-orgao" value="">
                                     </div>
                                     <div class="dado-group full-width">
                                         <label>E-mail Principal *</label>
-                                        <input type="email" id="campo-email" value="osniegidio@gmail.com">
+                                        <input type="email" id="campo-email" value="">
                                     </div>
                                     <div class="dado-group">
                                         <label>Biometria</label>
-                                        <input type="text" id="campo-biometria" value="Não" readonly class="dado-readonly">
+                                        <input type="text" id="campo-biometria" value="" readonly class="dado-readonly">
                                     </div>
                                     <div class="dado-group">
                                         <label>Registro</label>
-                                        <input type="text" id="campo-registro" value="29/04/2012" readonly class="dado-readonly">
+                                        <input type="text" id="campo-registro" value="" readonly class="dado-readonly">
                                     </div>
                                 </div>
                             </div>
@@ -401,7 +371,7 @@
                     <div class="panel-card-header">
                         <div class="phc-flex">
                             <h3 style="color:#fff"><i class="fas fa-receipt"></i> Consulta - Contas a Receber</h3>
-                            <span class="header-right-info">CIEIB - Ministros<br>Usuário: 11368992862</span>
+                            <span class="header-right-info">CIEIB - Ministros<br><span id="headerUsuario">Usuário: ...</span></span>
                         </div>
                     </div>
                     <div class="panel-card-body">
@@ -447,90 +417,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>CIEIB</td>
-                                        <td>12.026.337</td>
-                                        <td>1000938822019</td>
-                                        <td>01/01/2019</td>
-                                        <td>5.131</td>
-                                        <td>31/12/2019</td>
-                                        <td>144,00</td>
-                                        <td>0,00</td>
-                                        <td>0,00</td>
-                                        <td></td>
-                                        <td class="valor-aberto">R$144,00</td>
-                                        <td>ANUIDADE CONVENCIONAL</td>
-                                        <td><span class="status-badge status-aberto-badge">ABERTO</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>CIEIB</td>
-                                        <td>12.149.815</td>
-                                        <td>1000285589202</td>
-                                        <td>01/01/2020</td>
-                                        <td>5.131</td>
-                                        <td>31/12/2020</td>
-                                        <td>144,00</td>
-                                        <td>0,00</td>
-                                        <td>0,00</td>
-                                        <td></td>
-                                        <td class="valor-aberto">R$144,00</td>
-                                        <td>ANUIDADE CONVENCIONAL</td>
-                                        <td><span class="status-badge status-aberto-badge">ABERTO</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>CIEIB</td>
-                                        <td>12.516.151</td>
-                                        <td>1000624054202</td>
-                                        <td>05/11/2021</td>
-                                        <td>5.131</td>
-                                        <td>05/11/2021</td>
-                                        <td>24,00</td>
-                                        <td>0,00</td>
-                                        <td>0,00</td>
-                                        <td></td>
-                                        <td class="valor-aberto">R$24,00</td>
-                                        <td>CREDENCIAL / ENVIO</td>
-                                        <td><span class="status-badge status-aberto-badge">ABERTO</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>CIEIB</td>
-                                        <td>12.957.272</td>
-                                        <td>1000101439220</td>
-                                        <td>01/01/2024</td>
-                                        <td>5.131</td>
-                                        <td>31/12/2024</td>
-                                        <td>216,00</td>
-                                        <td>0,00</td>
-                                        <td>0,00</td>
-                                        <td></td>
-                                        <td class="valor-aberto">R$216,00</td>
-                                        <td>ANUIDADE CONVENCIONAL</td>
-                                        <td><span class="status-badge status-aberto-badge">ABERTO</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>CIEIB</td>
-                                        <td>13.194.905</td>
-                                        <td>1000122095620</td>
-                                        <td>01/01/2025</td>
-                                        <td>5.131</td>
-                                        <td>31/12/2025</td>
-                                        <td>216,00</td>
-                                        <td>0,00</td>
-                                        <td>0,00</td>
-                                        <td></td>
-                                        <td class="valor-aberto">R$216,00</td>
-                                        <td>ANUIDADE CONVENCIONAL</td>
-                                        <td><span class="status-badge status-aberto-badge">ABERTO</span></td>
-                                    </tr>
-                                    <tr class="row-total">
-                                        <td colspan="6"><strong>Soma</strong></td>
-                                        <td><strong>744,00</strong></td>
-                                        <td><strong>0,00</strong></td>
-                                        <td><strong>0,00</strong></td>
-                                        <td></td>
-                                        <td class="valor-aberto"><strong>R$744,00</strong></td>
-                                        <td colspan="2"></td>
-                                    </tr>
+                                    <!-- Preenchido dinamicamente via API -->
                                 </tbody>
                             </table>
                         </div>
@@ -588,22 +475,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td><button class="btn-icon" title="Editar"><i class="fas fa-edit"></i></button></td>
-                                        <td>93</td>
-                                        <td>CIEIB</td>
-                                        <td>ASSEMBLEIA GERAL</td>
-                                        <td><span class="status-badge status-encerrado">Encerrado</span></td>
-                                        <td>139.260</td>
-                                        <td>15/06/2025 00:00</td>
-                                        <td>R$0,01</td>
-                                        <td>R$0,01</td>
-                                        <td>Não</td>
-                                        <td><span class="status-badge status-quitado-badge">Quitado</span></td>
-                                        <td>15/12/2025</td>
-                                        <td>08:00</td>
-                                        <td>31/12/2025</td>
-                                    </tr>
+                                    <!-- Preenchido dinamicamente via API -->
                                 </tbody>
                             </table>
                         </div>

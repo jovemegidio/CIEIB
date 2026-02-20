@@ -185,54 +185,44 @@ document.addEventListener('DOMContentLoaded', () => {
     const newsletterForm = document.getElementById('newsletterForm');
 
     if (newsletterForm) {
-        newsletterForm.addEventListener('submit', (e) => {
+        newsletterForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = newsletterForm.querySelector('input[type="email"]');
-            if (email && email.value) {
-                // Show success feedback
-                const btn = newsletterForm.querySelector('button');
-                const originalText = btn.innerHTML;
+            const btn = newsletterForm.querySelector('button');
+            if (!email || !email.value) return;
+
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cadastrando...';
+            btn.disabled = true;
+
+            try {
+                await fetch('/api/contato/newsletter', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email.value })
+                });
                 btn.innerHTML = '<i class="fas fa-check"></i> Cadastrado!';
                 btn.style.background = '#28a745';
                 btn.style.borderColor = '#28a745';
                 email.value = '';
-
-                setTimeout(() => {
-                    btn.innerHTML = originalText;
-                    btn.style.background = '';
-                    btn.style.borderColor = '';
-                }, 3000);
+            } catch (err) {
+                btn.innerHTML = '<i class="fas fa-times"></i> Erro!';
+                btn.style.background = '#dc3545';
+                btn.style.borderColor = '#dc3545';
             }
-        });
-    }
-
-    // ===== Contact Form =====
-    const contactForm = document.getElementById('contactForm');
-
-    if (contactForm) {
-        contactForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-
-            const btn = contactForm.querySelector('button[type="submit"]');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
-            btn.disabled = true;
 
             setTimeout(() => {
-                btn.innerHTML = '<i class="fas fa-check"></i> Mensagem Enviada!';
-                btn.style.background = '#28a745';
-                btn.style.borderColor = '#28a745';
-                contactForm.reset();
-
-                setTimeout(() => {
-                    btn.innerHTML = originalText;
-                    btn.style.background = '';
-                    btn.style.borderColor = '';
-                    btn.disabled = false;
-                }, 3000);
-            }, 1500);
+                btn.innerHTML = originalText;
+                btn.style.background = '';
+                btn.style.borderColor = '';
+                btn.disabled = false;
+            }, 3000);
         });
     }
+
+    // ===== Contact Form — handled per-page via API (see contato.html) =====
+    // main.js no longer handles the contact form submission.
+    // Each page includes its own API-powered form handler.
 
     // ===== Smooth Scroll for Anchor Links =====
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {

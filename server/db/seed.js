@@ -137,8 +137,8 @@ async function seed() {
 
         for (const curso of cursosData) {
             const cursoRes = await pool.query(`
-                INSERT INTO cursos (titulo, descricao, categoria, nivel, carga_horaria, certificado, imagem_url, status)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, 'ativo')
+                INSERT INTO cursos (titulo, descricao, area, nivel, carga_horaria, certificado, imagem_url, ativo)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, true)
                 ON CONFLICT DO NOTHING
                 RETURNING id
             `, [curso.titulo, curso.desc, curso.cat, curso.nivel, curso.carga, curso.cert, curso.img]);
@@ -172,7 +172,7 @@ async function seed() {
 
                 for (const aula of aulas) {
                     await pool.query(`
-                        INSERT INTO curso_aulas (modulo_id, titulo, tipo, duracao_minutos, conteudo, ordem)
+                        INSERT INTO curso_aulas (modulo_id, titulo, tipo, duracao_minutos, conteudo_url, ordem)
                         VALUES ($1, $2, $3, $4, $5, $6)
                     `, [modId, aula.titulo, aula.tipo, aula.duracao, aula.conteudo, aula.ordem]);
                 }

@@ -78,6 +78,12 @@ async function loadMinistroData() {
         // Preencher mensagens
         fillMensagens(mensagens);
 
+        // Carregar cursos e credencial (lazy - quando clicar na aba)
+        initLazyTabs();
+
+        // Carregar notificações
+        loadNotificacoes();
+
         // Atualizar badge de notificações
         const naoLidas = mensagens.filter(m => !m.lida).length;
         const badge = document.querySelector('.notif-badge');
@@ -545,4 +551,520 @@ function showToast(message, type = 'info') {
     document.body.appendChild(toast);
 
     setTimeout(() => toast.remove(), 3000);
+}
+
+// ================================================================
+//  LAZY TABS — Cursos e Credencial
+// ================================================================
+let cursosLoaded = false;
+let credencialLoaded = false;
+
+function initLazyTabs() {
+    const tabs = document.querySelectorAll('.ptab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const target = this.getAttribute('data-tab');
+            if (target === 'cursos' && !cursosLoaded) {
+                loadCursos();
+                cursosLoaded = true;
+            }
+            if (target === 'credencial' && !credencialLoaded) {
+                loadCredencial();
+                credencialLoaded = true;
+            }
+        });
+    });
+
+    // Filtros de área de cursos
+    document.querySelectorAll('.curso-filtro-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.curso-filtro-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            const area = this.getAttribute('data-area');
+            filterCursos(area);
+        });
+    });
+}
+
+// ================================================================
+//  CURSOS / FACULDADES
+// ================================================================
+let allCursos = [];
+
+async function loadCursos() {
+    try {
+        const [cursos, matriculas, certificados] = await Promise.all([
+            API.getCursos(),
+            API.getMinhasMatriculas().catch(() => []),
+            API.getMeusCertificados().catch(() => [])
+        ]);
+
+        allCursos = cursos;
+        renderCursosCatalogo(cursos, matriculas);
+        renderMeusCoarsos(matriculas);
+        renderMeusCertificados(certificados);
+
+    } catch (err) {
+        console.error('Erro ao carregar cursos:', err);
+        document.getElementById('cursosCatalogoGrid').innerHTML =
+            '<p style="text-align:center;color:#999;padding:30px;">Erro ao carregar cursos. Tente novamente.</p>';
+    }
+}
+
+function filterCursos(area) {
+    const cards = document.querySelectorAll('.curso-catalogo-card');
+    cards.forEach(card => {
+        if (area === 'todos' || card.getAttribute('data-area') === area) {
+            card.style.display = '';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+function renderCursosCatalogo(cursos, matriculas) {
+    const grid = document.getElementById('cursosCatalogoGrid');
+    if (!grid) return;
+
+    if (cursos.length === 0) {
+        grid.innerHTML = `<div style="text-align:center;padding:40px;color:#999;">
+            <i class="fas fa-graduation-cap" style="font-size:2rem;"></i>
+            <p style="margin-top:12px;">Nenhum curso disponível no momento.</p>
+        </div>`;
+        return;
+    }
+
+    const matriculaIds = matriculas.map(m => m.curso_id);
+
+    const areaIcons = {
+        'teologica': 'fa-book-open',
+        'ministerial': 'fa-briefcase-medical'
+    };
+
+    const areaLabels = {
+        'teologica': 'Área Teológica',
+        'ministerial': 'Área Ministerial e Profissional'
+    };
+
+    grid.innerHTML = cursos.map(c => {
+        const isMatriculado = matriculaIds.includes(c.id);
+        const matricula = matriculas.find(m => m.curso_id === c.id);
+        const icon = areaIcons[c.area] || 'fa-graduation-cap';
+
+        return `
+        <div class="curso-catalogo-card" data-area="${c.area}">
+            <div class="curso-card-header" style="background: ${c.area === 'teologica' ? 'linear-gradient(135deg, #1a3a5c, #2c5282)' : 'linear-gradient(135deg, #065f46, #059669)'};">
+                <i class="fas ${icon}"></i>
+                <span class="curso-area-tag">${areaLabels[c.area] || c.area}</span>
+            </div>
+            <div class="curso-card-body">
+                <h4>${c.titulo}</h4>
+                <p class="curso-desc">${c.descricao || ''}</p>
+                <div class="curso-meta">
+                    ${c.nivel ? `<span><i class="fas fa-signal"></i> ${c.nivel}</span>` : ''}
+                    ${c.carga_horaria ? `<span><i class="fas fa-clock"></i> ${c.carga_horaria}h</span>` : ''}
+                    ${c.duracao ? `<span><i class="fas fa-calendar"></i> ${c.duracao}</span>` : ''}
+                </div>
+                ${c.certificado ? '<div class="curso-badge-cert"><i class="fas fa-certificate"></i> Com certificação</div>' : ''}
+                ${isMatriculado
+                    ? `<div class="curso-progresso-bar">
+                        <div class="curso-progresso-fill" style="width:${matricula.progresso}%"></div>
+                       </div>
+                       <span class="curso-progresso-text">${matricula.progresso}% concluído</span>
+                       <button class="btn-curso btn-curso-acessar" onclick="acessarCurso(${c.id})">
+                           <i class="fas fa-play"></i> Continuar
+                       </button>`
+                    : `<button class="btn-curso btn-curso-matricular" onclick="matricularCurso(${c.id})">
+                           <i class="fas fa-plus-circle"></i> Matricular-se
+                       </button>`
+                }
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function renderMeusCoarsos(matriculas) {
+    const card = document.getElementById('meusCoursosCard');
+    const grid = document.getElementById('meusCoursosGrid');
+    if (!card || !grid) return;
+
+    const ativos = matriculas.filter(m => m.status === 'ativo');
+    if (ativos.length === 0) {
+        card.style.display = 'none';
+        return;
+    }
+
+    card.style.display = 'block';
+    grid.innerHTML = ativos.map(m => `
+        <div class="meu-curso-item">
+            <div class="meu-curso-info">
+                <h5>${m.titulo}</h5>
+                <span class="meu-curso-nivel">${m.area === 'teologica' ? '📖' : '🏥'} ${m.nivel || ''} · ${m.carga_horaria || 0}h</span>
+            </div>
+            <div class="meu-curso-progress">
+                <div class="curso-progresso-bar">
+                    <div class="curso-progresso-fill" style="width:${m.progresso}%"></div>
+                </div>
+                <span>${m.progresso}%</span>
+            </div>
+            <button class="btn-icon" onclick="acessarCurso(${m.curso_id})" title="Acessar">
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+    `).join('');
+}
+
+function renderMeusCertificados(certificados) {
+    const card = document.getElementById('meusCertificadosCard');
+    const grid = document.getElementById('meusCertificadosGrid');
+    if (!card || !grid) return;
+
+    if (certificados.length === 0) {
+        card.style.display = 'none';
+        return;
+    }
+
+    card.style.display = 'block';
+    grid.innerHTML = certificados.map(c => `
+        <div class="certificado-item">
+            <div class="certificado-icon"><i class="fas fa-award"></i></div>
+            <div class="certificado-info">
+                <h5>${c.titulo}</h5>
+                <span>${c.nivel || ''} · ${c.carga_horaria || 0}h · Emitido em ${formatDate(c.data_emissao)}</span>
+            </div>
+            <div class="certificado-code">${c.codigo_validacao}</div>
+        </div>
+    `).join('');
+}
+
+async function matricularCurso(cursoId) {
+    if (!confirm('Deseja se matricular neste curso?')) return;
+
+    try {
+        await API.matricularCurso(cursoId);
+        showToast('Matrícula realizada com sucesso!', 'success');
+        cursosLoaded = false;
+        loadCursos();
+    } catch (err) {
+        showToast(err.message || 'Erro ao matricular', 'error');
+    }
+}
+
+async function acessarCurso(cursoId) {
+    try {
+        const data = await API.getCursoAulas(cursoId);
+        renderAulasCurso(cursoId, data);
+    } catch (err) {
+        showToast(err.message || 'Erro ao acessar curso', 'error');
+    }
+}
+
+function renderAulasCurso(cursoId, data) {
+    const grid = document.getElementById('cursosCatalogoGrid');
+    if (!grid) return;
+
+    const { modulos, matricula_id } = data;
+
+    let html = `
+        <div class="curso-aulas-voltar">
+            <button class="phb-btn phb-btn-secondary" onclick="loadCursos();cursosLoaded=true;">
+                <i class="fas fa-arrow-left"></i> Voltar ao catálogo
+            </button>
+        </div>
+    `;
+
+    modulos.forEach(mod => {
+        html += `<div class="modulo-section">
+            <h4 class="modulo-titulo"><i class="fas fa-folder-open"></i> ${mod.titulo}</h4>
+            ${mod.descricao ? `<p class="modulo-desc">${mod.descricao}</p>` : ''}
+            <div class="aulas-lista">`;
+
+        (mod.aulas || []).forEach(aula => {
+            const tipoIcon = aula.tipo === 'video' ? 'fa-play-circle' : aula.tipo === 'pdf' ? 'fa-file-pdf' : 'fa-file-alt';
+            html += `
+                <div class="aula-item ${aula.concluida ? 'aula-concluida' : ''}">
+                    <div class="aula-check">
+                        ${aula.concluida
+                            ? '<i class="fas fa-check-circle" style="color:#059669;"></i>'
+                            : '<i class="far fa-circle" style="color:#ccc;"></i>'
+                        }
+                    </div>
+                    <div class="aula-info">
+                        <span class="aula-tipo"><i class="fas ${tipoIcon}"></i></span>
+                        <span class="aula-titulo">${aula.titulo}</span>
+                        ${aula.duracao_minutos ? `<span class="aula-duracao">${aula.duracao_minutos} min</span>` : ''}
+                    </div>
+                    ${!aula.concluida
+                        ? `<button class="btn-aula-concluir" onclick="concluirAula(${aula.id}, ${cursoId})">
+                               <i class="fas fa-check"></i> Concluir
+                           </button>`
+                        : '<span class="aula-status-ok"><i class="fas fa-check"></i></span>'
+                    }
+                </div>`;
+        });
+
+        html += `</div></div>`;
+    });
+
+    // Esconder filtros e benefícios temporariamente
+    document.querySelector('.cursos-filtros').style.display = 'none';
+    document.querySelector('.cursos-beneficios').style.display = 'none';
+
+    grid.innerHTML = html;
+}
+
+async function concluirAula(aulaId, cursoId) {
+    try {
+        const result = await API.concluirAula(aulaId);
+        showToast(`Aula concluída! Progresso: ${result.progresso}%`, 'success');
+        acessarCurso(cursoId);
+    } catch (err) {
+        showToast(err.message || 'Erro ao concluir aula', 'error');
+    }
+}
+
+// ================================================================
+//  CREDENCIAL DIGITAL
+// ================================================================
+async function loadCredencial() {
+    try {
+        const cred = await API.getCredencial();
+        fillCredencial(cred);
+    } catch (err) {
+        console.error('Erro ao carregar credencial:', err);
+        showToast('Erro ao carregar credencial', 'error');
+    }
+}
+
+function fillCredencial(cred) {
+    // Nome
+    const nome = document.getElementById('credNome');
+    if (nome) nome.textContent = cred.nome || '---';
+
+    // Cargo
+    const cargo = document.getElementById('credCargo');
+    if (cargo) cargo.textContent = cred.cargo || '---';
+
+    // Registro
+    const registro = document.getElementById('credRegistro');
+    if (registro) registro.textContent = cred.registro || '---';
+
+    // Convenção
+    const conv = document.getElementById('credConvencao');
+    if (conv) conv.textContent = cred.convencao || '---';
+
+    // Filiação
+    const filiacao = document.getElementById('credFiliacao');
+    if (filiacao) filiacao.textContent = cred.data_registro
+        ? new Date(cred.data_registro).toLocaleDateString('pt-BR') : '---';
+
+    // Validade
+    const validade = document.getElementById('credValidade');
+    if (validade) {
+        const dataVal = cred.data_validade ? new Date(cred.data_validade) : null;
+        validade.textContent = dataVal ? dataVal.toLocaleDateString('pt-BR') : '---';
+
+        if (dataVal && dataVal < new Date()) {
+            validade.style.color = '#dc2626';
+            validade.textContent += ' (EXPIRADA)';
+        } else {
+            validade.style.color = '#059669';
+        }
+    }
+
+    // Código
+    const codigoEl = document.getElementById('credencialCodigo');
+    if (codigoEl) codigoEl.textContent = cred.codigo || '---';
+
+    // Foto
+    const foto = document.getElementById('credencialFoto');
+    if (foto && cred.foto_url) {
+        foto.innerHTML = `<img src="${cred.foto_url}" alt="${cred.nome}" style="width:100%;height:100%;object-fit:cover;">`;
+    }
+
+    // Status
+    const statusEl = document.getElementById('credencialStatus');
+    if (statusEl) {
+        const ativo = cred.status === 'ATIVO' && cred.data_validade && new Date(cred.data_validade) >= new Date();
+        statusEl.innerHTML = ativo
+            ? '<i class="fas fa-check-circle"></i><span>ATIVA</span>'
+            : '<i class="fas fa-times-circle"></i><span>INATIVA</span>';
+        statusEl.style.color = ativo ? '#059669' : '#dc2626';
+    }
+
+    // QR Code
+    const qrEl = document.getElementById('credencialQR');
+    if (qrEl && cred.codigo && typeof QRCode !== 'undefined') {
+        const verificarUrl = window.location.origin + '/verificar-credencial.html?code=' + encodeURIComponent(cred.codigo);
+        qrEl.innerHTML = '';
+        QRCode.toCanvas(document.createElement('canvas'), verificarUrl, {
+            width: 120,
+            margin: 1,
+            color: { dark: '#1a3a5c', light: '#ffffff' }
+        }, function(error, canvas) {
+            if (!error) {
+                canvas.style.borderRadius = '8px';
+                qrEl.appendChild(canvas);
+            }
+        });
+    }
+
+    // Link de verificação
+    const urlInput = document.getElementById('credVerificarUrl');
+    if (urlInput && cred.codigo) {
+        urlInput.value = window.location.origin + '/verificar-credencial.html?code=' + cred.codigo;
+    }
+}
+
+function copiarLinkVerificacao() {
+    const input = document.getElementById('credVerificarUrl');
+    if (input) {
+        input.select();
+        navigator.clipboard.writeText(input.value).then(() => {
+            showToast('Link copiado!', 'success');
+        }).catch(() => {
+            document.execCommand('copy');
+            showToast('Link copiado!', 'success');
+        });
+    }
+}
+
+async function renovarCredencial() {
+    if (!confirm('Deseja solicitar a renovação da sua credencial ministerial?')) return;
+
+    try {
+        await API.renovarCredencial();
+        showToast('Credencial renovada com sucesso!', 'success');
+        credencialLoaded = false;
+        loadCredencial();
+        credencialLoaded = true;
+    } catch (err) {
+        showToast(err.message || 'Erro ao renovar credencial', 'error');
+    }
+}
+
+function baixarCredencial() {
+    const card = document.getElementById('credencialCard');
+    if (!card) return;
+
+    // Usar html2canvas se disponível, senão captura simples
+    showToast('Preparando download da credencial...', 'info');
+
+    // Fallback: screenshot via window.print
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html><head><title>Credencial CIEIB</title>
+        <style>
+            body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #f0f2f5; font-family: 'Open Sans', Arial, sans-serif; }
+            @media print { body { background: white; } }
+        </style>
+        </head><body>${card.outerHTML}</body></html>
+    `);
+    printWindow.document.close();
+    setTimeout(() => { printWindow.print(); }, 500);
+}
+
+function compartilharCredencial() {
+    const url = document.getElementById('credVerificarUrl')?.value;
+    if (navigator.share && url) {
+        navigator.share({
+            title: 'Credencial Ministerial CIEIB',
+            text: 'Verifique minha credencial ministerial na CIEIB',
+            url: url
+        }).catch(() => {});
+    } else {
+        copiarLinkVerificacao();
+    }
+}
+
+// ================================================================
+//  NOTIFICAÇÕES
+// ================================================================
+async function loadNotificacoes() {
+    try {
+        const notifs = await API.getNotificacoes().catch(() => []);
+        const naoLidas = notifs.filter(n => !n.lida).length;
+
+        const badge = document.querySelector('.notif-badge');
+        if (badge) badge.textContent = naoLidas;
+
+        // Setup click handler no ícone de notificação
+        const notifIcon = document.querySelector('.painel-notif');
+        if (notifIcon) {
+            notifIcon.style.cursor = 'pointer';
+            notifIcon.onclick = function() {
+                toggleNotifPanel(notifs);
+            };
+        }
+    } catch (err) {
+        console.error('Erro ao carregar notificações:', err);
+    }
+}
+
+function toggleNotifPanel(notifs) {
+    let panel = document.getElementById('notifPanel');
+
+    if (panel) {
+        panel.remove();
+        return;
+    }
+
+    panel = document.createElement('div');
+    panel.id = 'notifPanel';
+    panel.className = 'notif-panel';
+
+    let html = `<div class="notif-panel-header">
+        <h4><i class="fas fa-bell"></i> Notificações</h4>
+        <button onclick="marcarTodasLidas()" class="notif-ler-todas">Marcar todas como lidas</button>
+    </div><div class="notif-panel-body">`;
+
+    if (notifs.length === 0) {
+        html += '<p class="notif-vazio"><i class="fas fa-check-circle"></i> Nenhuma notificação</p>';
+    } else {
+        notifs.slice(0, 15).forEach(n => {
+            const tipoIcons = { success: 'fa-check-circle', error: 'fa-times-circle', info: 'fa-info-circle', warning: 'fa-exclamation-triangle' };
+            const icon = tipoIcons[n.tipo] || 'fa-bell';
+            html += `
+                <div class="notif-item ${n.lida ? '' : 'notif-nao-lida'}" onclick="marcarNotifLida(${n.id})">
+                    <i class="fas ${icon} notif-tipo-${n.tipo || 'info'}"></i>
+                    <div>
+                        <strong>${n.titulo}</strong>
+                        <p>${n.mensagem || ''}</p>
+                        <span class="notif-data">${formatDate(n.created_at)}</span>
+                    </div>
+                </div>`;
+        });
+    }
+
+    html += '</div>';
+    panel.innerHTML = html;
+
+    document.querySelector('.painel-topnav').appendChild(panel);
+
+    // Fechar ao clicar fora
+    setTimeout(() => {
+        document.addEventListener('click', function closePanel(e) {
+            if (!panel.contains(e.target) && !e.target.closest('.painel-notif')) {
+                panel.remove();
+                document.removeEventListener('click', closePanel);
+            }
+        });
+    }, 100);
+}
+
+async function marcarNotifLida(id) {
+    try {
+        await API.marcarNotificacaoLida(id);
+        loadNotificacoes();
+    } catch (err) {}
+}
+
+async function marcarTodasLidas() {
+    try {
+        await API.marcarTodasNotificacoesLidas();
+        loadNotificacoes();
+        const panel = document.getElementById('notifPanel');
+        if (panel) panel.remove();
+        showToast('Todas as notificações marcadas como lidas', 'success');
+    } catch (err) {}
 }

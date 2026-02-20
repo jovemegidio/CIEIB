@@ -171,6 +171,197 @@ CREATE TABLE IF NOT EXISTS logs_acesso (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
+-- ===== CURSOS / FACULDADES =====
+CREATE TABLE IF NOT EXISTS cursos (
+    id SERIAL PRIMARY KEY,
+    titulo VARCHAR(300) NOT NULL,
+    descricao TEXT,
+    area VARCHAR(50) NOT NULL DEFAULT 'teologica',
+    nivel VARCHAR(50),
+    carga_horaria INTEGER DEFAULT 0,
+    duracao VARCHAR(50),
+    imagem_url VARCHAR(500),
+    ementa TEXT,
+    requisitos TEXT,
+    certificado BOOLEAN DEFAULT TRUE,
+    ativo BOOLEAN DEFAULT TRUE,
+    ordem INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ===== MÓDULOS DO CURSO =====
+CREATE TABLE IF NOT EXISTS curso_modulos (
+    id SERIAL PRIMARY KEY,
+    curso_id INTEGER REFERENCES cursos(id) ON DELETE CASCADE,
+    titulo VARCHAR(300) NOT NULL,
+    descricao TEXT,
+    ordem INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ===== AULAS =====
+CREATE TABLE IF NOT EXISTS curso_aulas (
+    id SERIAL PRIMARY KEY,
+    modulo_id INTEGER REFERENCES curso_modulos(id) ON DELETE CASCADE,
+    titulo VARCHAR(300) NOT NULL,
+    descricao TEXT,
+    tipo VARCHAR(30) DEFAULT 'video',
+    conteudo_url VARCHAR(500),
+    material_url VARCHAR(500),
+    duracao_minutos INTEGER DEFAULT 0,
+    ordem INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ===== MATRÍCULAS =====
+CREATE TABLE IF NOT EXISTS curso_matriculas (
+    id SERIAL PRIMARY KEY,
+    curso_id INTEGER REFERENCES cursos(id) ON DELETE CASCADE,
+    ministro_id INTEGER REFERENCES ministros(id) ON DELETE CASCADE,
+    status VARCHAR(30) DEFAULT 'ativo',
+    progresso INTEGER DEFAULT 0,
+    nota_final DECIMAL(5,2),
+    data_matricula TIMESTAMP DEFAULT NOW(),
+    data_conclusao TIMESTAMP,
+    UNIQUE(curso_id, ministro_id)
+);
+
+-- ===== PROGRESSO DE AULAS =====
+CREATE TABLE IF NOT EXISTS curso_progresso (
+    id SERIAL PRIMARY KEY,
+    matricula_id INTEGER REFERENCES curso_matriculas(id) ON DELETE CASCADE,
+    aula_id INTEGER REFERENCES curso_aulas(id) ON DELETE CASCADE,
+    concluida BOOLEAN DEFAULT FALSE,
+    data_conclusao TIMESTAMP,
+    UNIQUE(matricula_id, aula_id)
+);
+
+-- ===== AVALIAÇÕES =====
+CREATE TABLE IF NOT EXISTS curso_avaliacoes (
+    id SERIAL PRIMARY KEY,
+    curso_id INTEGER REFERENCES cursos(id) ON DELETE CASCADE,
+    titulo VARCHAR(300) NOT NULL,
+    descricao TEXT,
+    perguntas JSONB,
+    nota_minima DECIMAL(5,2) DEFAULT 7.0,
+    tentativas_max INTEGER DEFAULT 3,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ===== RESPOSTAS DE AVALIAÇÕES =====
+CREATE TABLE IF NOT EXISTS curso_avaliacao_respostas (
+    id SERIAL PRIMARY KEY,
+    avaliacao_id INTEGER REFERENCES curso_avaliacoes(id) ON DELETE CASCADE,
+    ministro_id INTEGER REFERENCES ministros(id) ON DELETE CASCADE,
+    respostas JSONB,
+    nota DECIMAL(5,2),
+    aprovado BOOLEAN DEFAULT FALSE,
+    tentativa INTEGER DEFAULT 1,
+    data_resposta TIMESTAMP DEFAULT NOW()
+);
+
+-- ===== CERTIFICADOS =====
+CREATE TABLE IF NOT EXISTS curso_certificados (
+    id SERIAL PRIMARY KEY,
+    matricula_id INTEGER REFERENCES curso_matriculas(id) ON DELETE CASCADE,
+    ministro_id INTEGER REFERENCES ministros(id) ON DELETE CASCADE,
+    curso_id INTEGER REFERENCES cursos(id) ON DELETE CASCADE,
+    codigo_validacao VARCHAR(50) UNIQUE NOT NULL,
+    data_emissao TIMESTAMP DEFAULT NOW(),
+    UNIQUE(ministro_id, curso_id)
+);
+
+-- ===== CREDENCIAL DIGITAL =====
+ALTER TABLE ministros ADD COLUMN IF NOT EXISTS data_validade DATE;
+ALTER TABLE ministros ADD COLUMN IF NOT EXISTS credencial_codigo VARCHAR(50);
+
+-- ===== NOTIFICAÇÕES =====
+CREATE TABLE IF NOT EXISTS notificacoes (
+    id SERIAL PRIMARY KEY,
+    ministro_id INTEGER REFERENCES ministros(id) ON DELETE CASCADE,
+    titulo VARCHAR(300) NOT NULL,
+    mensagem TEXT,
+    tipo VARCHAR(30) DEFAULT 'info',
+    link VARCHAR(500),
+    lida BOOLEAN DEFAULT FALSE,
+    global BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ===== NOTIFICAÇÕES GLOBAIS (para o site público) =====
+CREATE TABLE IF NOT EXISTS notificacoes_site (
+    id SERIAL PRIMARY KEY,
+    titulo VARCHAR(300) NOT NULL,
+    mensagem TEXT,
+    tipo VARCHAR(30) DEFAULT 'info',
+    link VARCHAR(500),
+    ativa BOOLEAN DEFAULT TRUE,
+    data_inicio TIMESTAMP DEFAULT NOW(),
+    data_fim TIMESTAMP,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ===== ADMINISTRADORES =====
+CREATE TABLE IF NOT EXISTS admins (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(200) NOT NULL,
+    email VARCHAR(200) UNIQUE NOT NULL,
+    senha VARCHAR(255) NOT NULL,
+    role VARCHAR(30) DEFAULT 'admin',
+    ativo BOOLEAN DEFAULT TRUE,
+    ultimo_acesso TIMESTAMP,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ===== CONTEÚDOS DE PÁGINAS (CMS) =====
+CREATE TABLE IF NOT EXISTS pagina_conteudos (
+    id SERIAL PRIMARY KEY,
+    pagina VARCHAR(100) NOT NULL,
+    secao VARCHAR(100) NOT NULL,
+    titulo VARCHAR(300),
+    conteudo TEXT,
+    imagem_url VARCHAR(500),
+    ordem INTEGER DEFAULT 0,
+    ativo BOOLEAN DEFAULT TRUE,
+    updated_at TIMESTAMP DEFAULT NOW(),
+    UNIQUE(pagina, secao)
+);
+
+-- ===== MÍDIAS =====
+CREATE TABLE IF NOT EXISTS midias (
+    id SERIAL PRIMARY KEY,
+    titulo VARCHAR(300),
+    descricao TEXT,
+    tipo VARCHAR(30) DEFAULT 'imagem',
+    url VARCHAR(500) NOT NULL,
+    tamanho INTEGER DEFAULT 0,
+    admin_id INTEGER REFERENCES admins(id) ON DELETE SET NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ===== REDES SOCIAIS =====
+CREATE TABLE IF NOT EXISTS redes_sociais (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    url VARCHAR(500) NOT NULL,
+    icone VARCHAR(50),
+    ordem INTEGER DEFAULT 0,
+    ativa BOOLEAN DEFAULT TRUE
+);
+
+-- ===== DIRETORIA =====
+CREATE TABLE IF NOT EXISTS diretoria (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(200) NOT NULL,
+    cargo VARCHAR(100) NOT NULL,
+    descricao TEXT,
+    foto_url VARCHAR(500),
+    email VARCHAR(200),
+    ordem INTEGER DEFAULT 0,
+    ativo BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
 `;
 
 async function initDB() {

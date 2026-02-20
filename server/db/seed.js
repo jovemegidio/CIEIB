@@ -121,6 +121,121 @@ async function seed() {
             `, [c.chave, c.valor, c.desc]);
         }
 
+        // --- Cursos / Faculdade Teológica ---
+        const cursosData = [
+            { titulo: 'Teologia Básica', desc: 'Fundamentos teológicos essenciais para o ministério pastoral, com estudo das doutrinas fundamentais da fé cristã.', cat: 'Teologia', nivel: 'Básico', carga: 120, cert: true, img: null },
+            { titulo: 'Teologia Intermediária', desc: 'Aprofundamento nos estudos teológicos com exegese bíblica, hermenêutica e história da igreja.', cat: 'Teologia', nivel: 'Intermediário', carga: 240, cert: true, img: null },
+            { titulo: 'Teologia Avançada', desc: 'Estudos avançados em teologia sistemática, apologética e liderança eclesiástica.', cat: 'Teologia', nivel: 'Avançado', carga: 360, cert: true, img: null },
+            { titulo: 'Formação Ministerial', desc: 'Capacitação completa para o exercício do ministério pastoral, incluindo homilética, aconselhamento e administração eclesiástica.', cat: 'Ministério', nivel: 'Intermediário', carga: 200, cert: true, img: null },
+            { titulo: 'Capelania Profissional', desc: 'Formação em capelania com foco em atendimento hospitalar, penitenciário e empresarial.', cat: 'Capelania', nivel: 'Avançado', carga: 180, cert: true, img: null },
+            { titulo: 'Juiz de Paz', desc: 'Habilitação como Juiz de Paz eclesiástico para celebração de casamentos religiosos com efeito civil.', cat: 'Jurídico', nivel: 'Intermediário', carga: 80, cert: true, img: null },
+            { titulo: 'Terapeuta Cristão', desc: 'Formação em terapia cristã integrando princípios bíblicos com técnicas de aconselhamento profissional.', cat: 'Aconselhamento', nivel: 'Avançado', carga: 300, cert: true, img: null },
+            { titulo: 'Psicanalista Clínico', desc: 'Curso de formação em psicanálise clínica com abordagem cristã para atendimento em consultório.', cat: 'Aconselhamento', nivel: 'Avançado', carga: 400, cert: true, img: null },
+            { titulo: 'Aconselhamento Pastoral', desc: 'Técnicas e fundamentos para aconselhamento pastoral eficaz, incluindo crises, luto e conflitos familiares.', cat: 'Ministério', nivel: 'Básico', carga: 100, cert: true, img: null },
+            { titulo: 'Liderança Cristã', desc: 'Desenvolvimento de competências de liderança baseadas em princípios bíblicos para pastores e líderes de ministérios.', cat: 'Liderança', nivel: 'Intermediário', carga: 80, cert: true, img: null },
+        ];
+
+        for (const curso of cursosData) {
+            const cursoRes = await pool.query(`
+                INSERT INTO cursos (titulo, descricao, categoria, nivel, carga_horaria, certificado, imagem_url, status)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, 'ativo')
+                ON CONFLICT DO NOTHING
+                RETURNING id
+            `, [curso.titulo, curso.desc, curso.cat, curso.nivel, curso.carga, curso.cert, curso.img]);
+
+            const cursoId = cursoRes.rows[0]?.id;
+            if (!cursoId) continue;
+
+            // Módulos por curso (3 módulos cada)
+            const modulos = [
+                { titulo: `Módulo 1 — Introdução`, desc: `Introdução ao curso de ${curso.titulo}`, ordem: 1 },
+                { titulo: `Módulo 2 — Aprofundamento`, desc: `Conteúdo aprofundado de ${curso.titulo}`, ordem: 2 },
+                { titulo: `Módulo 3 — Prática e Avaliação`, desc: `Prática e avaliação final de ${curso.titulo}`, ordem: 3 },
+            ];
+
+            for (const mod of modulos) {
+                const modRes = await pool.query(`
+                    INSERT INTO curso_modulos (curso_id, titulo, descricao, ordem)
+                    VALUES ($1, $2, $3, $4)
+                    RETURNING id
+                `, [cursoId, mod.titulo, mod.desc, mod.ordem]);
+
+                const modId = modRes.rows[0]?.id;
+                if (!modId) continue;
+
+                // 3 aulas por módulo
+                const aulas = [
+                    { titulo: `Aula ${mod.ordem}.1 — Fundamentos`, tipo: 'video', duracao: 45, conteudo: 'Conteúdo da aula com vídeo explicativo.', ordem: 1 },
+                    { titulo: `Aula ${mod.ordem}.2 — Desenvolvimento`, tipo: 'texto', duracao: 30, conteudo: 'Material de leitura complementar.', ordem: 2 },
+                    { titulo: `Aula ${mod.ordem}.3 — Revisão`, tipo: 'video', duracao: 60, conteudo: 'Revisão geral do módulo.', ordem: 3 },
+                ];
+
+                for (const aula of aulas) {
+                    await pool.query(`
+                        INSERT INTO curso_aulas (modulo_id, titulo, tipo, duracao_minutos, conteudo, ordem)
+                        VALUES ($1, $2, $3, $4, $5, $6)
+                    `, [modId, aula.titulo, aula.tipo, aula.duracao, aula.conteudo, aula.ordem]);
+                }
+            }
+
+            // Avaliação por curso
+            await pool.query(`
+                INSERT INTO curso_avaliacoes (curso_id, titulo, descricao, nota_minima, perguntas)
+                VALUES ($1, $2, $3, $4, $5)
+            `, [
+                cursoId,
+                `Avaliação Final — ${curso.titulo}`,
+                `Avaliação de conhecimentos do curso ${curso.titulo}`,
+                7.0,
+                JSON.stringify([
+                    { pergunta: `Qual é o objetivo principal do curso ${curso.titulo}?`, opcoes: ['Formação acadêmica', 'Capacitação ministerial', 'Entretenimento', 'Nenhuma das anteriores'], correta: 1 },
+                    { pergunta: 'A formação cristã deve ser fundamentada em:', opcoes: ['Opiniões pessoais', 'Tradições culturais', 'Princípios bíblicos', 'Filosofia secular'], correta: 2 },
+                    { pergunta: 'O líder cristão deve exercer seu ministério com:', opcoes: ['Autoritarismo', 'Humildade e serviço', 'Indiferença', 'Competitividade'], correta: 1 },
+                    { pergunta: 'A ética ministerial envolve:', opcoes: ['Apenas pregação', 'Conduta íntegra em todas as áreas', 'Apenas questões financeiras', 'Nenhuma das anteriores'], correta: 1 },
+                    { pergunta: 'Qual é a base da autoridade ministerial segundo a Bíblia?', opcoes: ['Poder político', 'Riqueza', 'Chamado divino e caráter', 'Popularidade'], correta: 2 },
+                ])
+            ]);
+        }
+
+        // --- Notificações do site (públicas) ---
+        await pool.query(`
+            INSERT INTO notificacoes_site (titulo, mensagem, tipo, link, ativa)
+            VALUES
+                ('Matrículas Abertas!', 'Inscreva-se nos cursos de Teologia e Formação Ministerial.', 'curso', '/painel-ministro.html', true),
+                ('Assembleia Geral 2025', 'Participe da assembleia geral da CIEIB em dezembro.', 'evento', '/painel-ministro.html', true)
+            ON CONFLICT DO NOTHING
+        `);
+
+        // --- Notificações para o ministro teste ---
+        if (mId) {
+            await pool.query(`
+                INSERT INTO notificacoes (ministro_id, titulo, mensagem, tipo)
+                VALUES
+                    ($1, 'Bem-vindo à nova área do ministro!', 'Agora você pode acessar cursos, sua credencial digital e muito mais.', 'info'),
+                    ($1, 'Novos cursos disponíveis', 'Confira os cursos de Teologia, Capelania e Liderança.', 'curso'),
+                    ($1, 'Renove sua credencial', 'Sua credencial digital já está disponível para download.', 'credencial')
+            `, [mId]);
+        }
+
+        // --- Admin padrão ---
+        const adminSenha = await bcrypt.hash('admin123', 10);
+        await pool.query(`
+            INSERT INTO admins (nome, email, senha, role)
+            VALUES ('Administrador CIEIB', 'admin@cieib.org.br', $1, 'superadmin')
+            ON CONFLICT (email) DO NOTHING
+        `, [adminSenha]);
+
+        // --- Redes sociais ---
+        const redes = [
+            { nome: 'Facebook', url: 'https://facebook.com/cieib', icone: 'fab fa-facebook-f', ordem: 1 },
+            { nome: 'Instagram', url: 'https://instagram.com/cieib', icone: 'fab fa-instagram', ordem: 2 },
+            { nome: 'YouTube', url: 'https://youtube.com/cieib', icone: 'fab fa-youtube', ordem: 3 },
+            { nome: 'WhatsApp', url: 'https://wa.me/5500000000000', icone: 'fab fa-whatsapp', ordem: 4 },
+        ];
+        for (const r of redes) {
+            await pool.query('INSERT INTO redes_sociais (nome, url, icone, ordem) VALUES ($1,$2,$3,$4) ON CONFLICT DO NOTHING', [r.nome, r.url, r.icone, r.ordem]);
+        }
+
         console.log('✅ Dados iniciais inseridos com sucesso!');
     } catch (err) {
         console.error('❌ Erro no seed:', err.message);

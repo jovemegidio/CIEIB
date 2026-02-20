@@ -43,6 +43,10 @@ const mensagensRoutes = require('./server/routes/mensagens');
 const contasRoutes = require('./server/routes/contas');
 const convencoesRoutes = require('./server/routes/convencoes');
 const dashboardRoutes = require('./server/routes/dashboard');
+const cursosRoutes = require('./server/routes/cursos');
+const credencialRoutes = require('./server/routes/credencial');
+const notificacoesRoutes = require('./server/routes/notificacoes');
+const adminRoutes = require('./server/routes/admin');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/ministros', ministrosRoutes);
@@ -53,11 +57,15 @@ app.use('/api/mensagens', mensagensRoutes);
 app.use('/api/contas', contasRoutes);
 app.use('/api/convencoes', convencoesRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/cursos', cursosRoutes);
+app.use('/api/credencial', credencialRoutes);
+app.use('/api/notificacoes', notificacoesRoutes);
+app.use('/api/admin', adminRoutes);
 
 // ---- SPA Fallback: Rotas HTML ----
 const htmlPages = [
     'index', 'quem-somos', 'diretoria', 'noticias',
-    'contato', 'area-do-ministro', 'painel-ministro'
+    'contato', 'area-do-ministro', 'painel-ministro', 'verificar-credencial', 'painel-admin'
 ];
 
 htmlPages.forEach(page => {

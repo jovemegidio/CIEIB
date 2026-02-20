@@ -132,5 +132,34 @@ const API = {
     // =============== ALTERAR SENHA ===============
     alterarSenha(senhaAtual, novaSenha) {
         return this.post('/auth/change-password', { senhaAtual, novaSenha });
-    }
+    },
+
+    // =============== CURSOS / FACULDADES ===============
+    getCursos(area = '') {
+        const qs = area ? `?area=${area}` : '';
+        return this.get(`/cursos${qs}`);
+    },
+    getCurso(id) { return this.get(`/cursos/${id}`); },
+    getMinhasMatriculas() { return this.get('/cursos/minhas/matriculas'); },
+    matricularCurso(cursoId) { return this.post(`/cursos/${cursoId}/matricular`); },
+    getCursoAulas(cursoId) { return this.get(`/cursos/${cursoId}/aulas`); },
+    concluirAula(aulaId) { return this.post(`/cursos/aulas/${aulaId}/concluir`); },
+    responderAvaliacao(avaliacaoId, respostas) {
+        return this.post(`/cursos/avaliacoes/${avaliacaoId}/responder`, { respostas });
+    },
+    getMeusCertificados() { return this.get('/cursos/meus/certificados'); },
+    solicitarCertificado(cursoId) { return this.post(`/cursos/${cursoId}/certificado`); },
+    verificarCertificado(codigo) { return this.get(`/cursos/certificado/verificar/${codigo}`); },
+
+    // =============== CREDENCIAL DIGITAL ===============
+    getCredencial() { return this.get('/credencial'); },
+    verificarCredencial(codigo) { return this.get(`/credencial/verificar/${codigo}`); },
+    renovarCredencial() { return this.post('/credencial/renovar'); },
+
+    // =============== NOTIFICAÇÕES ===============
+    getNotificacoes() { return this.get('/notificacoes'); },
+    marcarNotificacaoLida(id) { return this.put(`/notificacoes/${id}/lida`); },
+    marcarTodasNotificacoesLidas() { return this.put('/notificacoes/ler-todas'); },
+    getNotificacoesNaoLidas() { return this.get('/notificacoes/nao-lidas'); },
+    getNotificacoesSite() { return this.get('/notificacoes/site'); }
 };

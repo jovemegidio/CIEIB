@@ -243,4 +243,95 @@ document.addEventListener('DOMContentLoaded', () => {
             link.classList.add('active');
         }
     });
+
+    // ===== PUSH NOTIFICATIONS BAR (site público) =====
+    loadSiteNotifications();
 });
+
+// ---- Push Notification Bar para o site público ----
+async function loadSiteNotifications() {
+    try {
+        const res = await fetch('/api/notificacoes/site');
+        if (!res.ok) return;
+        const notifs = await res.json();
+        if (!notifs || notifs.length === 0) return;
+
+        // Verificar se já foram descartadas nesta sessão
+        const dismissed = JSON.parse(sessionStorage.getItem('cieib_notifs_dismissed') || '[]');
+        const pending = notifs.filter(n => !dismissed.includes(n.id));
+        if (pending.length === 0) return;
+
+        // Criar barra de notificação
+        const bar = document.createElement('div');
+        bar.className = 'site-notification-bar';
+        bar.id = 'siteNotifBar';
+
+        const tipoColors = {
+            'info': { bg: 'linear-gradient(135deg, #1a3a5c, #2c5282)', icon: 'fa-info-circle' },
+            'success': { bg: 'linear-gradient(135deg, #065f46, #059669)', icon: 'fa-check-circle' },
+            'warning': { bg: 'linear-gradient(135deg, #92400e, #d97706)', icon: 'fa-exclamation-triangle' },
+            'error': { bg: 'linear-gradient(135deg, #991b1b, #dc2626)', icon: 'fa-exclamation-circle' },
+            'evento': { bg: 'linear-gradient(135deg, #5b21b6, #7c3aed)', icon: 'fa-calendar-star' },
+            'curso': { bg: 'linear-gradient(135deg, #0e7490, #06b6d4)', icon: 'fa-graduation-cap' }
+        };
+
+        // Mostrar a primeira notificação pendente
+        const notif = pending[0];
+        const style = tipoColors[notif.tipo] || tipoColors['info'];
+
+        bar.style.background = style.bg;
+        bar.innerHTML = `
+            <div class="container" style="display:flex;align-items:center;justify-content:center;gap:12px;position:relative;">
+                <i class="fas ${style.icon}" style="font-size:1rem;"></i>
+                <span><strong>${notif.titulo}</strong> ${notif.mensagem || ''}</span>
+                ${notif.link ? `<a href="${notif.link}" style="color:rgba(255,255,255,0.9);text-decoration:underline;font-weight:600;margin-left:8px;">Saiba mais</a>` : ''}
+                <button onclick="dismissSiteNotif(${notif.id})" style="position:absolute;right:0;background:none;border:none;color:rgba(255,255,255,0.8);cursor:pointer;font-size:1.1rem;padding:4px 8px;" aria-label="Fechar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+
+        // Inserir logo após o top-bar
+        const topBar = document.querySelector('.top-bar');
+        if (topBar && topBar.nextSibling) {
+            topBar.parentNode.insertBefore(bar, topBar.nextSibling);
+        } else {
+            document.body.prepend(bar);
+        }
+
+        // Se houver múltiplas, criar rotação
+        if (pending.length > 1) {
+            let currentIdx = 0;
+            setInterval(() => {
+                currentIdx = (currentIdx + 1) % pending.length;
+                const n = pending[currentIdx];
+                const s = tipoColors[n.tipo] || tipoColors['info'];
+                bar.style.background = s.bg;
+                bar.querySelector('.container').innerHTML = `
+                    <i class="fas ${s.icon}" style="font-size:1rem;"></i>
+                    <span><strong>${n.titulo}</strong> ${n.mensagem || ''}</span>
+                    ${n.link ? `<a href="${n.link}" style="color:rgba(255,255,255,0.9);text-decoration:underline;font-weight:600;margin-left:8px;">Saiba mais</a>` : ''}
+                    <button onclick="dismissSiteNotif(${n.id})" style="position:absolute;right:0;background:none;border:none;color:rgba(255,255,255,0.8);cursor:pointer;font-size:1.1rem;padding:4px 8px;" aria-label="Fechar">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+            }, 6000);
+        }
+
+    } catch (err) {
+        // Silenciosamente falha se API não disponível
+    }
+}
+
+function dismissSiteNotif(id) {
+    const dismissed = JSON.parse(sessionStorage.getItem('cieib_notifs_dismissed') || '[]');
+    dismissed.push(id);
+    sessionStorage.setItem('cieib_notifs_dismissed', JSON.stringify(dismissed));
+
+    const bar = document.getElementById('siteNotifBar');
+    if (bar) {
+        bar.style.transform = 'translateY(-100%)';
+        bar.style.transition = 'transform 0.3s ease';
+        setTimeout(() => bar.remove(), 300);
+    }
+}

@@ -11,6 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 </head>
 <body class="painel-body">
 
@@ -77,6 +78,8 @@
                 <button class="ptab" data-tab="documentos"><i class="fas fa-file-alt"></i> Documentos de Ministro</button>
                 <button class="ptab" data-tab="historico"><i class="fas fa-receipt"></i> Histórico de Recebimentos</button>
                 <button class="ptab" data-tab="eventos"><i class="fas fa-calendar-alt"></i> Eventos</button>
+                <button class="ptab" data-tab="cursos"><i class="fas fa-graduation-cap"></i> Cursos</button>
+                <button class="ptab" data-tab="credencial"><i class="fas fa-id-badge"></i> Credencial</button>
                 <button class="ptab" data-tab="mensagens"><i class="fas fa-envelope"></i> Mensagens Diretas</button>
             </div>
         </div>
@@ -484,7 +487,179 @@
                 </div>
             </div>
 
-            <!-- ===== ABA 5: MENSAGENS DIRETAS ===== -->
+            <!-- ===== ABA 5: CURSOS E FACULDADES ===== -->
+            <div class="tab-panel" id="tab-cursos">
+                <!-- Cursos em andamento -->
+                <div class="panel-card" id="meusCoursosCard" style="display:none;">
+                    <div class="panel-card-header">
+                        <div class="phc-flex">
+                            <h3 style="color:#fff"><i class="fas fa-book-reader"></i> Meus Cursos em Andamento</h3>
+                        </div>
+                    </div>
+                    <div class="panel-card-body">
+                        <div class="cursos-meus-grid" id="meusCoursosGrid"></div>
+                    </div>
+                </div>
+
+                <!-- Certificados -->
+                <div class="panel-card" id="meusCertificadosCard" style="display:none;">
+                    <div class="panel-card-header">
+                        <div class="phc-flex">
+                            <h3 style="color:#fff"><i class="fas fa-award"></i> Meus Certificados</h3>
+                        </div>
+                    </div>
+                    <div class="panel-card-body">
+                        <div id="meusCertificadosGrid"></div>
+                    </div>
+                </div>
+
+                <!-- Catálogo de Cursos -->
+                <div class="panel-card">
+                    <div class="panel-card-header">
+                        <div class="phc-flex">
+                            <h3 style="color:#fff"><i class="fas fa-graduation-cap"></i> Faculdades e Cursos Oficiais CIEIB</h3>
+                        </div>
+                    </div>
+                    <div class="panel-card-body">
+                        <p style="color:var(--gray);margin-bottom:20px;">Nosso objetivo é formar líderes preparados espiritualmente, intelectualmente e socialmente.</p>
+                        
+                        <!-- Filtros de área -->
+                        <div class="cursos-filtros">
+                            <button class="curso-filtro-btn active" data-area="todos"><i class="fas fa-th"></i> Todos</button>
+                            <button class="curso-filtro-btn" data-area="teologica"><i class="fas fa-book-open"></i> Área Teológica</button>
+                            <button class="curso-filtro-btn" data-area="ministerial"><i class="fas fa-briefcase-medical"></i> Área Ministerial e Profissional</button>
+                        </div>
+
+                        <!-- Cards de benefícios -->
+                        <div class="cursos-beneficios">
+                            <div class="curso-beneficio"><i class="fas fa-play-circle"></i> Aulas online</div>
+                            <div class="curso-beneficio"><i class="fas fa-book"></i> Material didático digital</div>
+                            <div class="curso-beneficio"><i class="fas fa-user-graduate"></i> Área exclusiva do aluno</div>
+                            <div class="curso-beneficio"><i class="fas fa-clipboard-check"></i> Avaliações</div>
+                            <div class="curso-beneficio"><i class="fas fa-certificate"></i> Certificação reconhecida</div>
+                        </div>
+
+                        <!-- Grid de cursos -->
+                        <div class="cursos-catalogo-grid" id="cursosCatalogoGrid">
+                            <div style="text-align:center;padding:40px;color:#999;">
+                                <i class="fas fa-spinner fa-spin" style="font-size:2rem;"></i>
+                                <p style="margin-top:12px;">Carregando cursos...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== ABA 6: CREDENCIAL DIGITAL ===== -->
+            <div class="tab-panel" id="tab-credencial">
+                <div class="credencial-layout">
+                    <!-- Card da credencial -->
+                    <div class="panel-card">
+                        <div class="panel-card-header">
+                            <div class="phc-flex">
+                                <h3 style="color:#fff"><i class="fas fa-id-badge"></i> Credencial Ministerial Digital</h3>
+                            </div>
+                        </div>
+                        <div class="panel-card-body">
+                            <div class="credencial-container">
+                                <!-- Credencial Visual -->
+                                <div class="credencial-card" id="credencialCard">
+                                    <div class="credencial-header">
+                                        <div class="credencial-logo">
+                                            <div class="credencial-logo-icon"><i class="fas fa-dove"></i></div>
+                                            <div>
+                                                <span class="credencial-org">CIEIB</span>
+                                                <span class="credencial-org-full">Convenção das Igrejas Evangélicas<br>Interdenominacional do Brasil</span>
+                                            </div>
+                                        </div>
+                                        <span class="credencial-tipo">CREDENCIAL MINISTERIAL</span>
+                                    </div>
+                                    <div class="credencial-body">
+                                        <div class="credencial-foto" id="credencialFoto">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <div class="credencial-dados">
+                                            <div class="credencial-campo">
+                                                <label>Nome Completo</label>
+                                                <span id="credNome">---</span>
+                                            </div>
+                                            <div class="credencial-campo">
+                                                <label>Cargo Ministerial</label>
+                                                <span id="credCargo">---</span>
+                                            </div>
+                                            <div class="credencial-campo-row">
+                                                <div class="credencial-campo">
+                                                    <label>Nº Registro</label>
+                                                    <span id="credRegistro">---</span>
+                                                </div>
+                                                <div class="credencial-campo">
+                                                    <label>Convenção</label>
+                                                    <span id="credConvencao">---</span>
+                                                </div>
+                                            </div>
+                                            <div class="credencial-campo-row">
+                                                <div class="credencial-campo">
+                                                    <label>Data Filiação</label>
+                                                    <span id="credFiliacao">---</span>
+                                                </div>
+                                                <div class="credencial-campo">
+                                                    <label>Validade</label>
+                                                    <span id="credValidade" class="credencial-validade">---</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="credencial-footer">
+                                        <div class="credencial-qr" id="credencialQR"></div>
+                                        <div class="credencial-status" id="credencialStatus">
+                                            <i class="fas fa-check-circle"></i>
+                                            <span>ATIVA</span>
+                                        </div>
+                                        <div class="credencial-codigo" id="credencialCodigo">---</div>
+                                    </div>
+                                </div>
+
+                                <!-- Ações da credencial -->
+                                <div class="credencial-acoes">
+                                    <div class="credencial-info-box">
+                                        <h4><i class="fas fa-shield-alt"></i> Sobre a Credencial Digital</h4>
+                                        <p>A Credencial Ministerial Digital Oficial da CIEIB garante:</p>
+                                        <ul>
+                                            <li><i class="fas fa-check"></i> Segurança e autenticidade</li>
+                                            <li><i class="fas fa-check"></i> Organização convencional</li>
+                                            <li><i class="fas fa-check"></i> Validação oficial em todo o Brasil</li>
+                                            <li><i class="fas fa-check"></i> QR Code para verificação instantânea</li>
+                                        </ul>
+                                    </div>
+                                    <div class="credencial-botoes">
+                                        <button class="phb-btn phb-btn-save" onclick="baixarCredencial()">
+                                            <i class="fas fa-download"></i> Baixar Credencial
+                                        </button>
+                                        <button class="phb-btn phb-btn-secondary" onclick="compartilharCredencial()">
+                                            <i class="fas fa-share-alt"></i> Compartilhar
+                                        </button>
+                                        <button class="phb-btn phb-btn-credencial" onclick="renovarCredencial()">
+                                            <i class="fas fa-sync-alt"></i> Solicitar Renovação
+                                        </button>
+                                    </div>
+                                    <div class="credencial-verificacao">
+                                        <h4><i class="fas fa-qrcode"></i> Verificação Pública</h4>
+                                        <p>Qualquer pessoa pode verificar a autenticidade desta credencial através do link abaixo ou escaneando o QR Code:</p>
+                                        <div class="credencial-link-verificacao" id="linkVerificacao">
+                                            <input type="text" id="credVerificarUrl" readonly>
+                                            <button onclick="copiarLinkVerificacao()" title="Copiar link">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== ABA 7: MENSAGENS DIRETAS ===== -->
             <div class="tab-panel" id="tab-mensagens">
                 <div class="panel-card">
                     <div class="panel-card-header">

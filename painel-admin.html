@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo — CIEIB</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+
+    <!-- LOGIN SCREEN -->
+    <div id="adminLogin" class="admin-login-screen">
+        <div class="admin-login-card">
+            <div class="admin-login-header">
+                <div class="admin-login-icon"><i class="fas fa-shield-alt"></i></div>
+                <h1>CIEIB</h1>
+                <p>Painel Administrativo</p>
+            </div>
+            <form id="adminLoginForm" class="admin-login-form">
+                <div class="admin-form-group">
+                    <label><i class="fas fa-envelope"></i> E-mail</label>
+                    <input type="email" id="adminEmail" placeholder="admin@cieib.org.br" required>
+                </div>
+                <div class="admin-form-group">
+                    <label><i class="fas fa-lock"></i> Senha</label>
+                    <input type="password" id="adminSenha" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="admin-login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Entrar
+                </button>
+                <p class="admin-login-back"><a href="/"><i class="fas fa-arrow-left"></i> Voltar ao site</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- ADMIN PANEL -->
+    <div id="adminPanel" class="admin-panel" style="display:none;">
+
+        <!-- Sidebar -->
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="sidebar-logo-icon"><i class="fas fa-shield-alt"></i></div>
+                    <div>
+                        <span class="sidebar-logo-name">CIEIB</span>
+                        <span class="sidebar-logo-desc">Administração</span>
+                    </div>
+                </div>
+                <button class="sidebar-close" id="sidebarClose"><i class="fas fa-times"></i></button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#" class="sidebar-link active" data-section="dashboard">
+                    <i class="fas fa-tachometer-alt"></i><span>Dashboard</span>
+                </a>
+                <div class="sidebar-section-title">Conteúdo</div>
+                <a href="#" class="sidebar-link" data-section="noticias">
+                    <i class="fas fa-newspaper"></i><span>Notícias</span>
+                </a>
+                <a href="#" class="sidebar-link" data-section="eventos">
+                    <i class="fas fa-calendar-alt"></i><span>Eventos</span>
+                </a>
+                <a href="#" class="sidebar-link" data-section="cursos">
+                    <i class="fas fa-graduation-cap"></i><span>Cursos</span>
+                </a>
+                <a href="#" class="sidebar-link" data-section="paginas">
+                    <i class="fas fa-file-alt"></i><span>Páginas</span>
+                </a>
+                <div class="sidebar-section-title">Gestão</div>
+                <a href="#" class="sidebar-link" data-section="ministros">
+                    <i class="fas fa-users"></i><span>Ministros</span>
+                </a>
+                <a href="#" class="sidebar-link" data-section="diretoria">
+                    <i class="fas fa-user-tie"></i><span>Diretoria</span>
+                </a>
+                <a href="#" class="sidebar-link" data-section="contatos">
+                    <i class="fas fa-envelope"></i><span>Contatos</span>
+                    <span class="sidebar-badge" id="contatosBadge" style="display:none;">0</span>
+                </a>
+                <div class="sidebar-section-title">Configurações</div>
+                <a href="#" class="sidebar-link" data-section="configuracoes">
+                    <i class="fas fa-cog"></i><span>Config. do Site</span>
+                </a>
+                <a href="#" class="sidebar-link" data-section="redes">
+                    <i class="fas fa-share-alt"></i><span>Redes Sociais</span>
+                </a>
+                <a href="#" class="sidebar-link" data-section="midias">
+                    <i class="fas fa-photo-video"></i><span>Mídias</span>
+                </a>
+                <a href="#" class="sidebar-link" data-section="notificacoes">
+                    <i class="fas fa-bell"></i><span>Notificações Site</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="sidebar-user">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="adminNome">Admin</span>
+                </div>
+                <button class="sidebar-logout" onclick="adminLogout()">
+                    <i class="fas fa-sign-out-alt"></i> Sair
+                </button>
+            </div>
+        </aside>
+
+        <!-- Mobile topbar -->
+        <div class="admin-mobile-topbar">
+            <button class="admin-menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+            <span class="admin-mobile-title">CIEIB Admin</span>
+            <button class="admin-mobile-logout" onclick="adminLogout()"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
+
+        <!-- Overlay mobile -->
+        <div class="admin-sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- Main Content -->
+        <main class="admin-main" id="adminMain">
+
+            <!-- ===== DASHBOARD ===== -->
+            <section class="admin-section active" id="sec-dashboard">
+                <div class="section-topbar">
+                    <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
+                    <span class="topbar-date" id="dashDate"></span>
+                </div>
+                <div class="stats-cards" id="dashStats"></div>
+                <div class="dash-grid">
+                    <div class="admin-card">
+                        <div class="admin-card-header"><h3><i class="fas fa-users"></i> Últimos Ministros</h3></div>
+                        <div class="admin-card-body" id="dashMinistros"><p class="loading-text">Carregando...</p></div>
+                    </div>
+                    <div class="admin-card">
+                        <div class="admin-card-header"><h3><i class="fas fa-envelope"></i> Contatos Recentes</h3></div>
+                        <div class="admin-card-body" id="dashContatos"><p class="loading-text">Carregando...</p></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== NOTÍCIAS ===== -->
+            <section class="admin-section" id="sec-noticias">
+                <div class="section-topbar">
+                    <h2><i class="fas fa-newspaper"></i> Notícias</h2>
+                    <button class="btn-admin-primary" onclick="openNoticiaModal()"><i class="fas fa-plus"></i> Nova Notícia</button>
+                </div>
+                <div class="admin-card">
+                    <div class="admin-card-body">
+                        <div class="admin-table-responsive" id="noticiasTable"><p class="loading-text">Carregando...</p></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== EVENTOS ===== -->
+            <section class="admin-section" id="sec-eventos">
+                <div class="section-topbar">
+                    <h2><i class="fas fa-calendar-alt"></i> Eventos</h2>
+                    <button class="btn-admin-primary" onclick="openEventoModal()"><i class="fas fa-plus"></i> Novo Evento</button>
+                </div>
+                <div class="admin-card">
+                    <div class="admin-card-body">
+                        <div class="admin-table-responsive" id="eventosTable"><p class="loading-text">Carregando...</p></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== CURSOS ===== -->
+            <section class="admin-section" id="sec-cursos">
+                <div class="section-topbar">
+                    <h2><i class="fas fa-graduation-cap"></i> Cursos</h2>
+                    <button class="btn-admin-primary" onclick="openCursoModal()"><i class="fas fa-plus"></i> Novo Curso</button>
+                </div>
+                <div class="admin-card">
+                    <div class="admin-card-body">
+                        <div class="admin-table-responsive" id="cursosTable"><p class="loading-text">Carregando...</p></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== PÁGINAS / CMS ===== -->
+            <section class="admin-section" id="sec-paginas">
+                <div class="section-topbar">
+                    <h2><i class="fas fa-file-alt"></i> Conteúdos das Páginas</h2>
+                    <button class="btn-admin-primary" onclick="openConteudoModal()"><i class="fas fa-plus"></i> Novo Conteúdo</button>
+                </div>
+                <div class="admin-card">
+                    <div class="admin-card-body">
+                        <div class="cms-filters">
+                            <button class="cms-filter-btn active" onclick="filterCMS('todos')">Todas</button>
+                            <button class="cms-filter-btn" onclick="filterCMS('quem-somos')">Quem Somos</button>
+                            <button class="cms-filter-btn" onclick="filterCMS('diretoria')">Diretoria</button>
+                            <button class="cms-filter-btn" onclick="filterCMS('contato')">Contato</button>
+                            <button class="cms-filter-btn" onclick="filterCMS('home')">Home</button>
+                        </div>
+                        <div class="admin-table-responsive" id="conteudosTable"><p class="loading-text">Carregando...</p></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== MINISTROS ===== -->
+            <section class="admin-section" id="sec-ministros">
+                <div class="section-topbar">
+                    <h2><i class="fas fa-users"></i> Ministros</h2>
+                    <div class="topbar-search">
+                        <input type="text" id="ministrosSearch" placeholder="Buscar por nome, CPF ou email..." onkeyup="debounceMinistros()">
+                        <button onclick="loadAdminMinistros()"><i class="fas fa-search"></i></button>
+                    </div>
+                </div>
+                <div class="admin-card">
+                    <div class="admin-card-body">
+                        <div class="admin-table-responsive" id="ministrosTable"><p class="loading-text">Carregando...</p></div>
+                        <div id="ministrosPagination" class="admin-pagination"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== DIRETORIA ===== -->
+            <section class="admin-section" id="sec-diretoria">
+                <div class="section-topbar">
+                    <h2><i class="fas fa-user-tie"></i> Diretoria</h2>
+                    <button class="btn-admin-primary" onclick="openDiretoriaModal()"><i class="fas fa-plus"></i> Novo Membro</button>
+                </div>
+                <div class="admin-card">
+                    <div class="admin-card-body">
+                        <div class="admin-table-responsive" id="diretoriaTable"><p class="loading-text">Carregando...</p></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== CONTATOS ===== -->
+            <section class="admin-section" id="sec-contatos">
+                <div class="section-topbar">
+                    <h2><i class="fas fa-envelope"></i> Contatos Recebidos</h2>
+                </div>
+                <div class="admin-card">
+                    <div class="admin-card-body">
+                        <div class="admin-table-responsive" id="contatosTable"><p class="loading-text">Carregando...</p></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== CONFIGURAÇÕES ===== -->
+            <section class="admin-section" id="sec-configuracoes">
+                <div class="section-topbar">
+                    <h2><i class="fas fa-cog"></i> Configurações do Site</h2>
+                    <button class="btn-admin-primary" onclick="saveConfiguracoes()"><i class="fas fa-save"></i> Salvar</button>
+                </div>
+                <div class="admin-card">
+                    <div class="admin-card-body" id="configForm"><p class="loading-text">Carregando...</p></div>
+                </div>
+            </section>
+
+            <!-- ===== REDES SOCIAIS ===== -->
+            <section class="admin-section" id="sec-redes">
+                <div class="section-topbar">
+                    <h2><i class="fas fa-share-alt"></i> Redes Sociais</h2>
+                    <button class="btn-admin-primary" onclick="openRedeModal()"><i class="fas fa-plus"></i> Nova Rede</button>
+                </div>
+                <div class="admin-card">
+                    <div class="admin-card-body">
+                        <div class="admin-table-responsive" id="redesTable"><p class="loading-text">Carregando...</p></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== MÍDIAS ===== -->
+            <section class="admin-section" id="sec-midias">
+                <div class="section-topbar">
+                    <h2><i class="fas fa-photo-video"></i> Mídias</h2>
+                    <button class="btn-admin-primary" onclick="openUploadModal()"><i class="fas fa-cloud-upload-alt"></i> Upload</button>
+                </div>
+                <div class="admin-card">
+                    <div class="admin-card-body">
+                        <div class="midias-grid" id="midiasGrid"><p class="loading-text">Carregando...</p></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== NOTIFICAÇÕES SITE ===== -->
+            <section class="admin-section" id="sec-notificacoes">
+                <div class="section-topbar">
+                    <h2><i class="fas fa-bell"></i> Notificações do Site</h2>
+                    <button class="btn-admin-primary" onclick="openNotifSiteModal()"><i class="fas fa-plus"></i> Nova Notificação</button>
+                </div>
+                <div class="admin-card">
+                    <div class="admin-card-body">
+                        <div class="admin-table-responsive" id="notifSiteTable"><p class="loading-text">Carregando...</p></div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ===== MODAL GENÉRICO ===== -->
+    <div class="admin-modal-overlay" id="adminModal" style="display:none;">
+        <div class="admin-modal">
+            <div class="admin-modal-header">
+                <h3 id="modalTitle">Título</h3>
+                <button onclick="closeModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="admin-modal-body" id="modalBody"></div>
+            <div class="admin-modal-footer" id="modalFooter"></div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="adminToast" class="admin-toast" style="display:none;"></div>
+
+    <script src="/js/admin.js"></script>
+</body>
+</html>

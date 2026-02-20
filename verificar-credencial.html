@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Verificar Credencial Ministerial - CIEIB">
+    <title>Verificar Credencial - CIEIB</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .verificacao-container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 40px 0;
+        }
+        .verificacao-busca {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .verificacao-busca h2 {
+            font-family: var(--font-primary);
+            color: var(--primary-dark);
+            margin-bottom: 8px;
+        }
+        .verificacao-busca p {
+            color: var(--gray);
+            margin-bottom: 24px;
+            font-size: 0.95rem;
+        }
+        .verificacao-form {
+            display: flex;
+            gap: 12px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .verificacao-form input {
+            flex: 1;
+            padding: 14px 20px;
+            border: 2px solid var(--light-gray);
+            border-radius: var(--radius);
+            font-size: 0.95rem;
+            font-family: var(--font-body);
+            transition: border-color 0.3s;
+        }
+        .verificacao-form input:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+        .verificacao-form button {
+            padding: 14px 28px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+        .verificacao-form button:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Resultado */
+        .verificacao-resultado {
+            display: none;
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .resultado-header {
+            padding: 30px 40px;
+            text-align: center;
+        }
+        .resultado-header.valida {
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: white;
+        }
+        .resultado-header.invalida {
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+            color: white;
+        }
+        .resultado-header.expirada {
+            background: linear-gradient(135deg, #d97706, #f59e0b);
+            color: white;
+        }
+        .resultado-header i {
+            font-size: 3rem;
+            margin-bottom: 12px;
+            display: block;
+        }
+        .resultado-header h3 {
+            font-family: var(--font-primary);
+            font-size: 1.4rem;
+            margin-bottom: 4px;
+        }
+        .resultado-header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+        .resultado-dados {
+            padding: 30px 40px;
+        }
+        .resultado-ministro {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--light-gray);
+            margin-bottom: 24px;
+        }
+        .resultado-foto {
+            width: 100px;
+            height: 120px;
+            border-radius: 12px;
+            background: var(--light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .resultado-foto img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .resultado-foto i {
+            font-size: 2.5rem;
+            color: var(--light-gray);
+        }
+        .resultado-info h4 {
+            font-family: var(--font-primary);
+            font-size: 1.2rem;
+            color: var(--primary-dark);
+            margin-bottom: 4px;
+        }
+        .resultado-info .cargo {
+            color: var(--secondary-dark);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .resultado-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .resultado-campo {
+            padding: 12px 16px;
+            background: var(--light);
+            border-radius: var(--radius);
+        }
+        .resultado-campo label {
+            display: block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--gray);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        .resultado-campo span {
+            font-weight: 600;
+            color: var(--text);
+        }
+        .resultado-selo {
+            text-align: center;
+            padding: 24px 0 0;
+            margin-top: 24px;
+            border-top: 1px solid var(--light-gray);
+        }
+        .resultado-selo img {
+            height: 60px;
+            opacity: 0.6;
+        }
+        .resultado-selo p {
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-top: 8px;
+        }
+
+        /* Loading */
+        .verificacao-loading {
+            display: none;
+            text-align: center;
+            padding: 60px 0;
+        }
+        .verificacao-loading i {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        @media (max-width: 600px) {
+            .verificacao-form { flex-direction: column; }
+            .resultado-ministro { flex-direction: column; text-align: center; }
+            .resultado-grid { grid-template-columns: 1fr; }
+            .verificacao-busca, .resultado-dados { padding: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="container">
+            <div class="top-bar-content">
+                <div class="top-bar-left">
+                    <span><i class="fas fa-clock"></i> Seg a Sex: 09h às 17h</span>
+                    <span><i class="fas fa-phone"></i> (00) 0000-0000</span>
+                    <span><i class="fas fa-envelope"></i> contato@cieib.org.br</span>
+                </div>
+                <div class="top-bar-right">
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header" id="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon"><i class="fas fa-dove"></i></div>
+                    <div class="logo-text">
+                        <span class="logo-name">CIEIB</span>
+                        <span class="logo-desc">Convenção das Igrejas Evangélicas<br>Interdenominacional do Brasil</span>
+                    </div>
+                </a>
+                <nav class="nav" id="nav">
+                    <ul class="nav-list">
+                        <li><a href="index.html">Home</a></li>
+                        <li class="dropdown">
+                            <a href="#">Institucional <i class="fas fa-chevron-down"></i></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="quem-somos.html">Quem Somos</a></li>
+                                <li><a href="diretoria.html">Diretoria</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="noticias.html">Notícias</a></li>
+                        <li><a href="contato.html">Contato</a></li>
+                        <li class="nav-cta"><a href="area-do-ministro.html"><i class="fas fa-user-shield"></i> Área do Ministro</a></li>
+                    </ul>
+                </nav>
+                <button class="mobile-toggle" id="mobileToggle" aria-label="Menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <h1><i class="fas fa-qrcode" style="margin-right:12px;"></i>Verificar Credencial</h1>
+            <div class="breadcrumb">
+                <a href="index.html">Home</a>
+                <span>/</span>
+                <span>Verificar Credencial</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Content -->
+    <section class="page-content" style="background: var(--light);">
+        <div class="container">
+            <div class="verificacao-container">
+
+                <!-- Busca -->
+                <div class="verificacao-busca">
+                    <i class="fas fa-shield-alt" style="font-size:2.5rem;color:var(--primary);margin-bottom:12px;"></i>
+                    <h2>Verificação de Credencial Ministerial</h2>
+                    <p>Digite o código da credencial ou escaneie o QR Code para verificar a autenticidade.</p>
+                    <form class="verificacao-form" id="verificacaoForm">
+                        <input type="text" id="codigoInput" placeholder="Ex: CIEIB-5.131-A1B2C3D4" required>
+                        <button type="submit"><i class="fas fa-search"></i> Verificar</button>
+                    </form>
+                </div>
+
+                <!-- Loading -->
+                <div class="verificacao-loading" id="verificacaoLoading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p style="color:var(--gray);">Verificando credencial...</p>
+                </div>
+
+                <!-- Resultado -->
+                <div class="verificacao-resultado" id="verificacaoResultado">
+                    <div class="resultado-header" id="resultadoHeader">
+                        <i id="resultadoIcon"></i>
+                        <h3 id="resultadoTitulo"></h3>
+                        <p id="resultadoSubtitulo"></p>
+                    </div>
+                    <div class="resultado-dados" id="resultadoDados">
+                        <div class="resultado-ministro">
+                            <div class="resultado-foto" id="resultadoFoto">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="resultado-info">
+                                <h4 id="resultadoNome">---</h4>
+                                <p class="cargo" id="resultadoCargo">---</p>
+                            </div>
+                        </div>
+                        <div class="resultado-grid">
+                            <div class="resultado-campo">
+                                <label>Nº Registro</label>
+                                <span id="resultadoRegistro">---</span>
+                            </div>
+                            <div class="resultado-campo">
+                                <label>Convenção</label>
+                                <span id="resultadoConvencao">---</span>
+                            </div>
+                            <div class="resultado-campo">
+                                <label>Data de Filiação</label>
+                                <span id="resultadoFiliacao">---</span>
+                            </div>
+                            <div class="resultado-campo">
+                                <label>Validade</label>
+                                <span id="resultadoValidade">---</span>
+                            </div>
+                            <div class="resultado-campo">
+                                <label>Status</label>
+                                <span id="resultadoStatus">---</span>
+                            </div>
+                            <div class="resultado-campo">
+                                <label>Código</label>
+                                <span id="resultadoCodigoVal">---</span>
+                            </div>
+                        </div>
+                        <div class="resultado-selo">
+                            <i class="fas fa-dove" style="font-size:2rem;color:var(--primary);opacity:0.4;"></i>
+                            <p>Convenção das Igrejas Evangélicas Interdenominacional do Brasil<br>Verificação realizada em <span id="resultadoDataVerificacao"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col footer-about">
+                    <div class="footer-logo">
+                        <div class="logo-icon"><i class="fas fa-dove"></i></div>
+                        <span>CIEIB</span>
+                    </div>
+                    <p>Convenção das Igrejas Evangélicas Interdenominacional do Brasil.</p>
+                    <div class="footer-social">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                        <a href="#"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h3>Institucional</h3>
+                    <ul>
+                        <li><a href="quem-somos.html">Quem Somos</a></li>
+                        <li><a href="diretoria.html">Diretoria</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Links</h3>
+                    <ul>
+                        <li><a href="noticias.html">Notícias</a></li>
+                        <li><a href="contato.html">Contato</a></li>
+                        <li><a href="area-do-ministro.html">Área do Ministro</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Contato</h3>
+                    <ul class="footer-contact">
+                        <li><i class="fas fa-envelope"></i><span>contato@cieib.org.br</span></li>
+                        <li><i class="fas fa-phone"></i><span>(00) 0000-0000</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container">
+                <p>Copyright &copy; CIEIB 2026. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <button class="back-to-top" id="backToTop" aria-label="Voltar ao topo"><i class="fas fa-chevron-up"></i></button>
+
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        // Auto-preencher código da URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        if (code) {
+            document.getElementById('codigoInput').value = code;
+            verificarCredencial(code);
+        }
+
+        // Form submit
+        document.getElementById('verificacaoForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const codigo = document.getElementById('codigoInput').value.trim();
+            if (codigo) verificarCredencial(codigo);
+        });
+
+        async function verificarCredencial(codigo) {
+            const loading = document.getElementById('verificacaoLoading');
+            const resultado = document.getElementById('verificacaoResultado');
+
+            loading.style.display = 'block';
+            resultado.style.display = 'none';
+
+            try {
+                const res = await fetch(`/api/credencial/verificar/${encodeURIComponent(codigo)}`);
+                const data = await res.json();
+
+                loading.style.display = 'none';
+                resultado.style.display = 'block';
+
+                const header = document.getElementById('resultadoHeader');
+                const icon = document.getElementById('resultadoIcon');
+                const titulo = document.getElementById('resultadoTitulo');
+                const subtitulo = document.getElementById('resultadoSubtitulo');
+                const dadosDiv = document.getElementById('resultadoDados');
+
+                if (data.valido) {
+                    header.className = 'resultado-header valida';
+                    icon.className = 'fas fa-check-circle';
+                    titulo.textContent = 'Credencial Válida';
+                    subtitulo.textContent = data.mensagem;
+                    dadosDiv.style.display = 'block';
+                } else if (data.expirada) {
+                    header.className = 'resultado-header expirada';
+                    icon.className = 'fas fa-exclamation-triangle';
+                    titulo.textContent = 'Credencial Expirada';
+                    subtitulo.textContent = data.mensagem;
+                    dadosDiv.style.display = 'block';
+                } else {
+                    header.className = 'resultado-header invalida';
+                    icon.className = 'fas fa-times-circle';
+                    titulo.textContent = 'Credencial Não Encontrada';
+                    subtitulo.textContent = data.mensagem || 'O código informado não corresponde a nenhuma credencial ativa.';
+                    dadosDiv.style.display = data.nome ? 'block' : 'none';
+                }
+
+                if (data.nome) {
+                    document.getElementById('resultadoNome').textContent = data.nome;
+                    document.getElementById('resultadoCargo').textContent = data.cargo || '---';
+                    document.getElementById('resultadoRegistro').textContent = data.registro || '---';
+                    document.getElementById('resultadoConvencao').textContent = data.convencao || '---';
+                    document.getElementById('resultadoFiliacao').textContent = data.data_registro
+                        ? new Date(data.data_registro).toLocaleDateString('pt-BR') : '---';
+                    document.getElementById('resultadoValidade').textContent = data.data_validade
+                        ? new Date(data.data_validade).toLocaleDateString('pt-BR') : '---';
+                    document.getElementById('resultadoStatus').textContent = data.status || '---';
+                    document.getElementById('resultadoCodigoVal').textContent = codigo;
+
+                    const foto = document.getElementById('resultadoFoto');
+                    if (data.foto_url) {
+                        foto.innerHTML = `<img src="${data.foto_url}" alt="${data.nome}">`;
+                    }
+                }
+
+                document.getElementById('resultadoDataVerificacao').textContent =
+                    new Date().toLocaleString('pt-BR');
+
+            } catch (err) {
+                loading.style.display = 'none';
+                resultado.style.display = 'block';
+                document.getElementById('resultadoHeader').className = 'resultado-header invalida';
+                document.getElementById('resultadoIcon').className = 'fas fa-exclamation-triangle';
+                document.getElementById('resultadoTitulo').textContent = 'Erro na Verificação';
+                document.getElementById('resultadoSubtitulo').textContent = 'Não foi possível verificar a credencial. Tente novamente.';
+                document.getElementById('resultadoDados').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

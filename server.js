@@ -56,6 +56,7 @@ const cursosRoutes = require('./server/routes/cursos');
 const credencialRoutes = require('./server/routes/credencial');
 const notificacoesRoutes = require('./server/routes/notificacoes');
 const adminRoutes = require('./server/routes/admin');
+const registroRoutes = require('./server/routes/registro');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/ministros', ministrosRoutes);
@@ -70,6 +71,7 @@ app.use('/api/cursos', cursosRoutes);
 app.use('/api/credencial', credencialRoutes);
 app.use('/api/notificacoes', notificacoesRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/registro', registroRoutes);
 
 // ---- SPA Fallback: Rotas HTML ----
 const htmlPages = [

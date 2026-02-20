@@ -145,7 +145,7 @@
                             <div class="am-divider">
                                 <span>ou</span>
                             </div>
-                            <a href="#" class="btn btn-outline am-first-access" style="color: var(--primary); border-color: var(--primary);">
+                            <a href="#" class="btn btn-outline am-first-access" id="btnPrimeiroAcesso" style="color: var(--primary); border-color: var(--primary);">
                                 <i class="fas fa-user-plus"></i> Primeiro Acesso
                             </a>
                             <p class="am-help-text">
@@ -252,6 +252,411 @@
 
     </main>
 
+    <!-- ==================== MODAL PRIMEIRO ACESSO ==================== -->
+    <div class="reg-overlay" id="regOverlay">
+        <div class="reg-modal">
+            <button class="reg-close" id="regClose" aria-label="Fechar">&times;</button>
+
+            <!-- Progress Steps -->
+            <div class="reg-steps">
+                <div class="reg-step active" data-step="1">
+                    <div class="reg-step-num">1</div>
+                    <span>Dados Pessoais</span>
+                </div>
+                <div class="reg-step" data-step="2">
+                    <div class="reg-step-num">2</div>
+                    <span>Endereço</span>
+                </div>
+                <div class="reg-step" data-step="3">
+                    <div class="reg-step-num">3</div>
+                    <span>Ministerial</span>
+                </div>
+                <div class="reg-step" data-step="4">
+                    <div class="reg-step-num">4</div>
+                    <span>Documentos</span>
+                </div>
+            </div>
+
+            <form id="regForm" novalidate>
+                <!-- ===== ETAPA 1: DADOS PESSOAIS ===== -->
+                <div class="reg-panel active" id="regPanel1">
+                    <div class="reg-panel-header">
+                        <i class="fas fa-user"></i>
+                        <h3>Dados Pessoais</h3>
+                        <p>Preencha suas informações básicas</p>
+                    </div>
+                    <div class="reg-grid-2">
+                        <div class="reg-field full">
+                            <label>Nome Completo *</label>
+                            <input type="text" id="regNome" required placeholder="Seu nome completo">
+                        </div>
+                        <div class="reg-field">
+                            <label>CPF *</label>
+                            <input type="text" id="regCpf" required placeholder="000.000.000-00" maxlength="14">
+                        </div>
+                        <div class="reg-field">
+                            <label>RG</label>
+                            <input type="text" id="regRg" placeholder="Número do RG">
+                        </div>
+                        <div class="reg-field">
+                            <label>Órgão Expedidor</label>
+                            <input type="text" id="regOrgao" placeholder="Ex: SSP SP">
+                        </div>
+                        <div class="reg-field">
+                            <label>Data de Nascimento *</label>
+                            <input type="date" id="regNascimento" required>
+                        </div>
+                        <div class="reg-field">
+                            <label>Sexo *</label>
+                            <select id="regSexo" required>
+                                <option value="">Selecione</option>
+                                <option value="M">Masculino</option>
+                                <option value="F">Feminino</option>
+                            </select>
+                        </div>
+                        <div class="reg-field">
+                            <label>Nacionalidade</label>
+                            <input type="text" id="regNacionalidade" value="BRASILEIRO" placeholder="Nacionalidade">
+                        </div>
+                        <div class="reg-field">
+                            <label>Estado de Nascimento</label>
+                            <select id="regEstadoNasc">
+                                <option value="">Selecione UF</option>
+                                <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option>
+                                <option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option>
+                                <option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option>
+                                <option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option>
+                                <option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option>
+                                <option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option>
+                                <option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option>
+                                <option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option>
+                                <option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
+                            </select>
+                        </div>
+                        <div class="reg-field">
+                            <label>Cidade de Nascimento</label>
+                            <input type="text" id="regCidadeNasc" placeholder="Cidade">
+                        </div>
+                        <div class="reg-field">
+                            <label>Estado Civil *</label>
+                            <select id="regEstadoCivil" required>
+                                <option value="">Selecione</option>
+                                <option value="solteiro">Solteiro(a)</option>
+                                <option value="casado">Casado(a)</option>
+                                <option value="divorciado">Divorciado(a)</option>
+                                <option value="viuvo">Viúvo(a)</option>
+                            </select>
+                        </div>
+                        <div class="reg-field" id="regConjugeGroup" style="display:none;">
+                            <label>Nome do Cônjuge</label>
+                            <input type="text" id="regConjuge" placeholder="Nome completo do cônjuge">
+                        </div>
+                        <div class="reg-field" id="regConjugeNascGroup" style="display:none;">
+                            <label>Nasc. Cônjuge</label>
+                            <input type="date" id="regConjugeNasc">
+                        </div>
+                        <div class="reg-field">
+                            <label>Nome do Pai</label>
+                            <input type="text" id="regPai" placeholder="Nome completo">
+                        </div>
+                        <div class="reg-field">
+                            <label>Nome da Mãe</label>
+                            <input type="text" id="regMae" placeholder="Nome completo">
+                        </div>
+                        <div class="reg-field">
+                            <label>Email *</label>
+                            <input type="email" id="regEmail" required placeholder="seu@email.com">
+                        </div>
+                        <div class="reg-field">
+                            <label>Telefone</label>
+                            <input type="text" id="regTelefone" placeholder="(00) 0000-0000" maxlength="15">
+                        </div>
+                        <div class="reg-field">
+                            <label>WhatsApp</label>
+                            <input type="text" id="regWhatsapp" placeholder="(00) 00000-0000" maxlength="15">
+                        </div>
+                        <div class="reg-field">
+                            <label>Escolaridade</label>
+                            <select id="regEscolaridade">
+                                <option value="">Selecione</option>
+                                <option value="fundamental">Ensino Fundamental</option>
+                                <option value="medio">Ensino Médio</option>
+                                <option value="tecnico">Ensino Técnico</option>
+                                <option value="superior_incompleto">Superior Incompleto</option>
+                                <option value="superior">Ensino Superior</option>
+                                <option value="pos_graduacao">Pós-Graduação</option>
+                                <option value="mestrado">Mestrado</option>
+                                <option value="doutorado">Doutorado</option>
+                            </select>
+                        </div>
+
+                        <!-- Filhos -->
+                        <div class="reg-field full">
+                            <label>Filhos</label>
+                            <div id="regFilhosContainer"></div>
+                            <button type="button" class="reg-btn-add" id="btnAddFilho">
+                                <i class="fas fa-plus-circle"></i> Adicionar filho(a)
+                            </button>
+                        </div>
+                    </div>
+                    <div class="reg-actions">
+                        <span></span>
+                        <button type="button" class="reg-btn-next" onclick="regNextStep(2)">Próximo <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+
+                <!-- ===== ETAPA 2: ENDEREÇO ===== -->
+                <div class="reg-panel" id="regPanel2">
+                    <div class="reg-panel-header">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <h3>Endereço</h3>
+                        <p>Dados de localização residencial</p>
+                    </div>
+                    <div class="reg-grid-2">
+                        <div class="reg-field">
+                            <label>CEP *</label>
+                            <input type="text" id="regCep" required placeholder="00000-000" maxlength="9">
+                        </div>
+                        <div class="reg-field full">
+                            <label>Endereço</label>
+                            <input type="text" id="regEndereco" placeholder="Rua, Avenida...">
+                        </div>
+                        <div class="reg-field" style="max-width:120px;">
+                            <label>Número</label>
+                            <input type="text" id="regNumero" placeholder="Nº">
+                        </div>
+                        <div class="reg-field">
+                            <label>Complemento</label>
+                            <input type="text" id="regComplemento" placeholder="Apto, Bloco...">
+                        </div>
+                        <div class="reg-field">
+                            <label>Bairro</label>
+                            <input type="text" id="regBairro" placeholder="Bairro">
+                        </div>
+                        <div class="reg-field">
+                            <label>Cidade</label>
+                            <input type="text" id="regCidade" placeholder="Cidade">
+                        </div>
+                        <div class="reg-field">
+                            <label>UF</label>
+                            <select id="regUf">
+                                <option value="">UF</option>
+                                <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option>
+                                <option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option>
+                                <option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option>
+                                <option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option>
+                                <option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option>
+                                <option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option>
+                                <option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option>
+                                <option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option>
+                                <option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="reg-actions">
+                        <button type="button" class="reg-btn-prev" onclick="regNextStep(1)"><i class="fas fa-arrow-left"></i> Voltar</button>
+                        <button type="button" class="reg-btn-next" onclick="regNextStep(3)">Próximo <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+
+                <!-- ===== ETAPA 3: DADOS MINISTERIAIS + SENHA ===== -->
+                <div class="reg-panel" id="regPanel3">
+                    <div class="reg-panel-header">
+                        <i class="fas fa-cross"></i>
+                        <h3>Dados Ministeriais</h3>
+                        <p>Informações sobre seu ministério</p>
+                    </div>
+                    <div class="reg-grid-2">
+                        <div class="reg-field">
+                            <label>Cargo / Título Ministerial *</label>
+                            <select id="regCargo" required>
+                                <option value="">Selecione</option>
+                                <option value="PASTOR">Pastor</option>
+                                <option value="PASTORA">Pastora</option>
+                                <option value="APOSTOLO">Apóstolo</option>
+                                <option value="BISPO">Bispo(a)</option>
+                                <option value="EVANGELISTA">Evangelista</option>
+                                <option value="MISSIONARIO">Missionário(a)</option>
+                                <option value="PRESBITERO">Presbítero</option>
+                                <option value="DIACONO">Diácono/Diaconisa</option>
+                                <option value="OBREIRO">Obreiro(a)</option>
+                                <option value="LIDER">Líder</option>
+                                <option value="OUTRO">Outro</option>
+                            </select>
+                        </div>
+                        <div class="reg-field">
+                            <label>Função Ministerial</label>
+                            <input type="text" id="regFuncao" placeholder="Ex: Pastor Titular, Auxiliar...">
+                        </div>
+                        <div class="reg-field full">
+                            <label>Nome da Igreja / Congregação</label>
+                            <input type="text" id="regIgreja" placeholder="Nome da igreja onde congrega/pastoreia">
+                        </div>
+                        <div class="reg-field">
+                            <label>Tempo de Ministério</label>
+                            <select id="regTempoMinisterio">
+                                <option value="">Selecione</option>
+                                <option value="menos_1">Menos de 1 ano</option>
+                                <option value="1_3">1 a 3 anos</option>
+                                <option value="3_5">3 a 5 anos</option>
+                                <option value="5_10">5 a 10 anos</option>
+                                <option value="10_20">10 a 20 anos</option>
+                                <option value="mais_20">Mais de 20 anos</option>
+                            </select>
+                        </div>
+                        <div class="reg-field">
+                            <label>Data de Consagração</label>
+                            <input type="date" id="regConsagracao">
+                        </div>
+                    </div>
+
+                    <div class="reg-divider"><span>Crie sua senha de acesso</span></div>
+
+                    <div class="reg-grid-2">
+                        <div class="reg-field">
+                            <label>Senha *</label>
+                            <input type="password" id="regSenha" required placeholder="Mínimo 6 caracteres" minlength="6">
+                        </div>
+                        <div class="reg-field">
+                            <label>Confirmar Senha *</label>
+                            <input type="password" id="regSenhaConfirm" required placeholder="Repita a senha">
+                        </div>
+                    </div>
+                    <div class="reg-actions">
+                        <button type="button" class="reg-btn-prev" onclick="regNextStep(2)"><i class="fas fa-arrow-left"></i> Voltar</button>
+                        <button type="button" class="reg-btn-next reg-btn-submit" id="regSubmitBtn" onclick="regSubmitForm()">
+                            <i class="fas fa-check-circle"></i> Cadastrar e Continuar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ===== ETAPA 4: UPLOAD DE DOCUMENTOS ===== -->
+                <div class="reg-panel" id="regPanel4">
+                    <div class="reg-panel-header">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h3>Envio de Documentos</h3>
+                        <p>Envie os documentos para validação do seu cadastro</p>
+                    </div>
+
+                    <div class="reg-docs-list">
+                        <div class="reg-doc-item" data-tipo="foto_3x4">
+                            <div class="reg-doc-info">
+                                <i class="fas fa-camera"></i>
+                                <div>
+                                    <strong>Foto 3x4</strong>
+                                    <small>Foto recente para credencial (JPG ou PNG)</small>
+                                </div>
+                            </div>
+                            <label class="reg-doc-btn">
+                                <i class="fas fa-paperclip"></i> Escolher
+                                <input type="file" accept="image/*" class="reg-doc-input" data-tipo="foto_3x4" hidden>
+                            </label>
+                            <span class="reg-doc-status"></span>
+                        </div>
+
+                        <div class="reg-doc-item" data-tipo="documento_identidade">
+                            <div class="reg-doc-info">
+                                <i class="fas fa-id-card"></i>
+                                <div>
+                                    <strong>RG ou CNH</strong>
+                                    <small>Documento de identidade com foto</small>
+                                </div>
+                            </div>
+                            <label class="reg-doc-btn">
+                                <i class="fas fa-paperclip"></i> Escolher
+                                <input type="file" accept="image/*,.pdf" class="reg-doc-input" data-tipo="documento_identidade" hidden>
+                            </label>
+                            <span class="reg-doc-status"></span>
+                        </div>
+
+                        <div class="reg-doc-item" data-tipo="comprovante_endereco">
+                            <div class="reg-doc-info">
+                                <i class="fas fa-home"></i>
+                                <div>
+                                    <strong>Comprovante de Endereço</strong>
+                                    <small>Conta de luz, água ou telefone recente</small>
+                                </div>
+                            </div>
+                            <label class="reg-doc-btn">
+                                <i class="fas fa-paperclip"></i> Escolher
+                                <input type="file" accept="image/*,.pdf" class="reg-doc-input" data-tipo="comprovante_endereco" hidden>
+                            </label>
+                            <span class="reg-doc-status"></span>
+                        </div>
+
+                        <div class="reg-doc-item" data-tipo="certidao_casamento">
+                            <div class="reg-doc-info">
+                                <i class="fas fa-ring"></i>
+                                <div>
+                                    <strong>Certidão de Casamento</strong>
+                                    <small>Se casado(a), envie a certidão</small>
+                                </div>
+                            </div>
+                            <label class="reg-doc-btn">
+                                <i class="fas fa-paperclip"></i> Escolher
+                                <input type="file" accept="image/*,.pdf" class="reg-doc-input" data-tipo="certidao_casamento" hidden>
+                            </label>
+                            <span class="reg-doc-status"></span>
+                        </div>
+
+                        <div class="reg-doc-item" data-tipo="carta_recomendacao">
+                            <div class="reg-doc-info">
+                                <i class="fas fa-envelope-open-text"></i>
+                                <div>
+                                    <strong>Carta de Recomendação Pastoral</strong>
+                                    <small>Carta do pastor ou líder que o recomenda</small>
+                                </div>
+                            </div>
+                            <label class="reg-doc-btn">
+                                <i class="fas fa-paperclip"></i> Escolher
+                                <input type="file" accept="image/*,.pdf" class="reg-doc-input" data-tipo="carta_recomendacao" hidden>
+                            </label>
+                            <span class="reg-doc-status"></span>
+                        </div>
+
+                        <div class="reg-doc-item" data-tipo="certificado_teologico">
+                            <div class="reg-doc-info">
+                                <i class="fas fa-graduation-cap"></i>
+                                <div>
+                                    <strong>Certificado Teológico</strong>
+                                    <small>Se possuir, envie o certificado ou diploma</small>
+                                </div>
+                            </div>
+                            <label class="reg-doc-btn">
+                                <i class="fas fa-paperclip"></i> Escolher
+                                <input type="file" accept="image/*,.pdf" class="reg-doc-input" data-tipo="certificado_teologico" hidden>
+                            </label>
+                            <span class="reg-doc-status"></span>
+                        </div>
+                    </div>
+
+                    <div class="reg-actions">
+                        <button type="button" class="reg-btn-prev" onclick="regNextStep(3)"><i class="fas fa-arrow-left"></i> Voltar</button>
+                        <button type="button" class="reg-btn-next" id="regUploadBtn" onclick="regUploadDocs()">
+                            <i class="fas fa-cloud-upload-alt"></i> Enviar Documentos
+                        </button>
+                        <button type="button" class="reg-btn-skip" id="regSkipBtn" onclick="regFinish()">
+                            Pular e acessar o painel <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ===== SUCESSO ===== -->
+                <div class="reg-panel" id="regPanelSuccess">
+                    <div class="reg-success">
+                        <div class="reg-success-icon"><i class="fas fa-check-circle"></i></div>
+                        <h3>Cadastro Realizado com Sucesso!</h3>
+                        <p>Bem-vindo(a) à CIEIB! Seu acesso está liberado.</p>
+                        <p class="reg-success-detail">Você receberá uma notificação de boas-vindas no seu painel.</p>
+                        <button type="button" class="reg-btn-next" onclick="regGoToPanel()">
+                            <i class="fas fa-sign-in-alt"></i> Acessar Área do Ministro
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
@@ -336,7 +741,7 @@
     <script src="js/main.js"></script>
     <script src="js/api.js"></script>
     <script>
-        // Se já estiver logado, redirecionar direto
+        // ==================== LOGIN ====================
         if (API.isLoggedIn()) {
             API.verifyToken().then(valid => {
                 if (valid) window.location.href = 'painel-ministro.html';
@@ -357,55 +762,707 @@
 
         const loginForm = document.getElementById('ministerLoginForm');
         if (loginForm) {
-            const cpfInput = document.getElementById('loginCpf');
-            const senhaInput = document.getElementById('loginPassword');
-
             loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const btn = loginForm.querySelector('button[type="submit"]');
                 const original = btn.innerHTML;
-                const cpf = cpfInput.value.replace(/\D/g, '');
-                const senha = senhaInput.value;
-
-                // Remove mensagens anteriores
+                const cpf = document.getElementById('loginCpf').value.replace(/\D/g, '');
+                const senha = document.getElementById('loginPassword').value;
                 const msgAnterior = loginForm.querySelector('.login-error');
                 if (msgAnterior) msgAnterior.remove();
-
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Autenticando...';
                 btn.disabled = true;
-
                 try {
                     const data = await API.login(cpf, senha);
-
                     btn.innerHTML = '<i class="fas fa-check"></i> Bem-vindo, ' + data.ministro.nome + '!';
                     btn.style.background = '#28a745';
                     btn.style.borderColor = '#28a745';
-
-                    setTimeout(() => {
-                        window.location.href = 'painel-ministro.html';
-                    }, 1200);
+                    setTimeout(() => { window.location.href = 'painel-ministro.html'; }, 1200);
                 } catch (err) {
                     btn.innerHTML = original;
                     btn.disabled = false;
-
                     const errorDiv = document.createElement('div');
                     errorDiv.className = 'login-error';
                     errorDiv.setAttribute('role', 'alert');
-                    errorDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + (err.message || 'CPF ou senha incorretos. Verifique seus dados e tente novamente.');
+                    errorDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + (err.message || 'CPF ou senha incorretos.');
                     errorDiv.style.cssText = 'background:#fef2f2;color:#d93025;padding:12px 16px;border-radius:8px;font-size:0.85rem;margin-top:12px;display:flex;align-items:center;gap:8px;border:1px solid #fecdd3;';
                     loginForm.appendChild(errorDiv);
-
                     loginForm.style.animation = 'shake 0.5s ease';
                     setTimeout(() => loginForm.style.animation = '', 500);
                 }
             });
         }
+
+        // ==================== MODAL PRIMEIRO ACESSO ====================
+        let regCurrentStep = 1;
+        let regMinistroId = null;
+        let regToken = null;
+
+        // Abrir / Fechar modal
+        document.getElementById('btnPrimeiroAcesso').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('regOverlay').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        });
+        document.getElementById('regClose').addEventListener('click', () => {
+            document.getElementById('regOverlay').classList.remove('open');
+            document.body.style.overflow = '';
+        });
+        document.getElementById('regOverlay').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                document.getElementById('regOverlay').classList.remove('open');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Mostrar campos cônjuge conforme estado civil
+        document.getElementById('regEstadoCivil').addEventListener('change', function() {
+            const show = this.value === 'casado';
+            document.getElementById('regConjugeGroup').style.display = show ? '' : 'none';
+            document.getElementById('regConjugeNascGroup').style.display = show ? '' : 'none';
+        });
+
+        // Adicionar filhos
+        let filhoCount = 0;
+        document.getElementById('btnAddFilho').addEventListener('click', () => {
+            filhoCount++;
+            const div = document.createElement('div');
+            div.className = 'reg-filho-row';
+            div.innerHTML = `
+                <input type="text" placeholder="Nome do filho(a)" class="reg-filho-nome">
+                <input type="date" class="reg-filho-nasc" title="Data de nascimento">
+                <button type="button" class="reg-filho-remove" onclick="this.parentElement.remove()" title="Remover"><i class="fas fa-times"></i></button>
+            `;
+            document.getElementById('regFilhosContainer').appendChild(div);
+        });
+
+        // Máscara CPF
+        document.getElementById('regCpf').addEventListener('input', function() {
+            let v = this.value.replace(/\D/g, '');
+            if (v.length > 11) v = v.slice(0, 11);
+            if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4');
+            else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+            else if (v.length > 3) v = v.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+            this.value = v;
+        });
+
+        // Máscara telefone/whatsapp
+        ['regTelefone', 'regWhatsapp'].forEach(id => {
+            document.getElementById(id).addEventListener('input', function() {
+                let v = this.value.replace(/\D/g, '');
+                if (v.length > 11) v = v.slice(0, 11);
+                if (v.length > 10) v = v.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+                else if (v.length > 6) v = v.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+                else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,5})/, '($1) $2');
+                this.value = v;
+            });
+        });
+
+        // Máscara CEP + busca automática
+        document.getElementById('regCep').addEventListener('input', function() {
+            let v = this.value.replace(/\D/g, '');
+            if (v.length > 8) v = v.slice(0, 8);
+            if (v.length > 5) v = v.replace(/(\d{5})(\d{1,3})/, '$1-$2');
+            this.value = v;
+            if (v.replace(/\D/g, '').length === 8) buscarCep(v.replace(/\D/g, ''));
+        });
+
+        async function buscarCep(cep) {
+            try {
+                const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                const data = await res.json();
+                if (!data.erro) {
+                    document.getElementById('regEndereco').value = data.logradouro || '';
+                    document.getElementById('regBairro').value = data.bairro || '';
+                    document.getElementById('regCidade').value = data.localidade || '';
+                    document.getElementById('regUf').value = data.uf || '';
+                }
+            } catch(e) {}
+        }
+
+        // Navegação entre etapas
+        function regNextStep(step) {
+            // Validar etapa atual antes de avançar
+            if (step > regCurrentStep) {
+                if (!regValidateStep(regCurrentStep)) return;
+            }
+
+            // Esconder todas as panels
+            document.querySelectorAll('.reg-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.reg-step').forEach(s => {
+                s.classList.remove('active');
+                const sn = parseInt(s.dataset.step);
+                if (sn < step) s.classList.add('done');
+                else s.classList.remove('done');
+                if (sn === step) s.classList.add('active');
+            });
+
+            document.getElementById('regPanel' + step).classList.add('active');
+            regCurrentStep = step;
+
+            // Scroll modal to top
+            document.querySelector('.reg-modal').scrollTop = 0;
+        }
+
+        function regValidateStep(step) {
+            let valid = true;
+            const panel = document.getElementById('regPanel' + step);
+            const required = panel.querySelectorAll('[required]');
+            required.forEach(input => {
+                input.classList.remove('reg-invalid');
+                if (!input.value.trim()) {
+                    input.classList.add('reg-invalid');
+                    valid = false;
+                }
+            });
+
+            if (step === 1) {
+                const cpf = document.getElementById('regCpf').value.replace(/\D/g, '');
+                if (cpf.length !== 11) {
+                    document.getElementById('regCpf').classList.add('reg-invalid');
+                    valid = false;
+                }
+            }
+
+            if (step === 3) {
+                const s1 = document.getElementById('regSenha').value;
+                const s2 = document.getElementById('regSenhaConfirm').value;
+                if (s1.length < 6) {
+                    document.getElementById('regSenha').classList.add('reg-invalid');
+                    valid = false;
+                }
+                if (s1 !== s2) {
+                    document.getElementById('regSenhaConfirm').classList.add('reg-invalid');
+                    valid = false;
+                    alert('As senhas não coincidem.');
+                }
+            }
+
+            if (!valid) {
+                const first = panel.querySelector('.reg-invalid');
+                if (first) first.focus();
+            }
+            return valid;
+        }
+
+        // Submeter formulário (etapa 3 → salva no banco)
+        async function regSubmitForm() {
+            if (!regValidateStep(3)) return;
+
+            const btn = document.getElementById('regSubmitBtn');
+            const original = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cadastrando...';
+            btn.disabled = true;
+
+            // Coletar filhos
+            const filhos = [];
+            document.querySelectorAll('.reg-filho-row').forEach(row => {
+                const nome = row.querySelector('.reg-filho-nome').value.trim();
+                const nascimento = row.querySelector('.reg-filho-nasc').value;
+                if (nome) filhos.push({ nome, data_nascimento: nascimento || null });
+            });
+
+            const body = {
+                nome: document.getElementById('regNome').value.trim(),
+                cpf: document.getElementById('regCpf').value,
+                rg: document.getElementById('regRg').value.trim(),
+                orgao_expedidor: document.getElementById('regOrgao').value.trim(),
+                data_nascimento: document.getElementById('regNascimento').value,
+                sexo: document.getElementById('regSexo').value,
+                nacionalidade: document.getElementById('regNacionalidade').value.trim(),
+                naturalidade_estado: document.getElementById('regEstadoNasc').value,
+                naturalidade_cidade: document.getElementById('regCidadeNasc').value.trim(),
+                estado_civil: document.getElementById('regEstadoCivil').value,
+                nome_conjuge: document.getElementById('regConjuge').value.trim(),
+                data_nasc_conjuge: document.getElementById('regConjugeNasc').value || null,
+                pai: document.getElementById('regPai').value.trim(),
+                mae: document.getElementById('regMae').value.trim(),
+                email: document.getElementById('regEmail').value.trim(),
+                telefone: document.getElementById('regTelefone').value.trim(),
+                whatsapp: document.getElementById('regWhatsapp').value.trim(),
+                escolaridade: document.getElementById('regEscolaridade').value,
+                cep: document.getElementById('regCep').value.trim(),
+                endereco: document.getElementById('regEndereco').value.trim(),
+                numero: document.getElementById('regNumero').value.trim(),
+                complemento: document.getElementById('regComplemento').value.trim(),
+                bairro: document.getElementById('regBairro').value.trim(),
+                cidade: document.getElementById('regCidade').value.trim(),
+                uf: document.getElementById('regUf').value,
+                cargo: document.getElementById('regCargo').value,
+                funcao_ministerial: document.getElementById('regFuncao').value.trim(),
+                nome_igreja: document.getElementById('regIgreja').value.trim(),
+                tempo_ministerio: document.getElementById('regTempoMinisterio').value,
+                data_consagracao: document.getElementById('regConsagracao').value || null,
+                senha: document.getElementById('regSenha').value,
+                filhos
+            };
+
+            try {
+                const res = await fetch('/api/registro', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Erro no cadastro');
+
+                regMinistroId = data.ministro.id;
+                regToken = data.token;
+
+                // Salvar token para acesso
+                localStorage.setItem('cieib_token', data.token);
+                localStorage.setItem('cieib_usuario', data.ministro.nome);
+                localStorage.setItem('cieib_cpf', data.ministro.cpf);
+                localStorage.setItem('cieib_logado', 'true');
+                API.token = data.token;
+
+                regNextStep(4);
+            } catch (err) {
+                alert(err.message);
+                btn.innerHTML = original;
+                btn.disabled = false;
+            }
+        }
+
+        // Upload de documentos (etapa 4)
+        // Feedback visual ao escolher arquivo
+        document.querySelectorAll('.reg-doc-input').forEach(input => {
+            input.addEventListener('change', function() {
+                const item = this.closest('.reg-doc-item');
+                const status = item.querySelector('.reg-doc-status');
+                if (this.files.length > 0) {
+                    const file = this.files[0];
+                    const sizeMB = (file.size / 1024 / 1024).toFixed(1);
+                    status.innerHTML = `<i class="fas fa-check-circle" style="color:var(--success)"></i> ${file.name} (${sizeMB}MB)`;
+                    item.classList.add('selected');
+                } else {
+                    status.innerHTML = '';
+                    item.classList.remove('selected');
+                }
+            });
+        });
+
+        async function regUploadDocs() {
+            const inputs = document.querySelectorAll('.reg-doc-input');
+            const formData = new FormData();
+            const tipos = [];
+            let count = 0;
+
+            inputs.forEach(input => {
+                if (input.files.length > 0) {
+                    formData.append('documentos', input.files[0]);
+                    tipos.push(input.dataset.tipo);
+                    count++;
+                }
+            });
+
+            if (count === 0) {
+                alert('Selecione ao menos um documento para enviar.');
+                return;
+            }
+
+            formData.append('ministro_id', regMinistroId);
+            formData.append('tipos', JSON.stringify(tipos));
+
+            const btn = document.getElementById('regUploadBtn');
+            const original = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/registro/documentos', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Erro no upload');
+
+                // Mostrar painel de sucesso
+                document.querySelectorAll('.reg-panel').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.reg-step').forEach(s => s.classList.add('done'));
+                document.getElementById('regPanelSuccess').classList.add('active');
+            } catch (err) {
+                alert(err.message);
+                btn.innerHTML = original;
+                btn.disabled = false;
+            }
+        }
+
+        function regFinish() {
+            document.querySelectorAll('.reg-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.reg-step').forEach(s => s.classList.add('done'));
+            document.getElementById('regPanelSuccess').classList.add('active');
+        }
+
+        function regGoToPanel() {
+            window.location.href = 'painel-ministro.html';
+        }
     </script>
+
     <style>
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             20%, 60% { transform: translateX(-8px); }
             40%, 80% { transform: translateX(8px); }
+        }
+
+        /* ==================== MODAL REGISTRO ==================== */
+        .reg-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 10000;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .reg-overlay.open {
+            display: flex;
+        }
+        .reg-modal {
+            background: #fff;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 780px;
+            margin: 30px auto;
+            position: relative;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.3);
+            max-height: 92vh;
+            overflow-y: auto;
+            animation: regSlideIn 0.35s ease;
+        }
+        @keyframes regSlideIn {
+            from { opacity: 0; transform: translateY(40px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .reg-close {
+            position: sticky;
+            top: 10px;
+            float: right;
+            margin: 10px 14px 0 0;
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: var(--gray);
+            cursor: pointer;
+            z-index: 10;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+        .reg-close:hover { background: var(--light-gray); color: var(--dark); }
+
+        /* Steps indicator */
+        .reg-steps {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            padding: 24px 24px 0;
+            margin-bottom: 8px;
+        }
+        .reg-step {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 24px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--gray);
+            background: var(--light);
+            transition: var(--transition);
+        }
+        .reg-step-num {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: var(--light-gray);
+            color: var(--gray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            transition: var(--transition);
+        }
+        .reg-step.active {
+            background: var(--primary);
+            color: #fff;
+        }
+        .reg-step.active .reg-step-num {
+            background: rgba(255,255,255,0.25);
+            color: #fff;
+        }
+        .reg-step.done {
+            background: #e8f5e9;
+            color: var(--success);
+        }
+        .reg-step.done .reg-step-num {
+            background: var(--success);
+            color: #fff;
+        }
+        .reg-step span { display: none; }
+        @media (min-width: 600px) {
+            .reg-step span { display: inline; }
+        }
+
+        /* Panels */
+        .reg-panel {
+            display: none;
+            padding: 20px 32px 32px;
+        }
+        .reg-panel.active { display: block; }
+        .reg-panel-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .reg-panel-header i {
+            font-size: 2.2rem;
+            color: var(--secondary);
+            margin-bottom: 8px;
+        }
+        .reg-panel-header h3 {
+            font-size: 1.4rem;
+            color: var(--primary-dark);
+            margin: 4px 0;
+        }
+        .reg-panel-header p {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        /* Grid 2 cols */
+        .reg-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        .reg-field.full { grid-column: 1 / -1; }
+        .reg-field label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--dark-gray);
+            margin-bottom: 4px;
+        }
+        .reg-field input,
+        .reg-field select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1.5px solid var(--light-gray);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: var(--text);
+            background: #fff;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+        .reg-field input:focus,
+        .reg-field select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26,58,92,0.1);
+        }
+        .reg-field input.reg-invalid,
+        .reg-field select.reg-invalid {
+            border-color: #e53e3e;
+            box-shadow: 0 0 0 3px rgba(229,62,62,0.12);
+        }
+
+        /* Filhos */
+        .reg-filho-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+        .reg-filho-row input:first-child { flex: 2; }
+        .reg-filho-row input:nth-child(2) { flex: 1; }
+        .reg-filho-row input {
+            padding: 8px 10px;
+            border: 1.5px solid var(--light-gray);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-family: inherit;
+        }
+        .reg-filho-remove {
+            background: none;
+            border: none;
+            color: #e53e3e;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 4px 8px;
+        }
+        .reg-btn-add {
+            background: none;
+            border: 1.5px dashed var(--secondary);
+            color: var(--secondary-dark);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 4px;
+            transition: var(--transition);
+        }
+        .reg-btn-add:hover { background: #fdf8ec; }
+
+        /* Divider */
+        .reg-divider {
+            display: flex;
+            align-items: center;
+            margin: 24px 0 16px;
+            gap: 12px;
+        }
+        .reg-divider::before, .reg-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--light-gray);
+        }
+        .reg-divider span {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary);
+            white-space: nowrap;
+        }
+
+        /* Actions */
+        .reg-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 28px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .reg-btn-next, .reg-btn-prev {
+            padding: 12px 28px;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+        .reg-btn-next {
+            background: var(--primary);
+            color: #fff;
+        }
+        .reg-btn-next:hover { background: var(--primary-dark); }
+        .reg-btn-prev {
+            background: var(--light);
+            color: var(--text);
+        }
+        .reg-btn-prev:hover { background: var(--light-gray); }
+        .reg-btn-submit {
+            background: var(--success) !important;
+        }
+        .reg-btn-submit:hover {
+            background: #218838 !important;
+        }
+        .reg-btn-skip {
+            background: none;
+            border: none;
+            color: var(--gray);
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-decoration: underline;
+            font-family: inherit;
+        }
+        .reg-btn-skip:hover { color: var(--primary); }
+
+        /* Documents */
+        .reg-docs-list { display: flex; flex-direction: column; gap: 12px; }
+        .reg-doc-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            border: 1.5px solid var(--light-gray);
+            border-radius: 10px;
+            transition: var(--transition);
+            flex-wrap: wrap;
+        }
+        .reg-doc-item.selected { border-color: var(--success); background: #f0fff4; }
+        .reg-doc-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 200px;
+        }
+        .reg-doc-info i {
+            font-size: 1.4rem;
+            color: var(--secondary);
+            width: 32px;
+            text-align: center;
+        }
+        .reg-doc-info strong { display: block; font-size: 0.9rem; color: var(--dark-gray); }
+        .reg-doc-info small { color: var(--gray); font-size: 0.78rem; }
+        .reg-doc-btn {
+            padding: 8px 16px;
+            background: var(--light);
+            border: 1.5px solid var(--light-gray);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+        .reg-doc-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+        .reg-doc-status { font-size: 0.78rem; color: var(--gray); display: flex; align-items: center; gap: 4px; }
+
+        /* Success */
+        .reg-success {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .reg-success-icon {
+            font-size: 4rem;
+            color: var(--success);
+            margin-bottom: 16px;
+        }
+        .reg-success h3 {
+            font-size: 1.5rem;
+            color: var(--primary-dark);
+            margin-bottom: 8px;
+        }
+        .reg-success p {
+            color: var(--text-light);
+            margin-bottom: 4px;
+        }
+        .reg-success-detail {
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-bottom: 24px !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .reg-modal { margin: 10px; border-radius: 12px; }
+            .reg-panel { padding: 16px 18px 24px; }
+            .reg-grid-2 { grid-template-columns: 1fr; }
+            .reg-field.full { grid-column: 1; }
+            .reg-steps { gap: 4px; padding: 16px 12px 0; }
+            .reg-step { padding: 6px 10px; font-size: 0.7rem; }
+            .reg-actions { flex-direction: column; }
+            .reg-btn-next, .reg-btn-prev { width: 100%; justify-content: center; }
         }
     </style>
 </body>

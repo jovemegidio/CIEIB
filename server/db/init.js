@@ -369,6 +369,51 @@ DO $$ BEGIN
 EXCEPTION WHEN OTHERS THEN NULL;
 END $$;
 
+-- ===== ENDEREÇO DO MINISTRO =====
+CREATE TABLE IF NOT EXISTS ministro_endereco (
+    id SERIAL PRIMARY KEY,
+    ministro_id INTEGER REFERENCES ministros(id) ON DELETE CASCADE,
+    cep VARCHAR(10),
+    endereco VARCHAR(300),
+    numero VARCHAR(20),
+    complemento VARCHAR(100),
+    bairro VARCHAR(100),
+    cidade VARCHAR(100),
+    uf VARCHAR(2),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    UNIQUE(ministro_id)
+);
+
+-- ===== FILHOS DO MINISTRO =====
+CREATE TABLE IF NOT EXISTS ministro_filhos (
+    id SERIAL PRIMARY KEY,
+    ministro_id INTEGER REFERENCES ministros(id) ON DELETE CASCADE,
+    nome VARCHAR(200) NOT NULL,
+    data_nascimento DATE,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ===== DOCUMENTOS DE CADASTRO (uploads) =====
+CREATE TABLE IF NOT EXISTS ministro_uploads (
+    id SERIAL PRIMARY KEY,
+    ministro_id INTEGER REFERENCES ministros(id) ON DELETE CASCADE,
+    tipo_documento VARCHAR(50) NOT NULL,
+    nome_arquivo VARCHAR(300) NOT NULL,
+    caminho VARCHAR(500) NOT NULL,
+    tamanho INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ===== INFORMAÇÕES MINISTERIAIS (primeiro acesso) =====
+ALTER TABLE ministros ADD COLUMN IF NOT EXISTS telefone VARCHAR(20);
+ALTER TABLE ministros ADD COLUMN IF NOT EXISTS whatsapp VARCHAR(20);
+ALTER TABLE ministros ADD COLUMN IF NOT EXISTS escolaridade VARCHAR(50);
+ALTER TABLE ministros ADD COLUMN IF NOT EXISTS nome_igreja VARCHAR(200);
+ALTER TABLE ministros ADD COLUMN IF NOT EXISTS funcao_ministerial VARCHAR(100);
+ALTER TABLE ministros ADD COLUMN IF NOT EXISTS tempo_ministerio VARCHAR(50);
+ALTER TABLE ministros ADD COLUMN IF NOT EXISTS data_consagracao DATE;
+ALTER TABLE ministros ADD COLUMN IF NOT EXISTS aprovado BOOLEAN DEFAULT FALSE;
+
 `;
 
 async function initDB() {

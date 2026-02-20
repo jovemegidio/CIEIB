@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Ministro - CIEIB</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/painel.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="painel-body">
+
+    <!-- Painel Top Nav -->
+    <div class="painel-topnav">
+        <div class="container">
+            <div class="painel-topnav-content">
+                <a href="index.html" class="painel-logo">
+                    <div class="logo-icon"><i class="fas fa-dove"></i></div>
+                    <div class="logo-text">
+                        <span class="logo-name">CIEIB</span>
+                        <span class="logo-desc">Painel do Ministro</span>
+                    </div>
+                </a>
+                <div class="painel-nav-links" id="painelNav">
+                    <a href="#" class="pnav-link active" data-action="perfil"><i class="fas fa-user-circle"></i> Meu Perfil</a>
+                    <div class="pnav-dropdown">
+                        <a href="#" class="pnav-link"><i class="fas fa-shield-alt"></i> Segurança <i class="fas fa-chevron-down" style="font-size:0.6rem;"></i></a>
+                        <div class="pnav-dropdown-menu">
+                            <a href="#">Alterar Senha</a>
+                            <a href="#">Dados de Acesso</a>
+                        </div>
+                    </div>
+                    <a href="#" class="pnav-link"><i class="fas fa-headset"></i> Suporte</a>
+                    <a href="#" class="pnav-link pnav-sair" onclick="sessionStorage.clear(); window.location.href='area-do-ministro.html';"><i class="fas fa-sign-out-alt"></i> Sair</a>
+                </div>
+                <div class="painel-right-group">
+                    <div class="painel-user-name" id="painelUserName">
+                        <i class="fas fa-user-circle"></i>
+                        <span></span>
+                    </div>
+                    <div class="painel-notif">
+                        <i class="fas fa-bell"></i>
+                        <span class="notif-badge">0</span>
+                    </div>
+                    <button class="painel-mobile-toggle" id="painelMobileToggle" aria-label="Menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Painel Header Bar -->
+    <div class="painel-header-bar">
+        <div class="container">
+            <div class="phb-content">
+                <h1><i class="fas fa-user-cog"></i> Atualização - Ministros</h1>
+                <div class="phb-actions">
+                    <button class="phb-btn phb-btn-save" onclick="salvarDados()"><i class="fas fa-save"></i> Salvar</button>
+                    <button class="phb-btn phb-btn-refresh" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
+                    <span class="phb-separator">|</span>
+                    <button class="phb-btn phb-btn-credencial"><i class="fas fa-id-badge"></i> Solicitação de Credencial</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Tabs -->
+    <div class="painel-tabs-wrapper">
+        <div class="container">
+            <div class="painel-tabs">
+                <button class="ptab active" data-tab="cadastro"><i class="fas fa-user-edit"></i> Cadastro</button>
+                <button class="ptab" data-tab="documentos"><i class="fas fa-file-alt"></i> Documentos de Ministro</button>
+                <button class="ptab" data-tab="historico"><i class="fas fa-receipt"></i> Histórico de Recebimentos</button>
+                <button class="ptab" data-tab="eventos"><i class="fas fa-calendar-alt"></i> Eventos</button>
+                <button class="ptab" data-tab="mensagens"><i class="fas fa-envelope"></i> Mensagens Diretas</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="painel-content">
+        <div class="container">
+
+            <!-- ===== ABA 1: CADASTRO ===== -->
+            <div class="tab-panel active" id="tab-cadastro">
+                <div class="cadastro-layout">
+                    <!-- Foto + Convenções -->
+                    <div class="cadastro-left">
+                        <!-- Foto -->
+                        <div class="panel-card">
+                            <div class="panel-card-header">
+                                <h3><i class="fas fa-camera"></i> Foto</h3>
+                            </div>
+                            <div class="panel-card-body" style="text-align:center;">
+                                <div class="ministro-foto">
+                                    <div class="foto-placeholder" id="fotoMinistro">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                </div>
+                                <p style="font-size:0.8rem; color:var(--gray); margin-top:8px;">Foto do ministro</p>
+                            </div>
+                        </div>
+
+                        <!-- Convenções -->
+                        <div class="panel-card">
+                            <div class="panel-card-header">
+                                <h3><i class="fas fa-building"></i> Convenções</h3>
+                            </div>
+                            <div class="panel-card-body">
+                                <div class="table-responsive">
+                                    <table class="painel-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Sigla</th>
+                                                <th>Registro</th>
+                                                <th>Status</th>
+                                                <th>Condição</th>
+                                                <th>Detalhar</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><strong>CIEIB</strong></td>
+                                                <td>5.131</td>
+                                                <td><span class="status-badge status-ativo">ATIVO</span></td>
+                                                <td><span class="status-badge status-ativo">ATIVO</span></td>
+                                                <td><button class="btn-icon" title="Detalhar"><i class="fas fa-info-circle"></i></button></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contas a Receber -->
+                        <div class="panel-card">
+                            <div class="panel-card-header">
+                                <h3><i class="fas fa-file-invoice-dollar"></i> Contas a Receber</h3>
+                            </div>
+                            <div class="panel-card-body">
+                                <p class="conv-label">Convenção => CIEIB</p>
+                                <div class="table-responsive">
+                                    <table class="painel-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Serviço</th>
+                                                <th>Total</th>
+                                                <th>Descontos</th>
+                                                <th>Quitado</th>
+                                                <th>Em Aberto</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>ANUIDADE CONVENCIONAL</td>
+                                                <td>R$144,00</td>
+                                                <td>R$0,00</td>
+                                                <td>R$0,00</td>
+                                                <td class="valor-aberto">R$144,00</td>
+                                            </tr>
+                                            <tr>
+                                                <td>ANUIDADE CONVENCIONAL</td>
+                                                <td>R$144,00</td>
+                                                <td>R$0,00</td>
+                                                <td>R$0,00</td>
+                                                <td class="valor-aberto">R$144,00</td>
+                                            </tr>
+                                            <tr>
+                                                <td>ANUIDADE CONVENCIONAL</td>
+                                                <td>R$216,00</td>
+                                                <td>R$0,00</td>
+                                                <td>R$0,00</td>
+                                                <td class="valor-aberto">R$216,00</td>
+                                            </tr>
+                                            <tr>
+                                                <td>CREDENCIAL / ENVIO</td>
+                                                <td>R$15,00</td>
+                                                <td>R$0,00</td>
+                                                <td>R$0,00</td>
+                                                <td class="valor-aberto">R$15,00</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dados Pessoais -->
+                    <div class="cadastro-right">
+                        <div class="panel-card">
+                            <div class="panel-card-header">
+                                <h3><i class="fas fa-id-card"></i> Dados Pessoais</h3>
+                            </div>
+                            <div class="panel-card-body">
+                                <div class="dados-grid">
+                                    <div class="dado-group">
+                                        <label>CPF</label>
+                                        <input type="text" id="campo-cpf" value="113.689.928-62" readonly class="dado-readonly">
+                                    </div>
+                                    <div class="dado-group">
+                                        <label>Nome</label>
+                                        <input type="text" id="campo-nome" value="OSNI EGIDIO">
+                                    </div>
+                                    <div class="dado-group">
+                                        <label>Nome Social</label>
+                                        <input type="text" id="campo-nomesocial" value="OSNI EGIDIO">
+                                    </div>
+                                    <div class="dado-group">
+                                        <label>Doc Estrangeiro</label>
+                                        <input type="text" id="campo-docestrangeiro" value="">
+                                    </div>
+                                    <div class="dado-group">
+                                        <label>Cargo</label>
+                                        <input type="text" id="campo-cargo" value="PASTOR" readonly class="dado-readonly">
+                                    </div>
+                                    <div class="dado-group">
+                                        <label>Conv. Est./Int.</label>
+                                        <input type="text" id="campo-conv" value="CIEIB" readonly class="dado-readonly">
+                                    </div>
+                                    <div class="dado-group">
+                                        <label>Sexo</label>
+                                        <select id="campo-sexo">
+                                            <option value="M" selected>Masculino</option>
+                                            <option value="F">Feminino</option>
+                                        </select>
+                                    </div>
+                                    <div class="dado-group">
+                                        <label>Data de Nascimento</label>
+                                        <input type="date" id="campo-nascimento" value="1972-11-20">
+                                    </div>
+                                    <div class="dado-group">
+                                        <label>País de Nascimento</label>
+                                        <input type="text" id="campo-pais" value="BRASIL">
+                                    </div>
+                                    <div class="dado-group">
+                                        <label>Estado Nascimento</label>
+                                        <select id="campo-estado">
+                                            <option value="SP">SP</option>
+                                            <option value="RJ">RJ</option>
+                                            <option value="MG">MG</option>
+                                            <option value="ES" selected>ES</option>
+                                            <option value="BA">BA</option>
+                                            <option value="PR">PR</option>
+                                            <option value="SC">SC</option>
+                                            <option value="RS">RS</option>
+                                            <option value="GO">GO</option>
+                                            <option value="DF">DF</option>
+                                            <option value="MT">MT</option>
+                                            <option value="MS">MS</option>
+                                            <option value="PA">PA</option>
+                                            <option value="AM">AM</option>
+                                            <option value="CE">CE</option>
+                                            <option value="PE">PE</option>
+                                            <option value="MA">MA</option>
+                                            <option value="PI">PI</option>
+                                            <option value="RN">RN</option>
+                                            <option value="PB">PB</option>
+                                            <option value="AL">AL</option>
+                                            <option value="SE">SE</option>
+                                            <option value="TO">TO</option>
+                                            <option value="RO">RO</option>
+                                            <option value="AC">AC</option>
+                                            <option value="AP">AP</option>
+                                            <option value="RR">RR</option>
+                                        </select>
+                                    </div>
+                                    <div class="dado-group">
+                                        <label>Cidade Nascimento</label>
+                                        <input type="text" id="campo-cidade" value="CONCEICAO DA BARRA">
+                                    </div>
+                                    <div class="dado-group">
+                                        <label>Nacionalidade</label>
+                                        <input type="text" id="campo-nacionalidade" value="BRASILEIRO">
+                                    </div>
+                                    <div class="dado-group">
+                                        <label>Estado Civil</label>
+                                        <select id="campo-estadocivil">
+                                            <option value="solteiro">Solteiro(a)</option>
+                                            <option value="casado" selected>Casado(a)</option>
+                                            <option value="divorciado">Divorciado(a)</option>
+                                            <option value="viuvo">Viúvo(a)</option>
+                                        </select>
+                                    </div>
+                                    <div class="dado-group">
+                                        <label>Nome do Cônjuge</label>
+                                        <input type="text" id="campo-conjuge" value="ALESSANDRA DE OLIVEIRA EGIDIO">
+                                    </div>
+                                    <div class="dado-group full-width">
+                                        <label>Data Nascimento do Cônjuge</label>
+                                        <input type="date" id="campo-nascconjuge" value="">
+                                    </div>
+                                    <div class="dado-group">
+                                        <label>Pai</label>
+                                        <input type="text" id="campo-pai" value="ANTONIO EGIDIO">
+                                    </div>
+                                    <div class="dado-group">
+                                        <label>Mãe</label>
+                                        <input type="text" id="campo-mae" value="MARIA DUARTE EGIDIO">
+                                    </div>
+                                    <div class="dado-group">
+                                        <label>RG</label>
+                                        <input type="text" id="campo-rg" value="214692942">
+                                    </div>
+                                    <div class="dado-group">
+                                        <label>Órgão Expedidor</label>
+                                        <input type="text" id="campo-orgao" value="SSP SP">
+                                    </div>
+                                    <div class="dado-group full-width">
+                                        <label>E-mail Principal *</label>
+                                        <input type="email" id="campo-email" value="osniegidio@gmail.com">
+                                    </div>
+                                    <div class="dado-group">
+                                        <label>Biometria</label>
+                                        <input type="text" id="campo-biometria" value="Não" readonly class="dado-readonly">
+                                    </div>
+                                    <div class="dado-group">
+                                        <label>Registro</label>
+                                        <input type="text" id="campo-registro" value="29/04/2012" readonly class="dado-readonly">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== ABA 2: DOCUMENTOS DE MINISTRO ===== -->
+            <div class="tab-panel" id="tab-documentos">
+                <div class="docs-layout">
+                    <!-- Foto para Validação -->
+                    <div class="panel-card">
+                        <div class="panel-card-header">
+                            <h3><i class="fas fa-camera"></i> Foto para Validação</h3>
+                        </div>
+                        <div class="panel-card-body">
+                            <div class="docs-foto-section">
+                                <div class="docs-foto-left">
+                                    <div class="dado-group" style="margin-bottom:16px;">
+                                        <label>Homologar Foto</label>
+                                        <select>
+                                            <option value="nao" selected>Não</option>
+                                            <option value="sim">Sim</option>
+                                        </select>
+                                    </div>
+                                    <label class="file-upload-btn">
+                                        <i class="fas fa-folder-open"></i> Selecionar Arquivo...
+                                        <input type="file" accept="image/*" style="display:none;" id="fotoUpload">
+                                    </label>
+                                    <div class="drag-drop-area" id="dragDropArea">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <p>Arraste um arquivo e<br>solte-o aqui</p>
+                                    </div>
+                                    <p class="campo-obrigatorio">* Campos obrigatórios</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Documentos -->
+                    <div class="panel-card">
+                        <div class="panel-card-header">
+                            <h3><i class="fas fa-file-alt"></i> Documentos de Ministro</h3>
+                        </div>
+                        <div class="panel-card-body">
+                            <div class="dados-grid">
+                                <div class="dado-group">
+                                    <label>Passaporte</label>
+                                    <input type="text" value="" placeholder="Número do passaporte">
+                                </div>
+                                <div class="dado-group">
+                                    <label>CTPS</label>
+                                    <input type="text" value="" placeholder="Número da CTPS">
+                                </div>
+                                <div class="dado-group">
+                                    <label>Habilitação</label>
+                                    <input type="text" value="" placeholder="Número da CNH">
+                                </div>
+                                <div class="dado-group">
+                                    <label>Título de Eleitor</label>
+                                    <input type="text" value="" placeholder="Número do título">
+                                </div>
+                                <div class="dado-group full-width">
+                                    <label>Observações</label>
+                                    <textarea placeholder="Observações adicionais..." rows="4"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== ABA 3: HISTÓRICO DE RECEBIMENTOS ===== -->
+            <div class="tab-panel" id="tab-historico">
+                <div class="panel-card">
+                    <div class="panel-card-header">
+                        <div class="phc-flex">
+                            <h3><i class="fas fa-receipt"></i> Consulta - Contas a Receber</h3>
+                            <span class="header-right-info">CIEIB - Ministros<br>Usuário: 11368992862</span>
+                        </div>
+                    </div>
+                    <div class="panel-card-body">
+                        <!-- Filtros -->
+                        <div class="hist-filters">
+                            <div class="hist-filter-group">
+                                <button class="filter-btn" onclick="this.classList.toggle('open')"><i class="fas fa-chevron-right"></i> Ano</button>
+                                <button class="filter-btn" onclick="this.classList.toggle('open')"><i class="fas fa-chevron-right"></i> Mês</button>
+                                <button class="filter-btn" onclick="this.classList.toggle('open')"><i class="fas fa-chevron-right"></i> Serviço</button>
+                                <button class="filter-btn" onclick="this.classList.toggle('open')"><i class="fas fa-chevron-right"></i> Status</button>
+                            </div>
+                            <div class="hist-search">
+                                <input type="text" placeholder="Busca Rápida" class="busca-rapida">
+                                <button class="busca-btn"><i class="fas fa-search"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- Status Labels -->
+                        <div class="hist-status-label">
+                            <span>Convenção => CIEIB</span>
+                        </div>
+                        <div class="hist-status-label status-aberto">
+                            <span>Status => ABERTO</span>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="painel-table painel-table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Convenção</th>
+                                        <th>Conta</th>
+                                        <th>Nro Docto</th>
+                                        <th>Data</th>
+                                        <th>Registro</th>
+                                        <th>Data Vencto</th>
+                                        <th>Valor</th>
+                                        <th>Desconto</th>
+                                        <th>Valor Pago</th>
+                                        <th>Data Pgto</th>
+                                        <th>Saldo</th>
+                                        <th>Serviço</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>CIEIB</td>
+                                        <td>12.026.337</td>
+                                        <td>1000938822019</td>
+                                        <td>01/01/2019</td>
+                                        <td>5.131</td>
+                                        <td>31/12/2019</td>
+                                        <td>144,00</td>
+                                        <td>0,00</td>
+                                        <td>0,00</td>
+                                        <td></td>
+                                        <td class="valor-aberto">R$144,00</td>
+                                        <td>ANUIDADE CONVENCIONAL</td>
+                                        <td><span class="status-badge status-aberto-badge">ABERTO</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>CIEIB</td>
+                                        <td>12.149.815</td>
+                                        <td>1000285589202</td>
+                                        <td>01/01/2020</td>
+                                        <td>5.131</td>
+                                        <td>31/12/2020</td>
+                                        <td>144,00</td>
+                                        <td>0,00</td>
+                                        <td>0,00</td>
+                                        <td></td>
+                                        <td class="valor-aberto">R$144,00</td>
+                                        <td>ANUIDADE CONVENCIONAL</td>
+                                        <td><span class="status-badge status-aberto-badge">ABERTO</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>CIEIB</td>
+                                        <td>12.516.151</td>
+                                        <td>1000624054202</td>
+                                        <td>05/11/2021</td>
+                                        <td>5.131</td>
+                                        <td>05/11/2021</td>
+                                        <td>24,00</td>
+                                        <td>0,00</td>
+                                        <td>0,00</td>
+                                        <td></td>
+                                        <td class="valor-aberto">R$24,00</td>
+                                        <td>CREDENCIAL / ENVIO</td>
+                                        <td><span class="status-badge status-aberto-badge">ABERTO</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>CIEIB</td>
+                                        <td>12.957.272</td>
+                                        <td>1000101439220</td>
+                                        <td>01/01/2024</td>
+                                        <td>5.131</td>
+                                        <td>31/12/2024</td>
+                                        <td>216,00</td>
+                                        <td>0,00</td>
+                                        <td>0,00</td>
+                                        <td></td>
+                                        <td class="valor-aberto">R$216,00</td>
+                                        <td>ANUIDADE CONVENCIONAL</td>
+                                        <td><span class="status-badge status-aberto-badge">ABERTO</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>CIEIB</td>
+                                        <td>13.194.905</td>
+                                        <td>1000122095620</td>
+                                        <td>01/01/2025</td>
+                                        <td>5.131</td>
+                                        <td>31/12/2025</td>
+                                        <td>216,00</td>
+                                        <td>0,00</td>
+                                        <td>0,00</td>
+                                        <td></td>
+                                        <td class="valor-aberto">R$216,00</td>
+                                        <td>ANUIDADE CONVENCIONAL</td>
+                                        <td><span class="status-badge status-aberto-badge">ABERTO</span></td>
+                                    </tr>
+                                    <tr class="row-total">
+                                        <td colspan="6"><strong>Soma</strong></td>
+                                        <td><strong>744,00</strong></td>
+                                        <td><strong>0,00</strong></td>
+                                        <td><strong>0,00</strong></td>
+                                        <td></td>
+                                        <td class="valor-aberto"><strong>R$744,00</strong></td>
+                                        <td colspan="2"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="hist-status-label status-quitado" style="margin-top: 24px;">
+                            <span>Status => Quitado</span>
+                        </div>
+                        <div class="empty-state-small">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Nenhum registro quitado encontrado.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== ABA 4: EVENTOS ===== -->
+            <div class="tab-panel" id="tab-eventos">
+                <div class="panel-card">
+                    <div class="panel-card-header">
+                        <div class="phc-flex">
+                            <h3><i class="fas fa-calendar-alt"></i> Relatório de Inscrições</h3>
+                            <span class="header-right-info">CIEIB - Ministros</span>
+                        </div>
+                    </div>
+                    <div class="panel-card-body">
+                        <div class="eventos-actions">
+                            <button class="phb-btn phb-btn-secondary"><i class="fas fa-sort-amount-down"></i> Ordenação</button>
+                            <div class="pnav-dropdown">
+                                <button class="phb-btn phb-btn-secondary"><i class="fas fa-download"></i> Exportação <i class="fas fa-chevron-down" style="font-size:0.6rem;"></i></button>
+                                <div class="pnav-dropdown-menu">
+                                    <a href="#">PDF</a>
+                                    <a href="#">Excel</a>
+                                    <a href="#">CSV</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="painel-table painel-table-striped">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>Evento</th>
+                                        <th>Convenção</th>
+                                        <th>Título</th>
+                                        <th>Status</th>
+                                        <th>Inscrição</th>
+                                        <th>Data Inscrição</th>
+                                        <th>Valor</th>
+                                        <th>Valor Baixa</th>
+                                        <th>Participou?</th>
+                                        <th>Status Inscrição</th>
+                                        <th>Data Evento</th>
+                                        <th>Hr Início</th>
+                                        <th>Data Término</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><button class="btn-icon" title="Editar"><i class="fas fa-edit"></i></button></td>
+                                        <td>93</td>
+                                        <td>CIEIB</td>
+                                        <td>ASSEMBLEIA GERAL</td>
+                                        <td><span class="status-badge status-encerrado">Encerrado</span></td>
+                                        <td>139.260</td>
+                                        <td>15/06/2025 00:00</td>
+                                        <td>R$0,01</td>
+                                        <td>R$0,01</td>
+                                        <td>Não</td>
+                                        <td><span class="status-badge status-quitado-badge">Quitado</span></td>
+                                        <td>15/12/2025</td>
+                                        <td>08:00</td>
+                                        <td>31/12/2025</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="table-pagination">[1 a 1 de 1]</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== ABA 5: MENSAGENS DIRETAS ===== -->
+            <div class="tab-panel" id="tab-mensagens">
+                <div class="panel-card">
+                    <div class="panel-card-header">
+                        <div class="phc-flex">
+                            <h3><i class="fas fa-envelope"></i> Mensagens Diretas</h3>
+                            <span class="header-right-info" id="dataAtual"></span>
+                        </div>
+                    </div>
+                    <div class="panel-card-body">
+                        <div class="msg-toolbar">
+                            <div class="hist-search">
+                                <input type="text" placeholder="Busca Rápida" class="busca-rapida">
+                                <button class="busca-btn"><i class="fas fa-search"></i></button>
+                            </div>
+                            <button class="phb-btn phb-btn-save"><i class="fas fa-plus"></i> Nova Mensagem</button>
+                        </div>
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <h4>Registros não encontrados</h4>
+                            <p>Não há mensagens diretas para exibir no momento.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="painel-footer">
+        <div class="container">
+            <p>Copyright &copy; CIEIB 2026. Todos os direitos reservados. | <a href="index.html">Voltar ao site</a></p>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script src="js/painel.js"></script>
+</body>
+</html>

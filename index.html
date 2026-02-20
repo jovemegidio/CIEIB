@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CIEIB - Convenção das Igrejas Evangélicas Interdenominacional do Brasil">
+    <title>CIEIB - Convenção das Igrejas Evangélicas Interdenominacional do Brasil</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="container">
+            <div class="top-bar-content">
+                <div class="top-bar-left">
+                    <span><i class="fas fa-clock"></i> Seg a Sex: 09h às 17h</span>
+                    <span><i class="fas fa-phone"></i> (00) 0000-0000</span>
+                    <span><i class="fas fa-envelope"></i> contato@cieib.org.br</span>
+                </div>
+                <div class="top-bar-right">
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header" id="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-dove"></i>
+                    </div>
+                    <div class="logo-text">
+                        <span class="logo-name">CIEIB</span>
+                        <span class="logo-desc">Convenção das Igrejas Evangélicas<br>Interdenominacional do Brasil</span>
+                    </div>
+                </a>
+                <nav class="nav" id="nav">
+                    <ul class="nav-list">
+                        <li><a href="index.html" class="active">Home</a></li>
+                        <li class="dropdown">
+                            <a href="#">Institucional <i class="fas fa-chevron-down"></i></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="quem-somos.html">Quem Somos</a></li>
+                                <li><a href="diretoria.html">Diretoria</a></li>
+                                <li><a href="#">Presidente</a></li>
+                                <li><a href="#">Conselhos</a></li>
+                                <li><a href="#">Comissões</a></li>
+                                <li><a href="#">Órgãos</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown">
+                            <a href="#">Convenções <i class="fas fa-chevron-down"></i></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="#">Convenções Afiliadas</a></li>
+                                <li><a href="#">Assembleias Convencionais</a></li>
+                                <li><a href="#">Resoluções</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="noticias.html">Notícias</a></li>
+                        <li><a href="#">Mídias</a></li>
+                        <li><a href="contato.html">Contato</a></li>
+                        <li class="nav-cta"><a href="area-do-ministro.html"><i class="fas fa-user-shield"></i> Área do Ministro</a></li>
+                    </ul>
+                </nav>
+                <button class="mobile-toggle" id="mobileToggle" aria-label="Menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-particles" id="particles"></div>
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-badge">Fundada com propósito e fé</div>
+                <h1>CONVENÇÃO DAS IGREJAS EVANGÉLICAS<br><span>INTERDENOMINACIONAL DO BRASIL</span></h1>
+                <p>Promovendo a unidade, comunhão e crescimento do Reino de Deus através da cooperação entre igrejas e ministros em todo o território nacional.</p>
+                <div class="hero-buttons">
+                    <a href="quem-somos.html" class="btn btn-primary">Conheça a CIEIB</a>
+                    <a href="contato.html" class="btn btn-outline">Fale Conosco</a>
+                </div>
+            </div>
+        </div>
+        <div class="hero-scroll">
+            <a href="#eventos"><i class="fas fa-chevron-down"></i></a>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-icon"><i class="fas fa-church"></i></div>
+                    <div class="stat-number" data-target="500">0</div>
+                    <div class="stat-label">Igrejas Afiliadas</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
+                    <div class="stat-number" data-target="1200">0</div>
+                    <div class="stat-label">Ministros Credenciados</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon"><i class="fas fa-map-marked-alt"></i></div>
+                    <div class="stat-number" data-target="26">0</div>
+                    <div class="stat-label">Estados Alcançados</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon"><i class="fas fa-handshake"></i></div>
+                    <div class="stat-number" data-target="50">0</div>
+                    <div class="stat-label">Convenções Regionais</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Próximos Eventos -->
+    <section class="eventos" id="eventos">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">Agenda</span>
+                <h2>Próximos Eventos</h2>
+                <div class="section-divider"></div>
+            </div>
+            <div class="eventos-grid">
+                <div class="evento-card">
+                    <div class="evento-date">
+                        <span class="evento-day">15</span>
+                        <span class="evento-month">MAR</span>
+                        <span class="evento-year">2026</span>
+                    </div>
+                    <div class="evento-info">
+                        <span class="evento-category">Assembleia</span>
+                        <h3>47ª Assembleia Geral Ordinária</h3>
+                        <p><i class="fas fa-map-marker-alt"></i> Centro de Convenções - Brasília, DF</p>
+                        <p><i class="fas fa-clock"></i> 08h às 18h</p>
+                        <a href="#" class="btn-link">Saiba mais <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+                <div class="evento-card">
+                    <div class="evento-date">
+                        <span class="evento-day">22</span>
+                        <span class="evento-month">ABR</span>
+                        <span class="evento-year">2026</span>
+                    </div>
+                    <div class="evento-info">
+                        <span class="evento-category">Congresso</span>
+                        <h3>Congresso Nacional de Líderes</h3>
+                        <p><i class="fas fa-map-marker-alt"></i> Templo Central - São Paulo, SP</p>
+                        <p><i class="fas fa-clock"></i> 19h às 22h</p>
+                        <a href="#" class="btn-link">Saiba mais <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+                <div class="evento-card">
+                    <div class="evento-date">
+                        <span class="evento-day">10</span>
+                        <span class="evento-month">MAI</span>
+                        <span class="evento-year">2026</span>
+                    </div>
+                    <div class="evento-info">
+                        <span class="evento-category">Seminário</span>
+                        <h3>Seminário de Capacitação Ministerial</h3>
+                        <p><i class="fas fa-map-marker-alt"></i> Sede CIEIB - Rio de Janeiro, RJ</p>
+                        <p><i class="fas fa-clock"></i> 09h às 17h</p>
+                        <a href="#" class="btn-link">Saiba mais <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Convenções Afiliadas -->
+    <section class="convencoes">
+        <div class="container">
+            <div class="convencoes-content">
+                <div class="convencoes-text">
+                    <span class="section-tag">Rede Nacional</span>
+                    <h2>Convenções Afiliadas na CIEIB</h2>
+                    <p>Conheça as convenções regionais e estaduais que fazem parte da nossa rede de cooperação ministerial em todo o Brasil.</p>
+                    <a href="#" class="btn btn-primary">Ver Convenções <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="convencoes-map">
+                    <div class="map-placeholder">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <span>Presente em todo o Brasil</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Resoluções -->
+    <section class="resolucoes">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">Documentos</span>
+                <h2>Resoluções</h2>
+                <div class="section-divider"></div>
+            </div>
+            <div class="resolucoes-grid">
+                <div class="resolucao-card">
+                    <div class="resolucao-icon"><i class="fas fa-file-alt"></i></div>
+                    <h3>Estatuto Social</h3>
+                    <p>Documento que rege a organização e funcionamento da convenção.</p>
+                    <a href="#" class="btn-link">Acessar <i class="fas fa-download"></i></a>
+                </div>
+                <div class="resolucao-card">
+                    <div class="resolucao-icon"><i class="fas fa-gavel"></i></div>
+                    <h3>Regimento Interno</h3>
+                    <p>Normas e procedimentos para assembleias e atividades convencionais.</p>
+                    <a href="#" class="btn-link">Acessar <i class="fas fa-download"></i></a>
+                </div>
+                <div class="resolucao-card">
+                    <div class="resolucao-icon"><i class="fas fa-scroll"></i></div>
+                    <h3>Resoluções da AGO</h3>
+                    <p>Deliberações aprovadas nas Assembleias Gerais Ordinárias.</p>
+                    <a href="#" class="btn-link">Acessar <i class="fas fa-download"></i></a>
+                </div>
+                <div class="resolucao-card">
+                    <div class="resolucao-icon"><i class="fas fa-book-open"></i></div>
+                    <h3>Código de Ética</h3>
+                    <p>Princípios e normas de conduta ministerial para os filiados.</p>
+                    <a href="#" class="btn-link">Acessar <i class="fas fa-download"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Área do Ministro -->
+    <section class="area-ministro">
+        <div class="area-ministro-overlay"></div>
+        <div class="container">
+            <div class="area-ministro-content">
+                <div class="area-ministro-text">
+                    <span class="section-tag" style="background: rgba(255,255,255,0.15); color: var(--secondary-light);">Acesso Exclusivo</span>
+                    <h2>Área do Ministro</h2>
+                    <p>Acesse sua área exclusiva para consultar credenciais, emitir documentos, acompanhar sua situação cadastral e muito mais. Um espaço dedicado aos ministros filiados à CIEIB.</p>
+                    <div class="area-ministro-features">
+                        <div class="am-feature">
+                            <i class="fas fa-id-card"></i>
+                            <span>Credencial Digital</span>
+                        </div>
+                        <div class="am-feature">
+                            <i class="fas fa-file-certificate"></i>
+                            <span>Emissão de Documentos</span>
+                        </div>
+                        <div class="am-feature">
+                            <i class="fas fa-clipboard-check"></i>
+                            <span>Situação Cadastral</span>
+                        </div>
+                        <div class="am-feature">
+                            <i class="fas fa-calendar-check"></i>
+                            <span>Inscrição em Eventos</span>
+                        </div>
+                    </div>
+                    <a href="area-do-ministro.html" class="btn btn-primary" style="margin-top: 12px;">Acessar Agora <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="area-ministro-card">
+                    <div class="am-login-card">
+                        <div class="am-card-header">
+                            <i class="fas fa-user-shield"></i>
+                            <h3>Acesso Rápido</h3>
+                        </div>
+                        <form class="am-login-form" id="homeLoginForm">
+                            <div class="am-form-group">
+                                <label><i class="fas fa-user"></i> CPF ou Nº Credencial</label>
+                                <input type="text" id="homeCpf" placeholder="Digite seu CPF ou credencial">
+                            </div>
+                            <div class="am-form-group">
+                                <label><i class="fas fa-lock"></i> Senha</label>
+                                <input type="password" id="homeSenha" placeholder="Digite sua senha">
+                            </div>
+                            <div id="homeLoginError" style="display:none;background:#fef2f2;color:#d93025;padding:10px 14px;border-radius:8px;font-size:0.82rem;margin-bottom:8px;border:1px solid #fecdd3;"></div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">Entrar <i class="fas fa-sign-in-alt"></i></button>
+                            <div class="am-login-links">
+                                <a href="#">Esqueci minha senha</a>
+                                <a href="area-do-ministro.html">Primeiro acesso</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Notícias -->
+    <section class="noticias">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">Fique por dentro</span>
+                <h2>Notícias</h2>
+                <div class="section-divider"></div>
+            </div>
+            <div class="noticias-grid">
+                <div class="noticia-card featured">
+                    <div class="noticia-image">
+                        <div class="noticia-img-placeholder">
+                            <i class="fas fa-newspaper"></i>
+                        </div>
+                        <span class="noticia-badge">Destaque</span>
+                    </div>
+                    <div class="noticia-content">
+                        <div class="noticia-meta">
+                            <span><i class="fas fa-calendar"></i> 10 de Fevereiro de 2026</span>
+                            <span><i class="fas fa-tag"></i> Institucional</span>
+                        </div>
+                        <h3>CIEIB realiza encontro nacional de pastores em Brasília</h3>
+                        <p>O evento reuniu líderes de todo o país para discutir os rumos da convenção e fortalecer os laços de comunhão entre as igrejas afiliadas. Durante o encontro, foram apresentados os projetos para o próximo biênio...</p>
+                        <a href="#" class="btn-link">Leia mais <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+                <div class="noticia-card">
+                    <div class="noticia-image">
+                        <div class="noticia-img-placeholder">
+                            <i class="fas fa-handshake"></i>
+                        </div>
+                    </div>
+                    <div class="noticia-content">
+                        <div class="noticia-meta">
+                            <span><i class="fas fa-calendar"></i> 05 de Fevereiro de 2026</span>
+                        </div>
+                        <h3>Nova parceria fortalece ações sociais da convenção</h3>
+                        <p>A CIEIB firma parceria com instituições para ampliar o alcance de seus projetos sociais em comunidades carentes...</p>
+                        <a href="#" class="btn-link">Leia mais <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+                <div class="noticia-card">
+                    <div class="noticia-image">
+                        <div class="noticia-img-placeholder">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                    </div>
+                    <div class="noticia-content">
+                        <div class="noticia-meta">
+                            <span><i class="fas fa-calendar"></i> 28 de Janeiro de 2026</span>
+                        </div>
+                        <h3>Programa de capacitação teológica abre novas turmas</h3>
+                        <p>As inscrições para o programa de formação ministerial já estão abertas, com cursos presenciais e online...</p>
+                        <a href="#" class="btn-link">Leia mais <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+                <div class="noticia-card">
+                    <div class="noticia-image">
+                        <div class="noticia-img-placeholder">
+                            <i class="fas fa-globe-americas"></i>
+                        </div>
+                    </div>
+                    <div class="noticia-content">
+                        <div class="noticia-meta">
+                            <span><i class="fas fa-calendar"></i> 20 de Janeiro de 2026</span>
+                        </div>
+                        <h3>Missões: CIEIB amplia presença internacional</h3>
+                        <p>A convenção expande seu trabalho missionário com a abertura de novos campos em países da América Latina e África...</p>
+                        <a href="#" class="btn-link">Leia mais <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="section-cta">
+                <a href="noticias.html" class="btn btn-secondary">Ver todas as notícias</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Banner Slogan -->
+    <section class="slogan">
+        <div class="slogan-overlay"></div>
+        <div class="container">
+            <div class="slogan-content">
+                <div class="slogan-tags">
+                    <span>#UNIÃO</span>
+                    <span>#COMUNHÃO</span>
+                    <span>#CRESCIMENTO</span>
+                </div>
+                <p>"Porque, assim como o corpo é um e tem muitos membros, e todos os membros, sendo muitos, constituem um só corpo, assim também com respeito a Cristo."</p>
+                <cite>1 Coríntios 12:12</cite>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter -->
+    <section class="newsletter">
+        <div class="container">
+            <div class="newsletter-content">
+                <div class="newsletter-text">
+                    <h2>Receba nossas novidades</h2>
+                    <p>Cadastre seu e-mail e fique por dentro de todas as notícias, eventos e resoluções da CIEIB.</p>
+                </div>
+                <form class="newsletter-form" id="newsletterForm">
+                    <div class="input-group">
+                        <input type="email" placeholder="Seu melhor e-mail" required>
+                        <button type="submit" class="btn btn-primary">
+                            Cadastrar <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col footer-about">
+                    <div class="footer-logo">
+                        <div class="logo-icon"><i class="fas fa-dove"></i></div>
+                        <span>CIEIB</span>
+                    </div>
+                    <p>Convenção das Igrejas Evangélicas Interdenominacional do Brasil — promovendo a unidade e o crescimento do evangelho em todo o território nacional.</p>
+                    <div class="footer-social">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                        <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h3>Institucional</h3>
+                    <ul>
+                        <li><a href="quem-somos.html">Quem Somos</a></li>
+                        <li><a href="diretoria.html">Diretoria</a></li>
+                        <li><a href="#">Presidente</a></li>
+                        <li><a href="#">Conselhos</a></li>
+                        <li><a href="#">Comissões</a></li>
+                        <li><a href="#">Órgãos</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Convenções</h3>
+                    <ul>
+                        <li><a href="#">Convenções Afiliadas</a></li>
+                        <li><a href="#">Assembleias Convencionais</a></li>
+                        <li><a href="#">Resoluções</a></li>
+                        <li><a href="noticias.html">Notícias</a></li>
+                        <li><a href="#">Mídias</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Contato</h3>
+                    <ul class="footer-contact">
+                        <li>
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Rua Exemplo, 1000<br>Bairro Centro<br>CEP 00000-000<br>Cidade - UF</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-phone"></i>
+                            <span>(00) 0000-0000</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-envelope"></i>
+                            <span>contato@cieib.org.br</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Atendimento</h3>
+                    <div class="footer-hours">
+                        <p><i class="fas fa-clock"></i> De 2ª a 6ª feira<br>de 09h às 17h</p>
+                    </div>
+                    <a href="contato.html" class="btn btn-outline btn-sm">Fale Conosco</a>
+                    <div class="footer-dpo">
+                        <a href="#">Fale com o DPO</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container">
+                <p>Copyright &copy; CIEIB 2026. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top -->
+    <button class="back-to-top" id="backToTop" aria-label="Voltar ao topo">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <!-- WhatsApp Float -->
+    <a href="https://wa.me/5500000000000" class="whatsapp-float" target="_blank" aria-label="WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <script src="js/main.js"></script>
+    <script>
+        // Homepage quick login
+        const homeForm = document.getElementById('homeLoginForm');
+        if (homeForm) {
+            homeForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const cpf = document.getElementById('homeCpf').value.replace(/\D/g, '');
+                const senha = document.getElementById('homeSenha').value;
+                const errDiv = document.getElementById('homeLoginError');
+                const btn = homeForm.querySelector('button[type="submit"]');
+                const original = btn.innerHTML;
+                
+                errDiv.style.display = 'none';
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Autenticando...';
+                btn.disabled = true;
+
+                setTimeout(function() {
+                    if (cpf === '11368992862' && senha === 'nana2504') {
+                        sessionStorage.setItem('cieib_logado', 'true');
+                        sessionStorage.setItem('cieib_usuario', 'OSNI EGIDIO');
+                        sessionStorage.setItem('cieib_cpf', cpf);
+                        btn.innerHTML = '<i class="fas fa-check"></i> Bem-vindo!';
+                        btn.style.background = '#28a745';
+                        setTimeout(function() { window.location.href = 'painel-ministro.html'; }, 1000);
+                    } else {
+                        btn.innerHTML = original;
+                        btn.disabled = false;
+                        errDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> CPF ou senha incorretos.';
+                        errDiv.style.display = 'block';
+                    }
+                }, 1200);
+            });
+        }
+    </script>
+</body>
+</html>

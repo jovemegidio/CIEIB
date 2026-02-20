@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Área do Ministro - CIEIB - Convenção das Igrejas Evangélicas Interdenominacional do Brasil">
+    <title>Área do Ministro - CIEIB</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="container">
+            <div class="top-bar-content">
+                <div class="top-bar-left">
+                    <span><i class="fas fa-clock"></i> Seg a Sex: 09h às 17h</span>
+                    <span><i class="fas fa-phone"></i> (00) 0000-0000</span>
+                    <span><i class="fas fa-envelope"></i> contato@cieib.org.br</span>
+                </div>
+                <div class="top-bar-right">
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header" id="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-dove"></i>
+                    </div>
+                    <div class="logo-text">
+                        <span class="logo-name">CIEIB</span>
+                        <span class="logo-desc">Convenção das Igrejas Evangélicas<br>Interdenominacional do Brasil</span>
+                    </div>
+                </a>
+                <nav class="nav" id="nav">
+                    <ul class="nav-list">
+                        <li><a href="index.html">Home</a></li>
+                        <li class="dropdown">
+                            <a href="#">Institucional <i class="fas fa-chevron-down"></i></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="quem-somos.html">Quem Somos</a></li>
+                                <li><a href="diretoria.html">Diretoria</a></li>
+                                <li><a href="#">Presidente</a></li>
+                                <li><a href="#">Conselhos</a></li>
+                                <li><a href="#">Comissões</a></li>
+                                <li><a href="#">Órgãos</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown">
+                            <a href="#">Convenções <i class="fas fa-chevron-down"></i></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="#">Convenções Afiliadas</a></li>
+                                <li><a href="#">Assembleias Convencionais</a></li>
+                                <li><a href="#">Resoluções</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="noticias.html">Notícias</a></li>
+                        <li><a href="#">Mídias</a></li>
+                        <li><a href="contato.html">Contato</a></li>
+                        <li class="nav-cta"><a href="area-do-ministro.html" class="active"><i class="fas fa-user-shield"></i> Área do Ministro</a></li>
+                    </ul>
+                </nav>
+                <button class="mobile-toggle" id="mobileToggle" aria-label="Menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <h1><i class="fas fa-user-shield" style="margin-right: 12px;"></i>Área do Ministro</h1>
+            <div class="breadcrumb">
+                <a href="index.html">Home</a>
+                <span>/</span>
+                <span>Área do Ministro</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Login Section -->
+    <section class="page-content" style="background: var(--light);">
+        <div class="container">
+            <div class="am-page-grid">
+                <!-- Login Panel -->
+                <div class="am-login-panel">
+                    <div class="am-login-card am-login-card-page">
+                        <div class="am-card-header">
+                            <div class="am-card-icon">
+                                <i class="fas fa-user-shield"></i>
+                            </div>
+                            <h3>Acesse sua conta</h3>
+                            <p>Entre com seus dados para acessar a área exclusiva do ministro.</p>
+                        </div>
+                        <form class="am-login-form" id="ministerLoginForm">
+                            <div class="am-form-group">
+                                <label><i class="fas fa-user"></i> CPF ou Nº da Credencial</label>
+                                <input type="text" placeholder="Digite seu CPF ou número da credencial" required>
+                            </div>
+                            <div class="am-form-group">
+                                <label><i class="fas fa-lock"></i> Senha</label>
+                                <div class="am-password-group">
+                                    <input type="password" id="loginPassword" placeholder="Digite sua senha" required>
+                                    <button type="button" class="am-toggle-password" onclick="togglePassword()">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="am-form-options">
+                                <label class="am-checkbox">
+                                    <input type="checkbox"> 
+                                    <span>Lembrar-me</span>
+                                </label>
+                                <a href="#" class="am-forgot">Esqueci minha senha</a>
+                            </div>
+                            <button type="submit" class="btn btn-primary am-login-btn">
+                                <i class="fas fa-sign-in-alt"></i> Entrar
+                            </button>
+                        </form>
+                        <div class="am-login-footer">
+                            <div class="am-divider">
+                                <span>ou</span>
+                            </div>
+                            <a href="#" class="btn btn-outline am-first-access" style="color: var(--primary); border-color: var(--primary);">
+                                <i class="fas fa-user-plus"></i> Primeiro Acesso
+                            </a>
+                            <p class="am-help-text">
+                                Problemas para acessar? <a href="contato.html">Fale conosco</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Services Panel -->
+                <div class="am-services-panel">
+                    <h2 style="margin-bottom: 8px;">Serviços Disponíveis</h2>
+                    <p style="color: var(--gray); margin-bottom: 32px;">Confira os serviços disponíveis na área exclusiva do ministro credenciado.</p>
+
+                    <div class="am-services-grid">
+                        <div class="am-service-card">
+                            <div class="am-service-icon">
+                                <i class="fas fa-id-card"></i>
+                            </div>
+                            <h4>Credencial Digital</h4>
+                            <p>Acesse e baixe sua credencial ministerial digital válida em todo o território nacional.</p>
+                        </div>
+
+                        <div class="am-service-card">
+                            <div class="am-service-icon">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <h4>Emissão de Documentos</h4>
+                            <p>Emita cartas de recomendação, declarações e outros documentos oficiais da convenção.</p>
+                        </div>
+
+                        <div class="am-service-card">
+                            <div class="am-service-icon">
+                                <i class="fas fa-clipboard-check"></i>
+                            </div>
+                            <h4>Situação Cadastral</h4>
+                            <p>Verifique sua situação cadastral, anuidades e regularidade junto à convenção.</p>
+                        </div>
+
+                        <div class="am-service-card">
+                            <div class="am-service-icon">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <h4>Inscrição em Eventos</h4>
+                            <p>Inscreva-se nos congressos, seminários e assembleias promovidas pela CIEIB.</p>
+                        </div>
+
+                        <div class="am-service-card">
+                            <div class="am-service-icon">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <h4>Cursos e Capacitação</h4>
+                            <p>Acesse cursos de formação teológica e capacitação ministerial online e presencial.</p>
+                        </div>
+
+                        <div class="am-service-card">
+                            <div class="am-service-icon">
+                                <i class="fas fa-user-edit"></i>
+                            </div>
+                            <h4>Atualização Cadastral</h4>
+                            <p>Mantenha seus dados pessoais, endereço e informações ministeriais sempre atualizados.</p>
+                        </div>
+
+                        <div class="am-service-card">
+                            <div class="am-service-icon">
+                                <i class="fas fa-barcode"></i>
+                            </div>
+                            <h4>Boletos e Pagamentos</h4>
+                            <p>Emita boletos de anuidade, 2ª via e consulte seu histórico de pagamentos.</p>
+                        </div>
+
+                        <div class="am-service-card">
+                            <div class="am-service-icon">
+                                <i class="fas fa-church"></i>
+                            </div>
+                            <h4>Minha Igreja</h4>
+                            <p>Gerencie as informações da sua congregação, membros e relatórios pastorais.</p>
+                        </div>
+                    </div>
+
+                    <!-- Info boxes -->
+                    <div class="am-info-boxes">
+                        <div class="am-info-box">
+                            <div class="am-info-icon"><i class="fas fa-headset"></i></div>
+                            <div>
+                                <h4>Suporte ao Ministro</h4>
+                                <p>Precisa de ajuda? Nossa equipe está disponível de segunda a sexta, das 09h às 17h.</p>
+                                <a href="contato.html" class="btn-link">Fale conosco <i class="fas fa-arrow-right"></i></a>
+                            </div>
+                        </div>
+                        <div class="am-info-box">
+                            <div class="am-info-icon"><i class="fas fa-user-plus"></i></div>
+                            <div>
+                                <h4>Quer se filiar?</h4>
+                                <p>Conheça os requisitos para credenciamento e filiação de ministros à CIEIB.</p>
+                                <a href="#" class="btn-link">Saiba mais <i class="fas fa-arrow-right"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col footer-about">
+                    <div class="footer-logo">
+                        <div class="logo-icon"><i class="fas fa-dove"></i></div>
+                        <span>CIEIB</span>
+                    </div>
+                    <p>Convenção das Igrejas Evangélicas Interdenominacional do Brasil — promovendo a unidade e o crescimento do evangelho em todo o território nacional.</p>
+                    <div class="footer-social">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                        <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h3>Institucional</h3>
+                    <ul>
+                        <li><a href="quem-somos.html">Quem Somos</a></li>
+                        <li><a href="diretoria.html">Diretoria</a></li>
+                        <li><a href="#">Presidente</a></li>
+                        <li><a href="#">Conselhos</a></li>
+                        <li><a href="#">Comissões</a></li>
+                        <li><a href="#">Órgãos</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Convenções</h3>
+                    <ul>
+                        <li><a href="#">Convenções Afiliadas</a></li>
+                        <li><a href="#">Assembleias Convencionais</a></li>
+                        <li><a href="#">Resoluções</a></li>
+                        <li><a href="noticias.html">Notícias</a></li>
+                        <li><a href="#">Mídias</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Contato</h3>
+                    <ul class="footer-contact">
+                        <li>
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Rua Exemplo, 1000<br>Bairro Centro<br>CEP 00000-000<br>Cidade - UF</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-phone"></i>
+                            <span>(00) 0000-0000</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-envelope"></i>
+                            <span>contato@cieib.org.br</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Atendimento</h3>
+                    <div class="footer-hours">
+                        <p><i class="fas fa-clock"></i> De 2ª a 6ª feira<br>de 09h às 17h</p>
+                    </div>
+                    <a href="contato.html" class="btn btn-outline btn-sm">Fale Conosco</a>
+                    <div class="footer-dpo">
+                        <a href="#">Fale com o DPO</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container">
+                <p>Copyright &copy; CIEIB 2026. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <button class="back-to-top" id="backToTop" aria-label="Voltar ao topo">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+    <a href="https://wa.me/5500000000000" class="whatsapp-float" target="_blank" aria-label="WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <script src="js/main.js"></script>
+    <script>
+        // Se já estiver logado, redirecionar direto
+        if (sessionStorage.getItem('cieib_logado')) {
+            window.location.href = 'painel-ministro.html';
+        }
+
+        function togglePassword() {
+            const input = document.getElementById('loginPassword');
+            const icon = document.querySelector('.am-toggle-password i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        // Credenciais de teste
+        const USUARIOS = [
+            {
+                cpf: '11368992862',
+                senha: 'nana2504',
+                nome: 'OSNI EGIDIO'
+            }
+        ];
+
+        function formatCPF(value) {
+            return value.replace(/\D/g, '');
+        }
+
+        const loginForm = document.getElementById('ministerLoginForm');
+        if (loginForm) {
+            // Máscara de erro
+            const cpfInput = loginForm.querySelector('input[type="text"]');
+            const senhaInput = document.getElementById('loginPassword');
+
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const btn = loginForm.querySelector('button[type="submit"]');
+                const original = btn.innerHTML;
+                const cpf = formatCPF(cpfInput.value);
+                const senha = senhaInput.value;
+
+                // Remove mensagens anteriores
+                const msgAnterior = loginForm.querySelector('.login-error');
+                if (msgAnterior) msgAnterior.remove();
+
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Autenticando...';
+                btn.disabled = true;
+
+                setTimeout(() => {
+                    const usuario = USUARIOS.find(u => u.cpf === cpf && u.senha === senha);
+
+                    if (usuario) {
+                        // Login bem-sucedido
+                        sessionStorage.setItem('cieib_logado', 'true');
+                        sessionStorage.setItem('cieib_usuario', usuario.nome);
+                        sessionStorage.setItem('cieib_cpf', usuario.cpf);
+
+                        btn.innerHTML = '<i class="fas fa-check"></i> Bem-vindo, ' + usuario.nome + '!';
+                        btn.style.background = '#28a745';
+                        btn.style.borderColor = '#28a745';
+
+                        setTimeout(() => {
+                            window.location.href = 'painel-ministro.html';
+                        }, 1200);
+                    } else {
+                        // Login falhou
+                        btn.innerHTML = original;
+                        btn.disabled = false;
+
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'login-error';
+                        errorDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> CPF ou senha incorretos. Verifique seus dados e tente novamente.';
+                        errorDiv.style.cssText = 'background:#fef2f2;color:#d93025;padding:12px 16px;border-radius:8px;font-size:0.85rem;margin-top:12px;display:flex;align-items:center;gap:8px;border:1px solid #fecdd3;';
+                        loginForm.appendChild(errorDiv);
+
+                        // Shake animation
+                        loginForm.style.animation = 'shake 0.5s ease';
+                        setTimeout(() => loginForm.style.animation = '', 500);
+                    }
+                }, 1500);
+            });
+        }
+    </script>
+    <style>
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+    </style>
+</body>
+</html>

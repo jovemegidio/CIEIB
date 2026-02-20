@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Painel do Ministro - CIEIB">
     <title>Painel do Ministro - CIEIB</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="css/style.css">
@@ -14,6 +15,9 @@
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 </head>
 <body class="painel-body">
+
+    <!-- Skip to content -->
+    <a href="#main-content" class="sr-only sr-only-focusable">Pular para o conteúdo principal</a>
 
     <!-- Painel Top Nav -->
     <div class="painel-topnav">
@@ -43,10 +47,10 @@
                         <i class="fas fa-user-circle"></i>
                         <span></span>
                     </div>
-                    <div class="painel-notif">
-                        <i class="fas fa-bell"></i>
+                    <button class="painel-notif" aria-label="Notificações">
+                        <i class="fas fa-bell" aria-hidden="true"></i>
                         <span class="notif-badge">0</span>
-                    </div>
+                    </button>
                     <button class="painel-mobile-toggle" id="painelMobileToggle" aria-label="Menu">
                         <i class="fas fa-bars"></i>
                     </button>
@@ -73,24 +77,24 @@
     <!-- Main Tabs -->
     <div class="painel-tabs-wrapper">
         <div class="container">
-            <div class="painel-tabs">
-                <button class="ptab active" data-tab="cadastro"><i class="fas fa-user-edit"></i> Cadastro</button>
-                <button class="ptab" data-tab="documentos"><i class="fas fa-file-alt"></i> Documentos de Ministro</button>
-                <button class="ptab" data-tab="historico"><i class="fas fa-receipt"></i> Histórico de Recebimentos</button>
-                <button class="ptab" data-tab="eventos"><i class="fas fa-calendar-alt"></i> Eventos</button>
-                <button class="ptab" data-tab="cursos"><i class="fas fa-graduation-cap"></i> Cursos</button>
-                <button class="ptab" data-tab="credencial"><i class="fas fa-id-badge"></i> Credencial</button>
-                <button class="ptab" data-tab="mensagens"><i class="fas fa-envelope"></i> Mensagens Diretas</button>
+            <div class="painel-tabs" role="tablist" aria-label="Seções do painel">
+                <button class="ptab active" data-tab="cadastro" role="tab" aria-selected="true" aria-controls="tab-cadastro"><i class="fas fa-user-edit" aria-hidden="true"></i> Cadastro</button>
+                <button class="ptab" data-tab="documentos" role="tab" aria-selected="false" aria-controls="tab-documentos"><i class="fas fa-file-alt" aria-hidden="true"></i> Documentos de Ministro</button>
+                <button class="ptab" data-tab="historico" role="tab" aria-selected="false" aria-controls="tab-historico"><i class="fas fa-receipt" aria-hidden="true"></i> Histórico de Recebimentos</button>
+                <button class="ptab" data-tab="eventos" role="tab" aria-selected="false" aria-controls="tab-eventos"><i class="fas fa-calendar-alt" aria-hidden="true"></i> Eventos</button>
+                <button class="ptab" data-tab="cursos" role="tab" aria-selected="false" aria-controls="tab-cursos"><i class="fas fa-graduation-cap" aria-hidden="true"></i> Cursos</button>
+                <button class="ptab" data-tab="credencial" role="tab" aria-selected="false" aria-controls="tab-credencial"><i class="fas fa-id-badge" aria-hidden="true"></i> Credencial</button>
+                <button class="ptab" data-tab="mensagens" role="tab" aria-selected="false" aria-controls="tab-mensagens"><i class="fas fa-envelope" aria-hidden="true"></i> Mensagens Diretas</button>
             </div>
         </div>
     </div>
 
     <!-- Tab Content -->
-    <div class="painel-content">
+    <div class="painel-content" id="main-content">
         <div class="container">
 
             <!-- ===== ABA 1: CADASTRO ===== -->
-            <div class="tab-panel active" id="tab-cadastro">
+            <div class="tab-panel active" id="tab-cadastro" role="tabpanel" aria-labelledby="tab-cadastro">
                 <div class="cadastro-layout">
                     <!-- Foto + Convenções -->
                     <div class="cadastro-left">

@@ -14,6 +14,9 @@
 </head>
 <body>
 
+    <!-- Skip to content -->
+    <a href="#main-content" class="sr-only sr-only-focusable">Pular para o conteúdo principal</a>
+
     <!-- Top Bar -->
     <div class="top-bar">
         <div class="container">
@@ -83,6 +86,8 @@
         </div>
     </header>
 
+    <main id="main-content">
+
     <!-- Hero Section -->
     <section class="hero">
         <div class="hero-overlay"></div>
@@ -99,7 +104,7 @@
             </div>
         </div>
         <div class="hero-scroll">
-            <a href="#eventos"><i class="fas fa-chevron-down"></i></a>
+            <a href="#eventos" aria-label="Rolar para eventos"><i class="fas fa-chevron-down" aria-hidden="true"></i></a>
         </div>
     </section>
 
@@ -280,14 +285,14 @@
                         </div>
                         <form class="am-login-form" id="homeLoginForm">
                             <div class="am-form-group">
-                                <label><i class="fas fa-user"></i> CPF ou Nº Credencial</label>
+                                <label for="homeCpf"><i class="fas fa-user" aria-hidden="true"></i> CPF ou Nº Credencial</label>
                                 <input type="text" id="homeCpf" placeholder="Digite seu CPF ou credencial">
                             </div>
                             <div class="am-form-group">
-                                <label><i class="fas fa-lock"></i> Senha</label>
+                                <label for="homeSenha"><i class="fas fa-lock" aria-hidden="true"></i> Senha</label>
                                 <input type="password" id="homeSenha" placeholder="Digite sua senha">
                             </div>
-                            <div id="homeLoginError" style="display:none;background:#fef2f2;color:#d93025;padding:10px 14px;border-radius:8px;font-size:0.82rem;margin-bottom:8px;border:1px solid #fecdd3;"></div>
+                            <div id="homeLoginError" role="alert" aria-live="assertive" style="display:none;background:#fef2f2;color:#d93025;padding:10px 14px;border-radius:8px;font-size:0.82rem;margin-bottom:8px;border:1px solid #fecdd3;"></div>
                             <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">Entrar <i class="fas fa-sign-in-alt"></i></button>
                             <div class="am-login-links">
                                 <a href="#">Esqueci minha senha</a>
@@ -404,15 +409,18 @@
                 </div>
                 <form class="newsletter-form" id="newsletterForm">
                     <div class="input-group">
-                        <input type="email" placeholder="Seu melhor e-mail" required>
+                        <label for="newsletterEmail" class="sr-only">Seu e-mail</label>
+                        <input type="email" id="newsletterEmail" placeholder="Seu melhor e-mail" required>
                         <button type="submit" class="btn btn-primary">
-                            Cadastrar <i class="fas fa-paper-plane"></i>
+                            Cadastrar <i class="fas fa-paper-plane" aria-hidden="true"></i>
                         </button>
                     </div>
                 </form>
             </div>
         </div>
     </section>
+
+    </main>
 
     <!-- Footer -->
     <footer class="footer">

@@ -10,6 +10,19 @@
     font-family: 'Open Sans', sans-serif;
 }
 
+/* ---- ACCESSIBILITY ---- */
+.painel-body :focus-visible {
+    outline: 3px solid var(--secondary, #c8a951);
+    outline-offset: 2px;
+}
+
+.painel-body input:focus-visible,
+.painel-body textarea:focus-visible,
+.painel-body select:focus-visible {
+    outline: 3px solid var(--primary-light, #2a5a8c);
+    outline-offset: 0;
+}
+
 /* ---- TOP NAV ---- */
 .painel-topnav {
     background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, var(--primary-dark) 100%);

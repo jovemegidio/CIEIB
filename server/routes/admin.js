@@ -28,6 +28,11 @@ const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 // AUTH ADMIN
 // ================================================================
 
+// GET /api/admin/login — prevent 405 on browser prefetch/navigation
+router.get('/login', (req, res) => {
+    res.status(200).json({ error: 'Use POST para autenticar', redirect: '/painel-admin' });
+});
+
 // POST /api/admin/login
 router.post('/login', async (req, res) => {
     try {

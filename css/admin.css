@@ -19,6 +19,19 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* ---- ACCESSIBILITY ---- */
+.admin-body :focus-visible {
+    outline: 3px solid var(--admin-secondary);
+    outline-offset: 2px;
+}
+
+.admin-body input:focus-visible,
+.admin-body textarea:focus-visible,
+.admin-body select:focus-visible {
+    outline: 3px solid var(--admin-primary);
+    outline-offset: 0;
+}
+
 body.admin-body {
     font-family: 'Open Sans', sans-serif;
     background: var(--admin-bg);

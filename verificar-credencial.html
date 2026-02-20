@@ -214,6 +214,9 @@
 </head>
 <body>
 
+    <!-- Skip to content -->
+    <a href="#main-content" class="sr-only sr-only-focusable">Pular para o conteúdo principal</a>
+
     <!-- Top Bar -->
     <div class="top-bar">
         <div class="container">
@@ -266,6 +269,8 @@
         </div>
     </header>
 
+    <main id="main-content">
+
     <!-- Page Header -->
     <section class="page-header">
         <div class="container">
@@ -289,19 +294,20 @@
                     <h2>Verificação de Credencial Ministerial</h2>
                     <p>Digite o código da credencial ou escaneie o QR Code para verificar a autenticidade.</p>
                     <form class="verificacao-form" id="verificacaoForm">
+                        <label for="codigoInput" class="sr-only">Código da credencial</label>
                         <input type="text" id="codigoInput" placeholder="Ex: CIEIB-5.131-A1B2C3D4" required>
-                        <button type="submit"><i class="fas fa-search"></i> Verificar</button>
+                        <button type="submit"><i class="fas fa-search" aria-hidden="true"></i> Verificar</button>
                     </form>
                 </div>
 
                 <!-- Loading -->
-                <div class="verificacao-loading" id="verificacaoLoading">
-                    <i class="fas fa-spinner fa-spin"></i>
+                <div class="verificacao-loading" id="verificacaoLoading" aria-live="polite" role="status">
+                    <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
                     <p style="color:var(--gray);">Verificando credencial...</p>
                 </div>
 
                 <!-- Resultado -->
-                <div class="verificacao-resultado" id="verificacaoResultado">
+                <div class="verificacao-resultado" id="verificacaoResultado" aria-live="polite">
                     <div class="resultado-header" id="resultadoHeader">
                         <i id="resultadoIcon"></i>
                         <h3 id="resultadoTitulo"></h3>
@@ -353,6 +359,8 @@
         </div>
     </section>
 
+    </main>
+
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
@@ -364,10 +372,10 @@
                     </div>
                     <p>Convenção das Igrejas Evangélicas Interdenominacional do Brasil.</p>
                     <div class="footer-social">
-                        <a href="#"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-youtube"></i></a>
-                        <a href="#"><i class="fab fa-whatsapp"></i></a>
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                        <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
                     </div>
                 </div>
                 <div class="footer-col">

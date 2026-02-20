@@ -29,6 +29,11 @@ const apiLimiter = rateLimit({
 });
 app.use('/api/', apiLimiter);
 
+// ---- Favicon redirect ----
+app.get('/favicon.ico', (req, res) => {
+    res.redirect(301, '/favicon.svg');
+});
+
 // ---- Servir arquivos estáticos (HTML, CSS, JS) ----
 app.use(express.static(__dirname));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

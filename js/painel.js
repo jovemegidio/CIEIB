@@ -390,11 +390,21 @@ function initTabs() {
     tabs.forEach(tab => {
         tab.addEventListener('click', function() {
             const target = this.getAttribute('data-tab');
-            tabs.forEach(t => t.classList.remove('active'));
-            panels.forEach(p => p.classList.remove('active'));
+            tabs.forEach(t => {
+                t.classList.remove('active');
+                t.setAttribute('aria-selected', 'false');
+            });
+            panels.forEach(p => {
+                p.classList.remove('active');
+                p.setAttribute('role', 'tabpanel');
+            });
             this.classList.add('active');
+            this.setAttribute('aria-selected', 'true');
             const panel = document.getElementById('tab-' + target);
-            if (panel) panel.classList.add('active');
+            if (panel) {
+                panel.classList.add('active');
+                panel.setAttribute('aria-labelledby', this.id || '');
+            }
         });
     });
 }

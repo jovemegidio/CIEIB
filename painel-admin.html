@@ -207,8 +207,9 @@
                 <div class="section-topbar">
                     <h2><i class="fas fa-users"></i> Ministros</h2>
                     <div class="topbar-search">
+                        <label for="ministrosSearch" class="sr-only">Buscar ministros</label>
                         <input type="text" id="ministrosSearch" placeholder="Buscar por nome, CPF ou email..." onkeyup="debounceMinistros()">
-                        <button onclick="loadAdminMinistros()"><i class="fas fa-search"></i></button>
+                        <button onclick="loadAdminMinistros()" aria-label="Buscar"><i class="fas fa-search"></i></button>
                     </div>
                 </div>
                 <div class="admin-card">
@@ -299,10 +300,10 @@
 
     <!-- ===== MODAL GENÉRICO ===== -->
     <div class="admin-modal-overlay" id="adminModal" style="display:none;">
-        <div class="admin-modal">
+        <div class="admin-modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
             <div class="admin-modal-header">
                 <h3 id="modalTitle">Título</h3>
-                <button onclick="closeModal()"><i class="fas fa-times"></i></button>
+                <button onclick="closeModal()" aria-label="Fechar"><i class="fas fa-times"></i></button>
             </div>
             <div class="admin-modal-body" id="modalBody"></div>
             <div class="admin-modal-footer" id="modalFooter"></div>

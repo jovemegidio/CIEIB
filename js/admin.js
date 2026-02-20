@@ -6,11 +6,51 @@
 const AdminAPI = {
     baseUrl: '/api/admin',
     token: () => localStorage.getItem('admin_token'),
+    isMock: () => localStorage.getItem('admin_token') === 'mock_token_dev',
     headers: () => ({
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${AdminAPI.token()}`
     }),
+
+    // Mock data for dev/visualization mode
+    _mockData: {
+        '/dashboard': {
+            stats: { ministros: 128, eventos: 5, noticias: 24, cursos: 8, contatos_pendentes: 3, matriculas: 47 },
+            recentMinistros: [
+                { nome: 'Pr. João Silva', cargo: 'Pastor Presidente', status: 'ATIVO' },
+                { nome: 'Pr. Maria Souza', cargo: 'Missionária', status: 'ATIVO' },
+                { nome: 'Ev. Pedro Lima', cargo: 'Evangelista', status: 'PENDENTE' }
+            ],
+            recentContatos: [
+                { nome: 'Carlos Oliveira', assunto: 'Filiação de Igreja', lida: false },
+                { nome: 'Ana Santos', assunto: 'Credenciamento', lida: true }
+            ]
+        },
+        '/noticias': [],
+        '/eventos': [],
+        '/cursos': [],
+        '/conteudos': [],
+        '/ministros': { ministros: [], total: 0, page: 1, totalPages: 0 },
+        '/diretoria': [],
+        '/contatos': [],
+        '/configuracoes': [],
+        '/redes-sociais': [],
+        '/midias': [],
+        '/notificacoes-site': [],
+    },
+
+    _getMockResponse(method, endpoint) {
+        if (method !== 'GET') return { success: true, message: 'Mock: operação simulada' };
+        const base = endpoint.split('?')[0];
+        return this._mockData[base] || [];
+    },
+
     async request(method, endpoint, body) {
+        // Mock mode — return fake data, no network calls
+        if (AdminAPI.isMock()) {
+            return AdminAPI._getMockResponse(method, endpoint);
+        }
+
         const opts = { method, headers: AdminAPI.headers() };
         if (body) opts.body = JSON.stringify(body);
         const res = await fetch(`${AdminAPI.baseUrl}${endpoint}`, opts);
@@ -46,6 +86,15 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const email = document.getElementById('adminEmail').value;
         const senha = document.getElementById('adminSenha').value;
+
+        // ---- Mock login (visualização) ----
+        if (email === 'admin@cieib.org.br' && senha === 'admin123') {
+            localStorage.setItem('admin_token', 'mock_token_dev');
+            localStorage.setItem('admin_data', JSON.stringify({ nome: 'Administrador', email }));
+            showPanel();
+            return;
+        }
+
         try {
             const data = await fetch('/api/admin/login', {
                 method: 'POST',

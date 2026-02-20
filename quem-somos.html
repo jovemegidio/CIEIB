@@ -49,7 +49,7 @@
                         <span class="logo-desc">Convenção das Igrejas Evangélicas<br>Interdenominacional do Brasil</span>
                     </div>
                 </a>
-                <nav class="nav" id="nav">
+                <nav class="nav" id="nav" aria-label="Navegação principal">
                     <ul class="nav-list">
                         <li><a href="index.html">Home</a></li>
                         <li class="dropdown">
@@ -92,11 +92,13 @@
     <section class="page-header">
         <div class="container">
             <h1>Quem Somos</h1>
-            <div class="breadcrumb">
-                <a href="index.html">Home</a>
-                <span>/</span>
-                <span>Quem Somos</span>
-            </div>
+            <nav aria-label="Breadcrumb">
+                <div class="breadcrumb">
+                    <a href="index.html">Home</a>
+                    <span>/</span>
+                    <span aria-current="page">Quem Somos</span>
+                </div>
+            </nav>
         </div>
     </section>
 
@@ -261,7 +263,7 @@
     <button class="back-to-top" id="backToTop" aria-label="Voltar ao topo">
         <i class="fas fa-chevron-up"></i>
     </button>
-    <a href="https://wa.me/5500000000000" class="whatsapp-float" target="_blank" aria-label="WhatsApp">
+    <a href="https://wa.me/5500000000000" class="whatsapp-float" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp (abre em nova janela)">
         <i class="fab fa-whatsapp"></i>
     </a>
 

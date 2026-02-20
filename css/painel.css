@@ -1261,6 +1261,10 @@
         right: 16px;
         bottom: 16px;
     }
+
+    .docs-foto-left {
+        min-width: 100%;
+    }
 }
 
 /* ==============================================================
@@ -1823,7 +1827,8 @@
     border: 1px solid rgba(0,0,0,0.06);
 }
 
-.credencial-card-header {
+.credencial-card-header,
+.credencial-header {
     background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, var(--primary-dark) 100%);
     padding: 20px;
     text-align: center;
@@ -1831,7 +1836,8 @@
     overflow: hidden;
 }
 
-.credencial-card-header::before {
+.credencial-card-header::before,
+.credencial-header::before {
     content: '';
     position: absolute;
     top: -30px;
@@ -1842,7 +1848,8 @@
     border-radius: 50%;
 }
 
-.credencial-card-header::after {
+.credencial-card-header::after,
+.credencial-header::after {
     content: '';
     position: absolute;
     bottom: -40px;
@@ -1853,7 +1860,8 @@
     border-radius: 50%;
 }
 
-.credencial-card-header .credencial-org {
+.credencial-card-header .credencial-org,
+.credencial-header .credencial-org {
     font-family: 'Montserrat', sans-serif;
     font-size: 0.72rem;
     font-weight: 700;
@@ -1865,7 +1873,8 @@
     z-index: 1;
 }
 
-.credencial-card-header .credencial-titulo {
+.credencial-card-header .credencial-titulo,
+.credencial-header .credencial-tipo {
     font-family: 'Montserrat', sans-serif;
     font-size: 1.1rem;
     font-weight: 800;
@@ -1875,8 +1884,38 @@
     z-index: 1;
 }
 
-.credencial-card-body {
+.credencial-card-body,
+.credencial-body {
     padding: 24px 20px;
+}
+
+.credencial-header .credencial-org-full {
+    font-size: 0.6rem;
+    color: rgba(255,255,255,0.6);
+    display: block;
+    line-height: 1.3;
+    position: relative;
+    z-index: 1;
+}
+
+.credencial-header .credencial-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 8px;
+}
+
+.credencial-header .credencial-logo-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-dark);
+    font-size: 1rem;
 }
 
 .credencial-foto-section {
@@ -1964,11 +2003,56 @@
     color: #d93025;
 }
 
-.credencial-card-footer {
+.credencial-card-footer,
+.credencial-footer {
     background: linear-gradient(135deg, rgba(26,58,92,0.04), rgba(26,58,92,0.08));
     padding: 20px;
     text-align: center;
     border-top: 1px solid #eee;
+}
+
+/* Credencial body layout: foto + dados side by side */
+.credencial-body {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+/* Credencial campo row: fields in a row */
+.credencial-campo-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+/* Credencial status badge */
+.credencial-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 20px;
+    background: #e6f9ee;
+    color: #0f9d58;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.credencial-status.expirada {
+    background: #fce8e8;
+    color: #d93025;
+}
+
+/* Credencial codigo */
+.credencial-codigo {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.72rem;
+    color: var(--gray);
+    letter-spacing: 1px;
+    margin-top: 4px;
 }
 
 .credencial-qr {
@@ -2337,6 +2421,16 @@
         grid-template-columns: 1fr;
     }
 
+    .credencial-campo-row {
+        grid-template-columns: 1fr;
+    }
+
+    .credencial-body {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
     .credencial-botoes {
         flex-direction: column;
     }
@@ -2400,7 +2494,8 @@
         font-size: 0.75rem;
     }
 
-    .credencial-card-header .credencial-titulo {
+    .credencial-card-header .credencial-titulo,
+    .credencial-header .credencial-tipo {
         font-size: 0.92rem;
     }
 

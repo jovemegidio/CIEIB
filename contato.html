@@ -49,7 +49,7 @@
                         <span class="logo-desc">Convenção das Igrejas Evangélicas<br>Interdenominacional do Brasil</span>
                     </div>
                 </a>
-                <nav class="nav" id="nav">
+                <nav class="nav" id="nav" aria-label="Navegação principal">
                     <ul class="nav-list">
                         <li><a href="index.html">Home</a></li>
                         <li class="dropdown">
@@ -92,11 +92,13 @@
     <section class="page-header">
         <div class="container">
             <h1>Contato</h1>
-            <div class="breadcrumb">
-                <a href="index.html">Home</a>
-                <span>/</span>
-                <span>Contato</span>
-            </div>
+            <nav aria-label="Breadcrumb">
+                <div class="breadcrumb">
+                    <a href="index.html">Home</a>
+                    <span>/</span>
+                    <span aria-current="page">Contato</span>
+                </div>
+            </nav>
         </div>
     </section>
 
@@ -106,12 +108,13 @@
             <div class="contact-grid">
                 <!-- Contact Info -->
                 <div class="contact-info-cards">
+                    <h2 class="sr-only">Informações de Contato</h2>
                     <div class="contact-info-card">
                         <div class="icon">
                             <i class="fas fa-map-marker-alt"></i>
                         </div>
                         <div>
-                            <h4>Endereço</h4>
+                            <h3>Endereço</h3>
                             <p>Rua Exemplo, 1000<br>Bairro Centro<br>CEP 00000-000 - Cidade/UF</p>
                         </div>
                     </div>
@@ -120,7 +123,7 @@
                             <i class="fas fa-phone"></i>
                         </div>
                         <div>
-                            <h4>Telefone</h4>
+                            <h3>Telefone</h3>
                             <p>(00) 0000-0000</p>
                         </div>
                     </div>
@@ -129,7 +132,7 @@
                             <i class="fab fa-whatsapp"></i>
                         </div>
                         <div>
-                            <h4>WhatsApp</h4>
+                            <h3>WhatsApp</h3>
                             <p>(00) 00000-0000</p>
                         </div>
                     </div>
@@ -138,7 +141,7 @@
                             <i class="fas fa-envelope"></i>
                         </div>
                         <div>
-                            <h4>E-mail</h4>
+                            <h3>E-mail</h3>
                             <p>contato@cieib.org.br<br>atendimento@cieib.org.br</p>
                         </div>
                     </div>
@@ -147,7 +150,7 @@
                             <i class="fas fa-clock"></i>
                         </div>
                         <div>
-                            <h4>Horário de Atendimento</h4>
+                            <h3>Horário de Atendimento</h3>
                             <p>De 2ª a 6ª feira<br>de 09h às 17h</p>
                         </div>
                     </div>
@@ -192,6 +195,7 @@
                         <button type="submit" class="btn btn-primary">
                             Enviar Mensagem <i class="fas fa-paper-plane"></i>
                         </button>
+                        <div id="contactFormStatus" role="status" aria-live="polite"></div>
                     </form>
                 </div>
             </div>
@@ -286,7 +290,7 @@
     <button class="back-to-top" id="backToTop" aria-label="Voltar ao topo">
         <i class="fas fa-chevron-up"></i>
     </button>
-    <a href="https://wa.me/5500000000000" class="whatsapp-float" target="_blank" aria-label="WhatsApp">
+    <a href="https://wa.me/5500000000000" class="whatsapp-float" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp (abre em nova janela)">
         <i class="fab fa-whatsapp"></i>
     </a>
 
@@ -316,16 +320,20 @@
                     btn.innerHTML = '<i class="fas fa-check"></i> Enviado com sucesso!';
                     btn.style.background = '#28a745';
                     contactForm.reset();
+                    const statusEl = document.getElementById('contactFormStatus');
+                    if (statusEl) statusEl.textContent = 'Mensagem enviada com sucesso!';
                     setTimeout(() => {
                         btn.innerHTML = original;
                         btn.style.background = '';
                         btn.disabled = false;
+                        if (statusEl) statusEl.textContent = '';
                     }, 3000);
                 } catch (err) {
                     console.error('Erro ao enviar contato:', err);
                     btn.innerHTML = original;
                     btn.disabled = false;
-                    alert('Erro ao enviar mensagem. Tente novamente.');
+                    const statusEl = document.getElementById('contactFormStatus');
+                    if (statusEl) statusEl.textContent = 'Erro ao enviar mensagem. Tente novamente.';
                 }
             });
         }

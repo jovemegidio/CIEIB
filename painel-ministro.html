@@ -78,13 +78,13 @@
     <div class="painel-tabs-wrapper">
         <div class="container">
             <div class="painel-tabs" role="tablist" aria-label="Seções do painel">
-                <button class="ptab active" data-tab="cadastro" role="tab" aria-selected="true" aria-controls="tab-cadastro"><i class="fas fa-user-edit" aria-hidden="true"></i> Cadastro</button>
-                <button class="ptab" data-tab="documentos" role="tab" aria-selected="false" aria-controls="tab-documentos"><i class="fas fa-file-alt" aria-hidden="true"></i> Documentos de Ministro</button>
-                <button class="ptab" data-tab="historico" role="tab" aria-selected="false" aria-controls="tab-historico"><i class="fas fa-receipt" aria-hidden="true"></i> Histórico de Recebimentos</button>
-                <button class="ptab" data-tab="eventos" role="tab" aria-selected="false" aria-controls="tab-eventos"><i class="fas fa-calendar-alt" aria-hidden="true"></i> Eventos</button>
-                <button class="ptab" data-tab="cursos" role="tab" aria-selected="false" aria-controls="tab-cursos"><i class="fas fa-graduation-cap" aria-hidden="true"></i> Cursos</button>
-                <button class="ptab" data-tab="credencial" role="tab" aria-selected="false" aria-controls="tab-credencial"><i class="fas fa-id-badge" aria-hidden="true"></i> Credencial</button>
-                <button class="ptab" data-tab="mensagens" role="tab" aria-selected="false" aria-controls="tab-mensagens"><i class="fas fa-envelope" aria-hidden="true"></i> Mensagens Diretas</button>
+                <button class="ptab active" id="ptab-cadastro" data-tab="cadastro" role="tab" aria-selected="true" aria-controls="tab-cadastro"><i class="fas fa-user-edit" aria-hidden="true"></i> Cadastro</button>
+                <button class="ptab" id="ptab-documentos" data-tab="documentos" role="tab" aria-selected="false" aria-controls="tab-documentos"><i class="fas fa-file-alt" aria-hidden="true"></i> Documentos de Ministro</button>
+                <button class="ptab" id="ptab-historico" data-tab="historico" role="tab" aria-selected="false" aria-controls="tab-historico"><i class="fas fa-receipt" aria-hidden="true"></i> Histórico de Recebimentos</button>
+                <button class="ptab" id="ptab-eventos" data-tab="eventos" role="tab" aria-selected="false" aria-controls="tab-eventos"><i class="fas fa-calendar-alt" aria-hidden="true"></i> Eventos</button>
+                <button class="ptab" id="ptab-cursos" data-tab="cursos" role="tab" aria-selected="false" aria-controls="tab-cursos"><i class="fas fa-graduation-cap" aria-hidden="true"></i> Cursos</button>
+                <button class="ptab" id="ptab-credencial" data-tab="credencial" role="tab" aria-selected="false" aria-controls="tab-credencial"><i class="fas fa-id-badge" aria-hidden="true"></i> Credencial</button>
+                <button class="ptab" id="ptab-mensagens" data-tab="mensagens" role="tab" aria-selected="false" aria-controls="tab-mensagens"><i class="fas fa-envelope" aria-hidden="true"></i> Mensagens Diretas</button>
             </div>
         </div>
     </div>
@@ -94,7 +94,7 @@
         <div class="container">
 
             <!-- ===== ABA 1: CADASTRO ===== -->
-            <div class="tab-panel active" id="tab-cadastro" role="tabpanel" aria-labelledby="tab-cadastro">
+            <div class="tab-panel active" id="tab-cadastro" role="tabpanel" aria-labelledby="ptab-cadastro">
                 <div class="cadastro-layout">
                     <!-- Foto + Convenções -->
                     <div class="cadastro-left">
@@ -251,11 +251,11 @@
                                         <input type="text" id="campo-cidade" value="">
                                     </div>
                                     <div class="dado-group">
-                                        <label>Nacionalidade</label>
+                                        <label for="campo-nacionalidade">Nacionalidade</label>
                                         <input type="text" id="campo-nacionalidade" value="">
                                     </div>
                                     <div class="dado-group">
-                                        <label>Estado Civil</label>
+                                        <label for="campo-estadocivil">Estado Civil</label>
                                         <select id="campo-estadocivil">
                                             <option value="">Selecione</option>
                                             <option value="solteiro">Solteiro(a)</option>
@@ -265,39 +265,39 @@
                                         </select>
                                     </div>
                                     <div class="dado-group">
-                                        <label>Nome do Cônjuge</label>
+                                        <label for="campo-conjuge">Nome do Cônjuge</label>
                                         <input type="text" id="campo-conjuge" value="">
                                     </div>
                                     <div class="dado-group full-width">
-                                        <label>Data Nascimento do Cônjuge</label>
+                                        <label for="campo-nascconjuge">Data Nascimento do Cônjuge</label>
                                         <input type="date" id="campo-nascconjuge" value="">
                                     </div>
                                     <div class="dado-group">
-                                        <label>Pai</label>
+                                        <label for="campo-pai">Pai</label>
                                         <input type="text" id="campo-pai" value="">
                                     </div>
                                     <div class="dado-group">
-                                        <label>Mãe</label>
+                                        <label for="campo-mae">Mãe</label>
                                         <input type="text" id="campo-mae" value="">
                                     </div>
                                     <div class="dado-group">
-                                        <label>RG</label>
+                                        <label for="campo-rg">RG</label>
                                         <input type="text" id="campo-rg" value="">
                                     </div>
                                     <div class="dado-group">
-                                        <label>Órgão Expedidor</label>
+                                        <label for="campo-orgao">Órgão Expedidor</label>
                                         <input type="text" id="campo-orgao" value="">
                                     </div>
                                     <div class="dado-group full-width">
-                                        <label>E-mail Principal *</label>
+                                        <label for="campo-email">E-mail Principal *</label>
                                         <input type="email" id="campo-email" value="">
                                     </div>
                                     <div class="dado-group">
-                                        <label>Biometria</label>
+                                        <label for="campo-biometria">Biometria</label>
                                         <input type="text" id="campo-biometria" value="" readonly class="dado-readonly">
                                     </div>
                                     <div class="dado-group">
-                                        <label>Registro</label>
+                                        <label for="campo-registro">Registro</label>
                                         <input type="text" id="campo-registro" value="" readonly class="dado-readonly">
                                     </div>
                                 </div>
@@ -308,7 +308,7 @@
             </div>
 
             <!-- ===== ABA 2: DOCUMENTOS DE MINISTRO ===== -->
-            <div class="tab-panel" id="tab-documentos">
+            <div class="tab-panel" id="tab-documentos" role="tabpanel" aria-labelledby="ptab-documentos">
                 <div class="docs-layout">
                     <!-- Foto para Validação -->
                     <div class="panel-card">
@@ -319,8 +319,8 @@
                             <div class="docs-foto-section">
                                 <div class="docs-foto-left">
                                     <div class="dado-group" style="margin-bottom:16px;">
-                                        <label>Homologar Foto</label>
-                                        <select>
+                                        <label for="campo-homologar">Homologar Foto</label>
+                                        <select id="campo-homologar">
                                             <option value="nao" selected>Não</option>
                                             <option value="sim">Sim</option>
                                         </select>
@@ -347,24 +347,24 @@
                         <div class="panel-card-body">
                             <div class="dados-grid">
                                 <div class="dado-group">
-                                    <label>Passaporte</label>
-                                    <input type="text" value="" placeholder="Número do passaporte">
+                                    <label for="campo-passaporte">Passaporte</label>
+                                    <input type="text" id="campo-passaporte" value="" placeholder="Número do passaporte">
                                 </div>
                                 <div class="dado-group">
-                                    <label>CTPS</label>
-                                    <input type="text" value="" placeholder="Número da CTPS">
+                                    <label for="campo-ctps">CTPS</label>
+                                    <input type="text" id="campo-ctps" value="" placeholder="Número da CTPS">
                                 </div>
                                 <div class="dado-group">
-                                    <label>Habilitação</label>
-                                    <input type="text" value="" placeholder="Número da CNH">
+                                    <label for="campo-habilitacao">Habilitação</label>
+                                    <input type="text" id="campo-habilitacao" value="" placeholder="Número da CNH">
                                 </div>
                                 <div class="dado-group">
-                                    <label>Título de Eleitor</label>
-                                    <input type="text" value="" placeholder="Número do título">
+                                    <label for="campo-titulo">Título de Eleitor</label>
+                                    <input type="text" id="campo-titulo" value="" placeholder="Número do título">
                                 </div>
                                 <div class="dado-group full-width">
-                                    <label>Observações</label>
-                                    <textarea placeholder="Observações adicionais..." rows="4"></textarea>
+                                    <label for="campo-observacoes">Observações</label>
+                                    <textarea id="campo-observacoes" placeholder="Observações adicionais..." rows="4"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -373,7 +373,7 @@
             </div>
 
             <!-- ===== ABA 3: HISTÓRICO DE RECEBIMENTOS ===== -->
-            <div class="tab-panel" id="tab-historico">
+            <div class="tab-panel" id="tab-historico" role="tabpanel" aria-labelledby="ptab-historico">
                 <div class="panel-card">
                     <div class="panel-card-header">
                         <div class="phc-flex">

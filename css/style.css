@@ -133,6 +133,19 @@ select:focus-visible {
     }
 }
 
+/* Windows High Contrast Mode */
+@media (forced-colors: active) {
+    :focus-visible {
+        outline: 2px solid LinkText;
+    }
+    .btn, .ptab.active, .sidebar-link.active, .filter-btn.active {
+        border: 2px solid ButtonText;
+    }
+    .badge, .sidebar-badge {
+        border: 1px solid ButtonText;
+    }
+}
+
 .container {
     max-width: 1280px;
     margin: 0 auto;
@@ -1547,6 +1560,7 @@ select:focus-visible {
     font-size: 1.2rem;
 }
 
+.contact-info-card h3,
 .contact-info-card h4 {
     font-size: 0.9rem;
     margin-bottom: 4px;
@@ -1907,10 +1921,11 @@ img {
         grid-template-columns: 1fr !important;
     }
 
-    /* Mission/Vision boxes padding */
-    .mission-box, .vision-box {
-        padding: 24px;
-        margin: 24px 0;
+    /* Mission/Vision boxes padding — override inline styles */
+    .mission-box, .vision-box,
+    .page-content [style*="padding: 40px"] {
+        padding: 24px !important;
+        margin: 24px 0 !important;
     }
 
     /* Container padding boost for mobile */
@@ -1938,6 +1953,47 @@ img {
     .pagination {
         flex-wrap: wrap;
         justify-content: center;
+    }
+
+    /* --- Missing responsive fixes (768px) --- */
+    .page-header {
+        padding: 50px 0 35px;
+    }
+
+    .page-content h2 {
+        font-size: 1.5rem;
+    }
+
+    .section-header h2 {
+        font-size: 1.8rem;
+    }
+
+    .convencoes-text h2 {
+        font-size: 1.5rem;
+    }
+
+    .newsletter-text h2 {
+        font-size: 1.3rem;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+    }
+
+    .team-photo {
+        height: 180px;
+    }
+
+    .hero-content p {
+        font-size: 1.05rem;
+    }
+
+    .slogan-content p {
+        font-size: 1rem;
+    }
+
+    .news-page-grid .noticia-card.featured {
+        grid-template-columns: 1fr;
     }
 }
 
@@ -1980,12 +2036,8 @@ img {
     }
 
     /* Reduce section padding on small screens */
-    .eventos, .convencoes, .resolucoes, .noticias-section, .slogan-section {
+    .eventos, .convencoes, .resolucoes, .noticias, .slogan {
         padding: 60px 0 50px;
-    }
-
-    .page-section {
-        padding: 50px 0;
     }
 
     .newsletter-content {
@@ -1998,6 +2050,51 @@ img {
 
     .slogan-tags span {
         font-size: 1.4rem;
+    }
+
+    /* --- Missing responsive fixes (480px) --- */
+    .page-header {
+        padding: 40px 0 28px;
+    }
+
+    .page-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .stat-number {
+        font-size: 1.8rem;
+    }
+
+    .team-photo {
+        height: 140px;
+    }
+
+    .team-photo i {
+        font-size: 2.5rem;
+    }
+
+    .team-info {
+        padding: 16px;
+    }
+
+    .contact-info-card {
+        padding: 16px;
+        gap: 12px;
+    }
+
+    .hero-badge {
+        font-size: 0.75rem;
+        padding: 6px 16px;
+        letter-spacing: 1px;
+    }
+
+    .logo-name {
+        font-size: 1.3rem;
+        letter-spacing: 2px;
+    }
+
+    .logo-desc {
+        font-size: 0.6rem;
     }
 }
 

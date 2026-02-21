@@ -625,16 +625,36 @@
 
                                 <!-- Ações da credencial -->
                                 <div class="credencial-acoes">
-                                    <div class="credencial-info-box">
-                                        <h4><i class="fas fa-shield-alt"></i> Sobre a Credencial Digital</h4>
-                                        <p>A Credencial Ministerial Digital Oficial da CIEIB garante:</p>
-                                        <ul>
-                                            <li><i class="fas fa-check"></i> Segurança e autenticidade</li>
-                                            <li><i class="fas fa-check"></i> Organização convencional</li>
-                                            <li><i class="fas fa-check"></i> Validação oficial em todo o Brasil</li>
-                                            <li><i class="fas fa-check"></i> QR Code para verificação instantânea</li>
-                                        </ul>
+                                    <!-- Info Box Redesenhado -->
+                                    <div class="cred-about-card">
+                                        <div class="cred-about-header">
+                                            <div class="cred-about-icon"><i class="fas fa-shield-alt"></i></div>
+                                            <div>
+                                                <h4>Sobre a Credencial Digital</h4>
+                                                <p>A Credencial Ministerial Digital Oficial da CIEIB garante:</p>
+                                            </div>
+                                        </div>
+                                        <div class="cred-about-benefits">
+                                            <div class="cred-about-item">
+                                                <div class="cred-about-check"><i class="fas fa-check"></i></div>
+                                                <span>Segurança e autenticidade</span>
+                                            </div>
+                                            <div class="cred-about-item">
+                                                <div class="cred-about-check"><i class="fas fa-check"></i></div>
+                                                <span>Organização convencional</span>
+                                            </div>
+                                            <div class="cred-about-item">
+                                                <div class="cred-about-check"><i class="fas fa-check"></i></div>
+                                                <span>Validação oficial em todo o Brasil</span>
+                                            </div>
+                                            <div class="cred-about-item">
+                                                <div class="cred-about-check"><i class="fas fa-check"></i></div>
+                                                <span>QR Code para verificação instantânea</span>
+                                            </div>
+                                        </div>
                                     </div>
+
+                                    <!-- Botões -->
                                     <div class="credencial-botoes">
                                         <button class="phb-btn phb-btn-save" onclick="baixarCredencial()">
                                             <i class="fas fa-download"></i> Baixar Credencial
@@ -646,13 +666,21 @@
                                             <i class="fas fa-sync-alt"></i> Solicitar Renovação
                                         </button>
                                     </div>
-                                    <div class="credencial-verificacao">
-                                        <h4><i class="fas fa-qrcode"></i> Verificação Pública</h4>
-                                        <p>Qualquer pessoa pode verificar a autenticidade desta credencial através do link abaixo ou escaneando o QR Code:</p>
-                                        <div class="credencial-link-verificacao" id="linkVerificacao">
-                                            <input type="text" id="credVerificarUrl" readonly>
-                                            <button onclick="copiarLinkVerificacao()" title="Copiar link">
-                                                <i class="fas fa-copy"></i>
+
+                                    <!-- Verificação Pública Redesenhada -->
+                                    <div class="cred-verif-card">
+                                        <div class="cred-verif-header">
+                                            <i class="fas fa-globe-americas"></i>
+                                            <div>
+                                                <h4>Verificação Pública</h4>
+                                                <p>Qualquer pessoa pode verificar a autenticidade desta credencial através do link abaixo ou escaneando o QR Code.</p>
+                                            </div>
+                                        </div>
+                                        <div class="cred-verif-link-box">
+                                            <div class="cred-verif-link-icon"><i class="fas fa-link"></i></div>
+                                            <input type="text" id="credVerificarUrl" readonly class="cred-verif-input">
+                                            <button class="cred-verif-copy-btn" onclick="copiarLinkVerificacao()" title="Copiar link">
+                                                <i class="fas fa-copy"></i> Copiar
                                             </button>
                                         </div>
                                     </div>

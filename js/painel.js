@@ -1036,10 +1036,13 @@ function fillCredencial(cred) {
         });
     }
 
-    // Link de verificação
+    // Link de verificação (preferir domínio oficial)
     const urlInput = document.getElementById('credVerificarUrl');
     if (urlInput && cred.codigo) {
-        urlInput.value = window.location.origin + '/verificar-credencial.html?code=' + cred.codigo;
+        const origin = window.location.hostname === '147.93.69.162'
+            ? 'https://cieib.ong.br'
+            : window.location.origin;
+        urlInput.value = origin + '/verificar-credencial.html?code=' + cred.codigo;
     }
 }
 

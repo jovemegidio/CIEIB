@@ -52,6 +52,11 @@ body {
     line-height: 1.6;
     overflow-x: hidden;
     background-color: var(--white);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+body.site-ready {
+    opacity: 1;
 }
 
 h1, h2, h3, h4, h5, h6 {

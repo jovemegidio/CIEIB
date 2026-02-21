@@ -267,7 +267,14 @@ document.addEventListener('DOMContentLoaded', () => {
     loadSiteNotifications();
 
     // ===== CARREGAMENTO DINÂMICO DE CONFIGURAÇÕES =====
-    loadSiteConfig();
+    loadSiteConfig().finally(() => {
+        document.body.classList.add('site-ready');
+    });
+
+    // Fallback: garantir que a página aparece mesmo se a API falhar/demorar
+    setTimeout(() => {
+        document.body.classList.add('site-ready');
+    }, 2000);
 });
 
 // ---- Push Notification Bar para o site público (design profissional) ----
@@ -499,12 +506,23 @@ async function loadSiteConfig() {
 
         // Atualizar <title> com nome_site
         if (config.nome_site) {
-            const pageName = document.title.split('|').pop().trim();
-            const baseName = config.nome_site.split('—')[0].trim();
-            if (document.title.includes('|')) {
-                document.title = document.title.split('|')[0].trim() + ' | ' + baseName;
-            } else {
+            const baseName = config.nome_site;
+            const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+            const isHome = !currentPage || currentPage === '' || currentPage === '/' || currentPage === 'index.html' || currentPage === 'index';
+            if (isHome) {
+                // Página inicial: usa o nome completo da config
                 document.title = baseName;
+            } else {
+                // Subpáginas: extrai o nome da página do título original
+                // Detecta separadores: — | -
+                const separatorMatch = document.title.match(/^(.+?)\s*(?:—|\||-)\s*(.+)$/);
+                if (separatorMatch) {
+                    // Usa o prefixo da página + nome do site da config
+                    document.title = separatorMatch[1].trim() + ' — ' + baseName;
+                } else {
+                    // Título sem separador → usa nome completo
+                    document.title = baseName;
+                }
             }
         }
 
@@ -609,10 +627,16 @@ async function loadSiteConfig() {
 
         // Header CTA button
         if (config.header_cta_text) {
-            document.querySelectorAll('.nav-cta, .header-cta').forEach(btn => {
-                const link = btn.closest('a') || btn;
-                link.textContent = config.header_cta_text;
-                if (config.header_cta_url) link.href = config.header_cta_url;
+            document.querySelectorAll('.nav-cta').forEach(item => {
+                const link = item.tagName === 'A' ? item : item.querySelector('a');
+                if (link) {
+                    // Preservar o ícone existente e só alterar o texto
+                    const icon = link.querySelector('i');
+                    link.textContent = ''; // limpa
+                    if (icon) link.appendChild(icon);
+                    link.append(' ' + config.header_cta_text);
+                    if (config.header_cta_url) link.href = config.header_cta_url;
+                }
             });
         }
 

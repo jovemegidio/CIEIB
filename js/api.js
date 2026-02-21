@@ -173,6 +173,8 @@ const API = {
     // =============== PAGAMENTOS ===============
     solicitarBoleto(contaId) { return this.post(`/contas/${contaId}/solicitar-boleto`); },
 
+    getBoletos() { return this.get('/contas/boletos'); },
+
     async enviarComprovantePix(contaId, file) {
         const formData = new FormData();
         formData.append('comprovante', file);

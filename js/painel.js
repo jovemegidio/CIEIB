@@ -72,6 +72,9 @@ async function loadMinistroData() {
         // Preencher histórico completo
         fillHistorico(contasData);
 
+        // Carregar boletos do ministro
+        loadBoletos();
+
         // Preencher inscrições em eventos
         fillEventos(inscricoes);
 
@@ -265,6 +268,54 @@ function fillHistorico(data) {
     }
 
     tbody.innerHTML = html;
+}
+
+// ---- Carregar e exibir boletos do ministro ----
+async function loadBoletos() {
+    try {
+        const boletos = await API.getBoletos();
+        fillBoletos(boletos);
+    } catch (err) {
+        console.error('Erro ao carregar boletos:', err);
+    }
+}
+
+function fillBoletos(boletos) {
+    const section = document.getElementById('meus-boletos-section');
+    const tbody = document.getElementById('boletos-ministro-tbody');
+    if (!section || !tbody) return;
+
+    if (!boletos || boletos.length === 0) {
+        section.style.display = 'none';
+        return;
+    }
+
+    section.style.display = 'block';
+
+    tbody.innerHTML = boletos.map(b => {
+        const statusClass = b.status === 'pago' ? 'status-quitado-badge'
+            : b.status === 'vencido' ? 'status-encerrado'
+            : 'status-aberto-badge';
+        const statusLabel = b.status === 'pago' ? 'PAGO'
+            : b.status === 'vencido' ? 'VENCIDO'
+            : 'PENDENTE';
+
+        const downloadBtn = b.arquivo_boleto_url
+            ? `<a href="${b.arquivo_boleto_url}" target="_blank" class="btn-pagar-conta" style="text-decoration:none; display:inline-flex; align-items:center; gap:4px;">
+                   <i class="fas fa-download"></i> Baixar Boleto
+               </a>`
+            : '<span style="color:#999;">Aguardando</span>';
+
+        return `<tr>
+            <td style="text-transform:capitalize;">${b.tipo || '-'}</td>
+            <td>${b.referencia || '-'}</td>
+            <td>R$ ${parseFloat(b.valor || 0).toFixed(2)}</td>
+            <td>${b.data_vencimento ? formatDate(b.data_vencimento) : '-'}</td>
+            <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
+            <td>${b.observacao || '-'}</td>
+            <td>${downloadBtn}</td>
+        </tr>`;
+    }).join('');
 }
 
 function formatDate(dateStr) {

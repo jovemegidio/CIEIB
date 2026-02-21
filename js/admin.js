@@ -1267,63 +1267,242 @@ function printMembroDetail() {
     const printWin = window.open('', '_blank', 'width=900,height=700');
     const m = currentMembro || {};
     const fmtDate = d => d ? new Date(d).toLocaleDateString('pt-BR') : '—';
+    const fmtCPF = c => c ? c.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') : '—';
+    const fmtTel = t => t ? t.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3') : '—';
+    const boletos = m.boletos || [];
+    const contas = m.contas || [];
 
     printWin.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
-        <title>Ficha — ${m.nome || 'Membro'}</title>
+        <title>Ficha do Membro — ${m.nome || 'Membro'}</title>
         <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { font-family: 'Segoe UI', Tahoma, sans-serif; padding: 24px; color: #333; font-size: 13px; }
-            h1 { font-size: 18px; color: #1a3a5c; border-bottom: 2px solid #c8a951; padding-bottom: 6px; margin-bottom: 12px; }
-            h2 { font-size: 14px; color: #1a3a5c; margin: 16px 0 8px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
-            .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px 16px; }
-            .item label { font-size: 10px; color: #888; text-transform: uppercase; display: block; }
-            .item span { font-weight: 600; }
-            .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
-            .badge-ativo { background: #e8f5e9; color: #2e7d32; }
-            .badge-pendente { background: #fff3e0; color: #e65100; }
-            .footer { margin-top: 24px; text-align: center; font-size: 10px; color: #999; border-top: 1px solid #ddd; padding-top: 8px; }
-            @media print { body { padding: 12px; } }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, sans-serif; padding: 0; color: #1a1a2e; font-size: 12px; background: #fff; }
+
+            .report-page { max-width: 800px; margin: 0 auto; padding: 30px 40px; }
+
+            /* Header */
+            .report-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #1a3a5c; padding-bottom: 16px; margin-bottom: 20px; }
+            .report-header-left { display: flex; align-items: center; gap: 14px; }
+            .report-logo { width: 60px; height: 60px; background: linear-gradient(135deg, #1a3a5c, #2d5a8c); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #c8a951; font-size: 22px; font-weight: 900; letter-spacing: 1px; }
+            .report-org { font-size: 11px; color: #64748b; line-height: 1.4; }
+            .report-org strong { font-size: 18px; color: #1a3a5c; display: block; }
+            .report-header-right { text-align: right; }
+            .report-header-right .report-doc-type { font-size: 15px; font-weight: 700; color: #1a3a5c; text-transform: uppercase; letter-spacing: 1px; }
+            .report-header-right .report-doc-sub { font-size: 10px; color: #64748b; margin-top: 2px; }
+
+            /* Title bar */
+            .report-title-bar { background: #1a3a5c; color: #fff; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; }
+            .report-title-bar h1 { font-size: 16px; font-weight: 700; letter-spacing: 0.5px; }
+            .report-title-bar .report-badges { display: flex; gap: 8px; }
+            .report-badge { padding: 3px 12px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+            .badge-ativo { background: #dcfce7; color: #166534; }
+            .badge-inativo { background: #fee2e2; color: #991b1b; }
+            .badge-pendente { background: #fef3c7; color: #92400e; }
+            .badge-cargo { background: rgba(200,169,81,0.2); color: #c8a951; }
+
+            /* Profile row */
+            .report-profile { display: flex; align-items: center; gap: 20px; margin-bottom: 24px; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; }
+            .report-foto { width: 80px; height: 100px; border-radius: 8px; object-fit: cover; border: 2px solid #e2e8f0; background: #e2e8f0; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 28px; overflow: hidden; }
+            .report-foto img { width: 100%; height: 100%; object-fit: cover; }
+            .report-profile-info h2 { font-size: 18px; color: #1a3a5c; margin-bottom: 4px; }
+            .report-profile-info p { color: #64748b; font-size: 11px; line-height: 1.6; }
+            .report-profile-info .report-registro { font-weight: 700; color: #1a3a5c; }
+
+            /* Section */
+            .report-section { margin-bottom: 18px; }
+            .report-section-title { font-size: 13px; font-weight: 700; color: #1a3a5c; border-bottom: 2px solid #c8a951; padding-bottom: 4px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.8px; display: flex; align-items: center; gap: 6px; }
+            .report-section-title::before { content: ''; width: 4px; height: 16px; background: #c8a951; border-radius: 2px; }
+
+            /* Data grid */
+            .report-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px 16px; }
+            .report-field { padding: 5px 0; border-bottom: 1px solid #f1f5f9; }
+            .report-field label { font-size: 9px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; display: block; margin-bottom: 1px; }
+            .report-field span { font-size: 12px; font-weight: 600; color: #1e293b; }
+            .report-field-full { grid-column: 1 / -1; }
+
+            /* Table */
+            .report-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 11px; }
+            .report-table th { background: #f1f5f9; color: #475569; font-weight: 700; padding: 6px 8px; text-align: left; font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e2e8f0; }
+            .report-table td { padding: 5px 8px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+            .report-table tr:nth-child(even) { background: #fafafa; }
+            .report-table .status-pago { color: #16a34a; font-weight: 700; }
+            .report-table .status-pendente { color: #ea580c; font-weight: 700; }
+            .report-table .status-aberto { color: #dc2626; font-weight: 700; }
+
+            /* Footer */
+            .report-footer { margin-top: 30px; padding-top: 12px; border-top: 2px solid #1a3a5c; display: flex; justify-content: space-between; align-items: center; }
+            .report-footer-left { font-size: 10px; color: #64748b; }
+            .report-footer-right { font-size: 9px; color: #94a3b8; text-align: right; line-height: 1.6; }
+
+            /* Signatures */
+            .report-signatures { display: flex; justify-content: space-between; margin-top: 50px; }
+            .report-sig { text-align: center; width: 200px; }
+            .report-sig-line { border-top: 1px solid #333; padding-top: 4px; font-size: 10px; color: #475569; }
+            .report-sig-role { font-size: 9px; color: #94a3b8; }
+
+            /* Watermark */
+            .report-watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 60px; color: rgba(26,58,92,0.04); font-weight: 900; letter-spacing: 10px; pointer-events: none; z-index: 0; }
+
+            @media print {
+                body { padding: 0; }
+                .report-page { padding: 20px 30px; }
+                .report-watermark { display: block; }
+            }
         </style></head><body>
-        <h1><i>📋</i> Ficha do Membro — ${m.nome || ''}</h1>
-        <p style="margin-bottom: 12px;">
-            <span class="badge badge-${(m.status||'').toLowerCase() === 'ativo' ? 'ativo' : 'pendente'}">${m.status || '—'}</span>
-            ${m.cargo || ''} — Registro: ${m.registro || '—'}
-        </p>
-        <h2>Dados Pessoais</h2>
-        <div class="grid">
-            <div class="item"><label>Nome</label><span>${m.nome || '—'}</span></div>
-            <div class="item"><label>CPF</label><span>${m.cpf || '—'}</span></div>
-            <div class="item"><label>RG</label><span>${m.rg || '—'} ${m.orgao_expedidor || ''}</span></div>
-            <div class="item"><label>Sexo</label><span>${m.sexo === 'M' ? 'Masculino' : m.sexo === 'F' ? 'Feminino' : '—'}</span></div>
-            <div class="item"><label>Nascimento</label><span>${fmtDate(m.data_nascimento)}</span></div>
-            <div class="item"><label>Estado Civil</label><span>${m.estado_civil || '—'}</span></div>
-            <div class="item"><label>Cônjuge</label><span>${m.nome_conjuge || '—'}</span></div>
-            <div class="item"><label>Escolaridade</label><span>${m.escolaridade || '—'}</span></div>
-            <div class="item"><label>Email</label><span>${m.email || '—'}</span></div>
-            <div class="item"><label>Telefone</label><span>${m.telefone || '—'}</span></div>
-            <div class="item"><label>WhatsApp</label><span>${m.whatsapp || '—'}</span></div>
-            <div class="item"><label>Igreja</label><span>${m.nome_igreja || '—'}</span></div>
-        </div>
-        <h2>Dados Ministeriais</h2>
-        <div class="grid">
-            <div class="item"><label>Cargo</label><span>${m.cargo || '—'}</span></div>
-            <div class="item"><label>Função</label><span>${m.funcao_ministerial || '—'}</span></div>
-            <div class="item"><label>Tempo Ministério</label><span>${m.tempo_ministerio || '—'}</span></div>
-            <div class="item"><label>Consagração</label><span>${fmtDate(m.data_consagracao)}</span></div>
-            <div class="item"><label>Registro</label><span>${m.registro || '—'}</span></div>
-            <div class="item"><label>Data Registro</label><span>${fmtDate(m.data_registro)}</span></div>
-        </div>
-        ${(m.endereco && m.endereco.endereco) ? `
-            <h2>Endereço</h2>
-            <div class="grid">
-                <div class="item"><label>Logradouro</label><span>${m.endereco.endereco}, ${m.endereco.numero || 's/n'}</span></div>
-                <div class="item"><label>Complemento</label><span>${m.endereco.complemento || '—'}</span></div>
-                <div class="item"><label>Bairro</label><span>${m.endereco.bairro || '—'}</span></div>
-                <div class="item"><label>Cidade/UF</label><span>${m.endereco.cidade || '—'} / ${m.endereco.uf || '—'}</span></div>
-                <div class="item"><label>CEP</label><span>${m.endereco.cep || '—'}</span></div>
+        <div class="report-watermark">CIEIB</div>
+        <div class="report-page">
+            <!-- Header -->
+            <div class="report-header">
+                <div class="report-header-left">
+                    <div class="report-logo">CIEIB</div>
+                    <div class="report-org">
+                        <strong>CIEIB</strong>
+                        Convenção das Igrejas Evangélicas<br>Interdenominacional do Brasil
+                    </div>
+                </div>
+                <div class="report-header-right">
+                    <div class="report-doc-type">📋 Ficha do Membro</div>
+                    <div class="report-doc-sub">Relatório Cadastral Completo</div>
+                </div>
             </div>
-        ` : ''}
-        <div class="footer">CIEIB — Convenção das Igrejas Evangélicas Interdenominacional do Brasil | Impresso em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}</div>
+
+            <!-- Title Bar -->
+            <div class="report-title-bar">
+                <h1>${m.nome || '—'}</h1>
+                <div class="report-badges">
+                    <span class="report-badge badge-${(m.status||'').toLowerCase() === 'ativo' ? 'ativo' : 'pendente'}">${m.status || '—'}</span>
+                    <span class="report-badge badge-cargo">${m.cargo || '—'}</span>
+                </div>
+            </div>
+
+            <!-- Profile -->
+            <div class="report-profile">
+                <div class="report-foto">
+                    ${m.foto_url ? `<img src="${m.foto_url}" alt="Foto">` : '👤'}
+                </div>
+                <div class="report-profile-info">
+                    <h2>${m.nome || '—'}</h2>
+                    <p>
+                        <span class="report-registro">Registro: ${m.registro || '—'}</span> &nbsp;|&nbsp;
+                        CPF: ${fmtCPF(m.cpf)} &nbsp;|&nbsp;
+                        RG: ${m.rg || '—'} ${m.orgao_expedidor || ''}
+                    </p>
+                    <p>
+                        Cargo: <strong>${m.cargo || '—'}</strong> &nbsp;|&nbsp;
+                        Convenção: ${m.conv_estadual || 'CIEIB'} &nbsp;|&nbsp;
+                        Cadastrado em: ${fmtDate(m.created_at)}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Dados Pessoais -->
+            <div class="report-section">
+                <div class="report-section-title">Dados Pessoais</div>
+                <div class="report-grid">
+                    <div class="report-field"><label>Nome</label><span>${m.nome || '—'}</span></div>
+                    <div class="report-field"><label>CPF</label><span>${fmtCPF(m.cpf)}</span></div>
+                    <div class="report-field"><label>RG</label><span>${m.rg || '—'} ${m.orgao_expedidor || ''}</span></div>
+                    <div class="report-field"><label>Sexo</label><span>${m.sexo === 'M' ? 'Masculino' : m.sexo === 'F' ? 'Feminino' : '—'}</span></div>
+                    <div class="report-field"><label>Nascimento</label><span>${fmtDate(m.data_nascimento)}</span></div>
+                    <div class="report-field"><label>Estado Civil</label><span>${m.estado_civil || '—'}</span></div>
+                    <div class="report-field"><label>Cônjuge</label><span>${m.nome_conjuge || '—'}</span></div>
+                    <div class="report-field"><label>Escolaridade</label><span>${m.escolaridade || '—'}</span></div>
+                    <div class="report-field"><label>Email</label><span>${m.email || '—'}</span></div>
+                    <div class="report-field"><label>Telefone</label><span>${fmtTel(m.telefone)}</span></div>
+                    <div class="report-field"><label>WhatsApp</label><span>${fmtTel(m.whatsapp)}</span></div>
+                    <div class="report-field"><label>Igreja</label><span>${m.nome_igreja || '—'}</span></div>
+                </div>
+            </div>
+
+            <!-- Dados Ministeriais -->
+            <div class="report-section">
+                <div class="report-section-title">Dados Ministeriais</div>
+                <div class="report-grid">
+                    <div class="report-field"><label>Cargo</label><span>${m.cargo || '—'}</span></div>
+                    <div class="report-field"><label>Função</label><span>${m.funcao_ministerial || '—'}</span></div>
+                    <div class="report-field"><label>Tempo Ministério</label><span>${m.tempo_ministerio || '—'}</span></div>
+                    <div class="report-field"><label>Consagração</label><span>${fmtDate(m.data_consagracao)}</span></div>
+                    <div class="report-field"><label>Registro</label><span>${m.registro || '—'}</span></div>
+                    <div class="report-field"><label>Data Registro</label><span>${fmtDate(m.data_registro)}</span></div>
+                    <div class="report-field"><label>Data Batismo</label><span>${fmtDate(m.data_batismo)}</span></div>
+                    <div class="report-field"><label>Data Ordenação</label><span>${fmtDate(m.data_ordenacao)}</span></div>
+                    <div class="report-field"><label>Igreja Ordenação</label><span>${m.igreja_ordenacao || '—'}</span></div>
+                    <div class="report-field"><label>Cidade Ordenação</label><span>${m.cidade_ordenacao || '—'}</span></div>
+                </div>
+            </div>
+
+            <!-- Endereço -->
+            ${m.endereco ? `
+            <div class="report-section">
+                <div class="report-section-title">Endereço</div>
+                <div class="report-grid">
+                    <div class="report-field report-field-full"><label>Logradouro</label><span>${m.endereco.endereco || '—'}, ${m.endereco.numero || 'S/N'}${m.endereco.complemento ? ' — ' + m.endereco.complemento : ''}</span></div>
+                    <div class="report-field"><label>Bairro</label><span>${m.endereco.bairro || '—'}</span></div>
+                    <div class="report-field"><label>Cidade/UF</label><span>${m.endereco.cidade || '—'} / ${m.endereco.uf || '—'}</span></div>
+                    <div class="report-field"><label>CEP</label><span>${m.endereco.cep || '—'}</span></div>
+                </div>
+            </div>
+            ` : ''}
+
+            <!-- Financeiro -->
+            ${boletos.length > 0 || contas.length > 0 ? `
+            <div class="report-section">
+                <div class="report-section-title">Situação Financeira</div>
+                ${boletos.length > 0 ? `
+                <table class="report-table">
+                    <thead><tr><th>Tipo</th><th>Referência</th><th>Vencimento</th><th>Valor</th><th>Pago</th><th>Status</th></tr></thead>
+                    <tbody>
+                        ${boletos.map(b => `<tr>
+                            <td>${b.tipo || 'anuidade'}</td>
+                            <td>${b.referencia || '—'} ${b.ano || ''}</td>
+                            <td>${fmtDate(b.data_vencimento)}</td>
+                            <td>R$ ${parseFloat(b.valor||0).toFixed(2)}</td>
+                            <td>R$ ${parseFloat(b.valor_pago||0).toFixed(2)}</td>
+                            <td class="status-${b.status === 'pago' ? 'pago' : 'pendente'}">${(b.status||'pendente').toUpperCase()}</td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>` : ''}
+                ${contas.length > 0 ? `
+                <p style="font-weight:700;margin:10px 0 4px;font-size:11px;color:#475569;">Contas a Receber</p>
+                <table class="report-table">
+                    <thead><tr><th>Serviço</th><th>Documento</th><th>Vencimento</th><th>Valor</th><th>Saldo</th><th>Status</th></tr></thead>
+                    <tbody>
+                        ${contas.map(c => `<tr>
+                            <td>${c.servico || '—'}</td>
+                            <td>${c.nro_docto || '—'}</td>
+                            <td>${fmtDate(c.data_vencimento)}</td>
+                            <td>R$ ${parseFloat(c.valor||0).toFixed(2)}</td>
+                            <td>R$ ${parseFloat(c.saldo||0).toFixed(2)}</td>
+                            <td class="status-${c.status === 'QUITADO' || c.status === 'PAGO' ? 'pago' : 'aberto'}">${c.status || 'ABERTO'}</td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>` : ''}
+            </div>
+            ` : ''}
+
+            <!-- Assinaturas -->
+            <div class="report-signatures">
+                <div class="report-sig">
+                    <div class="report-sig-line">Membro / Ministro</div>
+                    <div class="report-sig-role">${m.nome || '—'}</div>
+                </div>
+                <div class="report-sig">
+                    <div class="report-sig-line">Administração CIEIB</div>
+                    <div class="report-sig-role">Responsável</div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="report-footer">
+                <div class="report-footer-left">
+                    <strong>CIEIB</strong> — Convenção das Igrejas Evangélicas Interdenominacional do Brasil
+                </div>
+                <div class="report-footer-right">
+                    Impresso em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}<br>
+                    Documento gerado pelo sistema CIEIB
+                </div>
+            </div>
+        </div>
     </body></html>`);
 
     printWin.document.close();
@@ -1458,8 +1637,46 @@ function switchMdpTab(tab) {
     else if (tab === 'financeiro') {
         const boletos = m.boletos || [];
         const contas = m.contas || [];
+        const contasBoletoSolicitado = contas.filter(c => c.boleto_solicitado && c.status === 'ABERTO');
+        const contasPixEnviado = contas.filter(c => c.forma_pagamento === 'pix' && c.comprovante_pix_url);
 
         content.innerHTML = `
+            ${contasBoletoSolicitado.length > 0 ? `
+                <div class="mdp-section-title" style="margin-top:0;color:#d97706;"><i class="fas fa-exclamation-triangle"></i> Boletos Solicitados pelo Membro</div>
+                <div class="mdp-alert-box" style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px;margin-bottom:16px;">
+                    <p style="font-size:0.78rem;color:#92400e;margin-bottom:8px;"><strong>${contasBoletoSolicitado.length}</strong> boleto(s) aguardando importação:</p>
+                    ${contasBoletoSolicitado.map(c => `
+                        <div class="mdp-list-item" style="background:#fff;border:1px solid #fde68a;margin-bottom:6px;border-radius:8px;">
+                            <div class="mdp-list-item-info">
+                                <h5>⏳ ${c.servico || 'Conta'} — Doc. ${c.nro_docto || 'N/A'}</h5>
+                                <p>Venc: ${fmtDate(c.data_vencimento)} | Valor: R$ ${parseFloat(c.valor || 0).toFixed(2)} | Saldo: R$ ${parseFloat(c.saldo || 0).toFixed(2)}</p>
+                                <p style="font-size:0.7rem;color:#d97706;">Solicitado em: ${fmtDate(c.boleto_solicitado_em)}</p>
+                            </div>
+                            <div class="mdp-list-item-actions">
+                                <button class="btn-admin-primary" style="font-size:0.72rem;padding:6px 12px;" onclick="importarBoletoParaConta(${m.id}, ${c.id})"><i class="fas fa-file-upload"></i> Importar Boleto</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            ` : ''}
+
+            ${contasPixEnviado.length > 0 ? `
+                <div class="mdp-section-title" style="margin-top:0;color:#059669;"><i class="fas fa-qrcode"></i> Comprovantes PIX Recebidos</div>
+                <div class="mdp-alert-box" style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px;margin-bottom:16px;">
+                    ${contasPixEnviado.map(c => `
+                        <div class="mdp-list-item" style="background:#fff;border:1px solid #bbf7d0;margin-bottom:6px;border-radius:8px;">
+                            <div class="mdp-list-item-info">
+                                <h5>✅ ${c.servico || 'Conta'} — Doc. ${c.nro_docto || 'N/A'}</h5>
+                                <p>Valor: R$ ${parseFloat(c.valor || 0).toFixed(2)} | Saldo: R$ ${parseFloat(c.saldo || 0).toFixed(2)}</p>
+                            </div>
+                            <div class="mdp-list-item-actions">
+                                <a href="${c.comprovante_pix_url}" target="_blank" class="mdp-btn-view" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none;width:30px;height:30px;border-radius:6px;" title="Ver comprovante"><i class="fas fa-eye"></i></a>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            ` : ''}
+
             <div style="display:flex;justify-content:space-between;align-items:center;">
                 <div class="mdp-section-title" style="margin-top:0;"><i class="fas fa-barcode"></i> Boletos / Anuidades</div>
                 <button class="btn-admin-primary" style="font-size:0.78rem;padding:8px 16px;" onclick="openBoletoModal(${m.id})"><i class="fas fa-plus"></i> Novo Boleto</button>
@@ -1829,6 +2046,60 @@ async function deleteBoleto(boletoId) {
         await AdminAPI.del(`/boletos/${boletoId}`);
         showToast('Boleto excluído', 'success');
         if (currentMembro) openMembroDetail(currentMembro.id);
+    } catch (err) { showToast(err.message, 'error'); }
+}
+
+// ---- Importar Boleto para Conta (solicitação do membro) ----
+function importarBoletoParaConta(ministroId, contaId) {
+    document.getElementById('modalTitle').textContent = 'Importar Boleto para o Membro';
+    document.getElementById('modalBody').innerHTML = `
+        <div class="mdp-alert-box" style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px;margin-bottom:16px;">
+            <p style="font-size:0.82rem;color:#92400e;"><i class="fas fa-info-circle"></i> O membro solicitou boleto para esta conta. Faça o upload do arquivo PDF do boleto.</p>
+        </div>
+        <div class="form-grid">
+            <div class="admin-form-group"><label>Tipo</label>
+                <select id="mImpBoletoTipo">
+                    <option value="mensalidade">Mensalidade</option>
+                    <option value="anuidade">Anuidade</option>
+                    <option value="taxa">Taxa</option>
+                </select>
+            </div>
+            <div class="admin-form-group"><label>Referência</label><input type="text" id="mImpBoletoRef" placeholder="Ex: Jan/2026, 2026"></div>
+        </div>
+        <div class="form-grid">
+            <div class="admin-form-group"><label>Valor (R$)</label><input type="number" id="mImpBoletoValor" step="0.01" value="18.00"></div>
+            <div class="admin-form-group"><label>Vencimento</label><input type="date" id="mImpBoletoVenc"></div>
+        </div>
+        <div class="admin-form-group"><label>Observação</label><textarea id="mImpBoletoObs" placeholder="Referente à solicitação do membro"></textarea></div>
+        ${adminUploadField('mImpBoletoArquivo', 'Arquivo do Boleto (PDF/Imagem)', '')}
+        <input type="hidden" id="mImpContaId" value="${contaId}">
+    `;
+    document.getElementById('modalFooter').innerHTML = `
+        <button class="btn-admin-secondary" onclick="closeModal()">Cancelar</button>
+        <button class="btn-admin-primary" onclick="salvarBoletoImportado(${ministroId})"><i class="fas fa-save"></i> Salvar e Notificar</button>
+    `;
+    openModal();
+}
+
+async function salvarBoletoImportado(ministroId) {
+    const contaId = document.getElementById('mImpContaId').value;
+    const body = {
+        tipo: document.getElementById('mImpBoletoTipo').value,
+        referencia: document.getElementById('mImpBoletoRef').value,
+        ano: new Date().getFullYear(),
+        mes: new Date().getMonth() + 1,
+        valor: parseFloat(document.getElementById('mImpBoletoValor').value) || 0,
+        data_vencimento: document.getElementById('mImpBoletoVenc').value || null,
+        observacao: document.getElementById('mImpBoletoObs').value,
+        arquivo_boleto_url: document.getElementById('mImpBoletoArquivo').value || null,
+        status: 'pendente',
+        conta_receber_id: parseInt(contaId) || null,
+    };
+    try {
+        await AdminAPI.post(`/ministros/${ministroId}/boletos`, body);
+        closeModal();
+        showToast('Boleto importado e membro notificado!', 'success');
+        openMembroDetail(ministroId);
     } catch (err) { showToast(err.message, 'error'); }
 }
 

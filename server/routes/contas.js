@@ -218,6 +218,24 @@ router.post('/solicitar-carteirinha', auth, async (req, res) => {
     }
 });
 
+// GET /api/contas/boletos — Boletos do ministro (vindos de ministro_boletos)
+router.get('/boletos', auth, async (req, res) => {
+    try {
+        const result = await pool.query(
+            `SELECT id, tipo, referencia, ano, mes, valor, data_vencimento, data_pagamento,
+                    valor_pago, arquivo_boleto_url, arquivo_comprovante_url, status, observacao, created_at
+             FROM ministro_boletos
+             WHERE ministro_id = $1
+             ORDER BY created_at DESC`,
+            [req.userId]
+        );
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Erro ao buscar boletos:', err);
+        res.status(500).json({ error: 'Erro ao buscar boletos' });
+    }
+});
+
 // GET /api/contas/carteirinha-status — Status da solicitação de carteirinha
 router.get('/carteirinha-status', auth, async (req, res) => {
     try {

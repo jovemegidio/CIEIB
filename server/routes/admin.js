@@ -451,7 +451,7 @@ router.get('/ministros/:id/boletos', adminAuth, async (req, res) => {
 
 router.post('/ministros/:id/boletos', adminAuth, async (req, res) => {
     try {
-        const { tipo, referencia, ano, mes, valor, data_vencimento, status, observacao, arquivo_boleto_url } = req.body;
+        const { tipo, referencia, ano, mes, valor, data_vencimento, status, observacao, arquivo_boleto_url, conta_receber_id } = req.body;
         const r = await pool.query(
             `INSERT INTO ministro_boletos (ministro_id, tipo, referencia, ano, mes, valor, data_vencimento, status, observacao, arquivo_boleto_url)
              VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
@@ -462,6 +462,21 @@ router.post('/ministros/:id/boletos', adminAuth, async (req, res) => {
             'INSERT INTO ministro_historico (ministro_id, acao, descricao, admin_nome) VALUES ($1, $2, $3, $4)',
             [req.params.id, 'BOLETO ADICIONADO', `Boleto ${tipo || 'anuidade'} - ${referencia || ''} - R$ ${valor || 0}`, 'Administrador']
         );
+
+        // Se veio de uma solicitação de boleto (conta_receber_id), marcar a conta e notificar
+        if (conta_receber_id) {
+            await pool.query(
+                "UPDATE contas_receber SET forma_pagamento = 'boleto' WHERE id = $1 AND ministro_id = $2",
+                [conta_receber_id, req.params.id]
+            );
+
+            // Notificar o ministro
+            await pool.query(
+                `INSERT INTO notificacoes (ministro_id, titulo, mensagem, tipo)
+                 VALUES ($1, 'Boleto Disponível!', $2, 'success')`,
+                [req.params.id, `Seu boleto de ${tipo || 'anuidade'} (${referencia || ''}) no valor de R$ ${parseFloat(valor || 0).toFixed(2)} está disponível na aba "Boletos" do seu painel.`]
+            );
+        }
 
         res.status(201).json(r.rows[0]);
     } catch (err) { res.status(500).json({ error: err.message }); }

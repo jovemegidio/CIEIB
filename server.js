@@ -41,7 +41,22 @@ app.get('/favicon.ico', (req, res) => {
     res.redirect(302, '/fav.jpg');
 });
 
-// ---- Cache control para HTML (nunca cachear) ----
+// ---- Helper: servir HTML com cache-busting automático ----
+const fs = require('fs');
+function sendHtmlWithCacheBust(res, filePath) {
+    fs.readFile(filePath, 'utf8', (err, html) => {
+        if (err) return res.status(404).send('Página não encontrada');
+        // Injeta ?v=VERSAO em todos os CSS/JS locais
+        const busted = html
+            .replace(/(href=["'](?:\/)?css\/[^"'?]+)(["'])/g, `$1?v=${APP_VERSION}$2`)
+            .replace(/(src=["'](?:\/)?js\/[^"'?]+)(["'])/g, `$1?v=${APP_VERSION}$2`);
+        res.set('Content-Type', 'text/html');
+        res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.send(busted);
+    });
+}
+
+// ---- Cache control ----
 app.use((req, res, next) => {
     if (req.path.endsWith('.html') || req.path === '/' || !req.path.includes('.')) {
         res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
@@ -51,28 +66,20 @@ app.use((req, res, next) => {
     next();
 });
 
-// ---- Servir arquivos estáticos (CSS, JS, imagens) ----
+// ---- Servir arquivos estáticos (CSS, JS, imagens — NÃO HTML) ----
 app.use(express.static(__dirname, {
     etag: true,
     lastModified: true,
+    index: false, // Não servir index.html automaticamente
     setHeaders: (res, filePath) => {
-        if (filePath.endsWith('.html')) {
-            res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
-        } else if (filePath.endsWith('.css') || filePath.endsWith('.js')) {
-            // CSS/JS: sem cache forte — sempre revalidar via ETag
+        if (filePath.endsWith('.css') || filePath.endsWith('.js')) {
             res.set('Cache-Control', 'no-cache, must-revalidate');
         }
-    }
+    },
+    // Redirecionar .html para nossas rotas com cache-busting
+    extensions: []
 }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// ---- Helper: servir HTML com cache-busting automático ----
-const fs = require('fs');
-function sendHtmlWithCacheBust(res, filePath) {
-    fs.readFile(filePath, 'utf8', (err, html) => {
-        if (err) return res.status(404).send('Página não encontrada');
-        // Injeta ?v=VERSAO em todos os CSS/JS locais
-        const busted = html
             .replace(/(href=["'](?:\/)?css\/[^"']+)(["'])/g, `$1?v=${APP_VERSION}$2`)
             .replace(/(src=["'](?:\/)?js\/[^"']+)(["'])/g, `$1?v=${APP_VERSION}$2`);
         res.set('Content-Type', 'text/html');
@@ -121,12 +128,21 @@ const htmlPages = [
 ];
 
 htmlPages.forEach(page => {
+    // Rota sem extensão: /painel-ministro
     app.get(`/${page}`, (req, res) => {
+        sendHtmlWithCacheBust(res, path.join(__dirname, `${page}.html`));
+    });
+    // Rota com extensão: /painel-ministro.html
+    app.get(`/${page}.html`, (req, res) => {
         sendHtmlWithCacheBust(res, path.join(__dirname, `${page}.html`));
     });
 });
 
 app.get('/', (req, res) => {
+    sendHtmlWithCacheBust(res, path.join(__dirname, 'index.html'));
+});
+
+app.get('/index.html', (req, res) => {
     sendHtmlWithCacheBust(res, path.join(__dirname, 'index.html'));
 });
 

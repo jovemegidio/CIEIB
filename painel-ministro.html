@@ -699,6 +699,93 @@
         </div>
     </div>
 
+    <!-- ==================== MODAL MATRÍCULA ==================== -->
+    <div class="mat-overlay" id="matOverlay">
+        <div class="mat-modal">
+            <button class="mat-close" id="matClose" aria-label="Fechar">&times;</button>
+
+            <!-- Estado 1: Confirmação -->
+            <div class="mat-step" id="matStepConfirm">
+                <div class="mat-header" id="matHeader">
+                    <div class="mat-header-icon" id="matHeaderIcon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <span class="mat-header-tag" id="matHeaderTag"></span>
+                </div>
+                <div class="mat-body">
+                    <h3 class="mat-titulo" id="matTitulo"></h3>
+                    <p class="mat-desc" id="matDesc"></p>
+                    <div class="mat-details">
+                        <div class="mat-detail" id="matNivel">
+                            <i class="fas fa-signal"></i>
+                            <span></span>
+                        </div>
+                        <div class="mat-detail" id="matCarga">
+                            <i class="fas fa-clock"></i>
+                            <span></span>
+                        </div>
+                        <div class="mat-detail" id="matCert" style="display:none;">
+                            <i class="fas fa-certificate"></i>
+                            <span>Com certificação</span>
+                        </div>
+                    </div>
+                    <div class="mat-info-box">
+                        <i class="fas fa-info-circle"></i>
+                        <p>Ao se matricular, você terá acesso a todos os módulos e aulas deste curso. Você pode acompanhar seu progresso a qualquer momento pelo painel.</p>
+                    </div>
+                    <div class="mat-actions">
+                        <button class="mat-btn mat-btn-cancel" id="matBtnCancel">Cancelar</button>
+                        <button class="mat-btn mat-btn-confirm" id="matBtnConfirm">
+                            <i class="fas fa-check-circle"></i> Confirmar Matrícula
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estado 2: Carregando -->
+            <div class="mat-step" id="matStepLoading" style="display:none;">
+                <div class="mat-loading-content">
+                    <div class="mat-spinner"></div>
+                    <p>Processando matrícula...</p>
+                </div>
+            </div>
+
+            <!-- Estado 3: Sucesso -->
+            <div class="mat-step" id="matStepSuccess" style="display:none;">
+                <div class="mat-success-content">
+                    <div class="mat-success-icon">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <h3>Matrícula Realizada!</h3>
+                    <p id="matSuccessMsg">Você foi matriculado com sucesso.</p>
+                    <div class="mat-actions">
+                        <button class="mat-btn mat-btn-secondary" id="matBtnClose">Fechar</button>
+                        <button class="mat-btn mat-btn-confirm" id="matBtnAccess">
+                            <i class="fas fa-play"></i> Acessar Curso
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estado 4: Erro -->
+            <div class="mat-step" id="matStepError" style="display:none;">
+                <div class="mat-error-content">
+                    <div class="mat-error-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h3>Não foi possível matricular</h3>
+                    <p id="matErrorMsg">Ocorreu um erro.</p>
+                    <div class="mat-actions">
+                        <button class="mat-btn mat-btn-cancel" id="matBtnErrorClose">Fechar</button>
+                        <button class="mat-btn mat-btn-confirm" id="matBtnRetry">
+                            <i class="fas fa-redo"></i> Tentar Novamente
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="js/api.js"></script>
     <script src="js/main.js"></script>
     <script src="js/painel.js"></script>

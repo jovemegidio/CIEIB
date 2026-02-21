@@ -599,6 +599,17 @@ function initLazyTabs() {
 // ================================================================
 //  CURSOS / FACULDADES
 // ================================================================
+/* Mapa global de categorias → gradiente, ícone e cor do tag */
+const catConfig = {
+    'Teologia':        { bg: 'linear-gradient(135deg, #1a3a5c 0%, #2c5282 50%, #3b6cb5 100%)', icon: 'fa-book-bible',       tag: '#a3c4f3' },
+    'Ministério':      { bg: 'linear-gradient(135deg, #065f46 0%, #059669 50%, #10b981 100%)', icon: 'fa-church',           tag: '#86efac' },
+    'Capelania':       { bg: 'linear-gradient(135deg, #5b21b6 0%, #7c3aed 50%, #a78bfa 100%)', icon: 'fa-hand-holding-heart', tag: '#ddd6fe' },
+    'Jurídico':        { bg: 'linear-gradient(135deg, #92400e 0%, #b45309 50%, #d97706 100%)', icon: 'fa-gavel',            tag: '#fde68a' },
+    'Aconselhamento':  { bg: 'linear-gradient(135deg, #9d174d 0%, #be185d 50%, #ec4899 100%)', icon: 'fa-comments',         tag: '#fbcfe8' },
+    'Liderança':       { bg: 'linear-gradient(135deg, #0e7490 0%, #0891b2 50%, #22d3ee 100%)', icon: 'fa-users-cog',        tag: '#a5f3fc' }
+};
+const defaultCat = { bg: 'linear-gradient(135deg, #374151, #6b7280)', icon: 'fa-graduation-cap', tag: '#d1d5db' };
+
 let allCursos = [];
 
 async function loadCursos() {
@@ -653,17 +664,6 @@ function renderCursosCatalogo(cursos, matriculas) {
     }
 
     const matriculaIds = matriculas.map(m => m.curso_id);
-
-    /* Mapa de categorias → gradiente, ícone e cor do tag */
-    const catConfig = {
-        'Teologia':        { bg: 'linear-gradient(135deg, #1a3a5c 0%, #2c5282 50%, #3b6cb5 100%)', icon: 'fa-book-bible',       tag: '#a3c4f3' },
-        'Ministério':      { bg: 'linear-gradient(135deg, #065f46 0%, #059669 50%, #10b981 100%)', icon: 'fa-church',           tag: '#86efac' },
-        'Capelania':       { bg: 'linear-gradient(135deg, #5b21b6 0%, #7c3aed 50%, #a78bfa 100%)', icon: 'fa-hand-holding-heart', tag: '#ddd6fe' },
-        'Jurídico':        { bg: 'linear-gradient(135deg, #92400e 0%, #b45309 50%, #d97706 100%)', icon: 'fa-gavel',            tag: '#fde68a' },
-        'Aconselhamento':  { bg: 'linear-gradient(135deg, #9d174d 0%, #be185d 50%, #ec4899 100%)', icon: 'fa-comments',         tag: '#fbcfe8' },
-        'Liderança':       { bg: 'linear-gradient(135deg, #0e7490 0%, #0891b2 50%, #22d3ee 100%)', icon: 'fa-users-cog',        tag: '#a5f3fc' }
-    };
-    const defaultCat = { bg: 'linear-gradient(135deg, #374151, #6b7280)', icon: 'fa-graduation-cap', tag: '#d1d5db' };
 
     grid.innerHTML = cursos.map(c => {
         const isMatriculado = matriculaIds.includes(c.id);
@@ -756,18 +756,126 @@ function renderMeusCertificados(certificados) {
     `).join('');
 }
 
-async function matricularCurso(cursoId) {
-    if (!confirm('Deseja se matricular neste curso?')) return;
+// ==================== MODAL MATRÍCULA ====================
+let matCurrentCursoId = null;
+
+function openMatModal() {
+    document.getElementById('matOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeMatModal() {
+    document.getElementById('matOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+function showMatStep(step) {
+    ['matStepConfirm', 'matStepLoading', 'matStepSuccess', 'matStepError'].forEach(id => {
+        document.getElementById(id).style.display = 'none';
+    });
+    document.getElementById(step).style.display = '';
+}
+
+function matricularCurso(cursoId) {
+    const curso = allCursos.find(c => c.id === cursoId);
+    if (!curso) return;
+
+    matCurrentCursoId = cursoId;
+    const cfg = catConfig[curso.area] || defaultCat;
+
+    // Populate modal header
+    const header = document.getElementById('matHeader');
+    header.style.background = cfg.bg;
+
+    const headerIcon = document.getElementById('matHeaderIcon');
+    headerIcon.innerHTML = `<i class="fas ${cfg.icon}"></i>`;
+
+    const headerTag = document.getElementById('matHeaderTag');
+    headerTag.style.background = cfg.tag;
+    headerTag.style.color = '#1a1a2e';
+    headerTag.innerHTML = `<i class="fas ${cfg.icon}"></i> ${curso.area}`;
+
+    // Populate body
+    document.getElementById('matTitulo').textContent = curso.titulo;
+    document.getElementById('matDesc').textContent = curso.descricao || '';
+
+    const nivelEl = document.getElementById('matNivel');
+    if (curso.nivel) {
+        nivelEl.style.display = '';
+        nivelEl.querySelector('span').textContent = curso.nivel;
+    } else {
+        nivelEl.style.display = 'none';
+    }
+
+    const cargaEl = document.getElementById('matCarga');
+    if (curso.carga_horaria) {
+        cargaEl.style.display = '';
+        cargaEl.querySelector('span').textContent = curso.carga_horaria + 'h de carga horária';
+    } else {
+        cargaEl.style.display = 'none';
+    }
+
+    document.getElementById('matCert').style.display = curso.certificado ? '' : 'none';
+
+    // Show confirm step
+    showMatStep('matStepConfirm');
+    openMatModal();
+}
+
+async function confirmarMatricula() {
+    if (!matCurrentCursoId) return;
+
+    showMatStep('matStepLoading');
 
     try {
-        await API.matricularCurso(cursoId);
-        showToast('Matrícula realizada com sucesso!', 'success');
+        await API.matricularCurso(matCurrentCursoId);
+
+        const curso = allCursos.find(c => c.id === matCurrentCursoId);
+        document.getElementById('matSuccessMsg').textContent =
+            `Você foi matriculado no curso "${curso ? curso.titulo : ''}" com sucesso. Bons estudos!`;
+
+        showMatStep('matStepSuccess');
+
+        // Refresh cursos list in background
         cursosLoaded = false;
-        loadCursos();
+
     } catch (err) {
-        showToast(err.message || 'Erro ao matricular', 'error');
+        document.getElementById('matErrorMsg').textContent =
+            err.message || 'Ocorreu um erro ao processar sua matrícula. Tente novamente.';
+        showMatStep('matStepError');
     }
 }
+
+// Wire modal events after DOM load
+document.addEventListener('DOMContentLoaded', () => {
+    // Close
+    document.getElementById('matClose')?.addEventListener('click', closeMatModal);
+    document.getElementById('matBtnCancel')?.addEventListener('click', closeMatModal);
+    document.getElementById('matBtnClose')?.addEventListener('click', () => {
+        closeMatModal();
+        loadCursos();
+    });
+
+    // Confirm
+    document.getElementById('matBtnConfirm')?.addEventListener('click', confirmarMatricula);
+
+    // Access course after success
+    document.getElementById('matBtnAccess')?.addEventListener('click', () => {
+        closeMatModal();
+        loadCursos().then(() => {
+            if (matCurrentCursoId) acessarCurso(matCurrentCursoId);
+        });
+    });
+
+    // Error retry
+    document.getElementById('matBtnRetry')?.addEventListener('click', confirmarMatricula);
+    document.getElementById('matBtnErrorClose')?.addEventListener('click', closeMatModal);
+
+    // Overlay click to close
+    document.getElementById('matOverlay')?.addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) closeMatModal();
+    });
+});
 
 async function acessarCurso(cursoId) {
     try {

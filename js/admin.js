@@ -93,11 +93,25 @@ const AdminAPI = {
         ],
         '/configuracoes': [
             { chave: 'nome_site', valor: 'CIEIB — Convenção de Igrejas Evangélicas Independentes do Brasil', descricao: 'Nome do Site' },
-            { chave: 'email_contato', valor: 'contato@cieib.org.br', descricao: 'Email de Contato' },
-            { chave: 'telefone', valor: '(11) 3000-0000', descricao: 'Telefone Principal' },
-            { chave: 'endereco', valor: 'Rua da Convenção, 123 — Centro, São Paulo/SP', descricao: 'Endereço da Sede' },
-            { chave: 'horario_funcionamento', valor: 'Seg a Sex — 9h às 18h', descricao: 'Horário de Funcionamento' },
-            { chave: 'meta_description', valor: 'CIEIB é uma convenção que reúne igrejas evangélicas independentes em todo o Brasil.', descricao: 'Meta Description (SEO)' }
+            { chave: 'meta_description', valor: 'CIEIB é uma convenção que reúne igrejas evangélicas independentes em todo o Brasil, promovendo unidade, comunhão e crescimento do Reino de Deus.', descricao: 'Meta Description (SEO)' },
+            { chave: 'site_telefone', valor: '(11) 3000-0000', descricao: 'Telefone principal' },
+            { chave: 'site_email', valor: 'contato@cieib.org.br', descricao: 'Email principal' },
+            { chave: 'site_email_atendimento', valor: 'atendimento@cieib.org.br', descricao: 'Email de atendimento' },
+            { chave: 'site_endereco', valor: 'Rua da Convenção, 123 — Centro, São Paulo/SP', descricao: 'Endereço' },
+            { chave: 'site_horario', valor: 'Seg a Sex — 9h às 18h', descricao: 'Horário de funcionamento' },
+            { chave: 'site_whatsapp', valor: '5511900000000', descricao: 'WhatsApp' },
+            { chave: 'site_whatsapp_display', valor: '(11) 90000-0000', descricao: 'WhatsApp para exibição' },
+            { chave: 'site_logo_url', valor: '', descricao: 'URL do Logo do Site' },
+            { chave: 'site_maps_embed', valor: '', descricao: 'Código Embed do Google Maps (iframe)' },
+            { chave: 'hero_badge', valor: 'Fundada com propósito e fé', descricao: 'Badge do hero na home' },
+            { chave: 'hero_titulo', valor: 'CONVENÇÃO DAS IGREJAS EVANGÉLICAS<br><span>INTERDENOMINACIONAL DO BRASIL</span>', descricao: 'Título do hero na home' },
+            { chave: 'hero_descricao', valor: 'Promovendo a unidade, comunhão e crescimento do Reino de Deus através da cooperação entre igrejas e ministros em todo o território nacional.', descricao: 'Descrição do hero na home' },
+            { chave: 'footer_sobre', valor: 'Convenção das Igrejas Evangélicas Interdenominacional do Brasil — promovendo a unidade e o crescimento do evangelho em todo o território nacional.', descricao: 'Texto sobre no footer' },
+            { chave: 'footer_copyright', valor: 'Copyright © CIEIB 2026. Todos os direitos reservados.', descricao: 'Copyright no rodapé' },
+            { chave: 'stat_igrejas', valor: '500', descricao: 'Contador: Igrejas afiliadas' },
+            { chave: 'stat_ministros', valor: '1200', descricao: 'Contador: Ministros credenciados' },
+            { chave: 'stat_estados', valor: '26', descricao: 'Contador: Estados alcançados' },
+            { chave: 'stat_convencoes', valor: '50', descricao: 'Contador: Convenções regionais' }
         ],
         '/redes-sociais': [
             { id: 1, nome: 'Facebook', url: 'https://facebook.com/cieib', icone: 'fab fa-facebook-f', ordem: 1, ativa: true },
@@ -1897,12 +1911,53 @@ async function loadConfiguracoes() {
     try {
         const configs = await AdminAPI.get('/configuracoes');
         const el = document.getElementById('configForm');
-        el.innerHTML = configs.map(c => `
-            <div class="admin-form-group">
+
+        // Agrupar configurações por categoria
+        const grupos = {
+            'Informações do Site': ['nome_site', 'meta_description', 'site_logo_url'],
+            'Contato': ['site_telefone', 'site_email', 'site_email_atendimento', 'site_whatsapp', 'site_whatsapp_display', 'site_endereco', 'site_horario', 'site_maps_embed'],
+            'Hero (Página Inicial)': ['hero_badge', 'hero_titulo', 'hero_descricao'],
+            'Rodapé': ['footer_sobre', 'footer_copyright'],
+            'Estatísticas': ['stat_igrejas', 'stat_ministros', 'stat_estados', 'stat_convencoes']
+        };
+
+        const configMap = {};
+        configs.forEach(c => { configMap[c.chave] = c; });
+
+        let html = '';
+        const rendered = new Set();
+
+        for (const [grupo, chaves] of Object.entries(grupos)) {
+            const items = chaves.filter(k => configMap[k]).map(k => configMap[k]);
+            if (items.length === 0) continue;
+            html += `<div style="margin-bottom:8px;margin-top:18px;"><strong style="color:var(--admin-primary);font-size:0.85rem;text-transform:uppercase;letter-spacing:0.5px;"><i class="fas fa-layer-group" style="margin-right:6px;color:var(--admin-secondary);"></i>${grupo}</strong></div>`;
+            html += items.map(c => {
+                rendered.add(c.chave);
+                const isTextarea = ['site_endereco', 'hero_descricao', 'footer_sobre', 'meta_description', 'hero_titulo', 'site_maps_embed'].includes(c.chave);
+                if (isTextarea) {
+                    return `<div class="admin-form-group">
+                        <label>${c.descricao || c.chave} <span style="font-size:0.65rem;color:#bbb;">(${c.chave})</span></label>
+                        <textarea class="config-input" data-chave="${c.chave}" rows="3" style="width:100%;padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:0.9rem;resize:vertical;">${c.valor || ''}</textarea>
+                    </div>`;
+                }
+                return `<div class="admin-form-group">
+                    <label>${c.descricao || c.chave} <span style="font-size:0.65rem;color:#bbb;">(${c.chave})</span></label>
+                    <input type="text" class="config-input" data-chave="${c.chave}" value="${(c.valor || '').replace(/"/g, '&quot;')}">
+                </div>`;
+            }).join('');
+        }
+
+        // Renderizar qualquer chave restante não agrupada
+        const extras = configs.filter(c => !rendered.has(c.chave));
+        if (extras.length > 0) {
+            html += `<div style="margin-bottom:8px;margin-top:18px;"><strong style="color:var(--admin-primary);font-size:0.85rem;text-transform:uppercase;letter-spacing:0.5px;"><i class="fas fa-cog" style="margin-right:6px;color:var(--admin-secondary);"></i>Outras Configurações</strong></div>`;
+            html += extras.map(c => `<div class="admin-form-group">
                 <label>${c.descricao || c.chave} <span style="font-size:0.65rem;color:#bbb;">(${c.chave})</span></label>
-                <input type="text" class="config-input" data-chave="${c.chave}" value="${c.valor || ''}">
-            </div>
-        `).join('');
+                <input type="text" class="config-input" data-chave="${c.chave}" value="${(c.valor || '').replace(/"/g, '&quot;')}">
+            </div>`).join('');
+        }
+
+        el.innerHTML = html;
     } catch (err) { showToast('Erro ao carregar configurações', 'error'); }
 }
 
@@ -1911,7 +1966,7 @@ async function saveConfiguracoes() {
     const configs = Array.from(inputs).map(i => ({ chave: i.dataset.chave, valor: i.value }));
     try {
         await AdminAPI.put('/configuracoes', { configs });
-        showToast('Configurações salvas!', 'success');
+        showToast('Configurações salvas! As alterações já refletem no site.', 'success');
     } catch (err) { showToast(err.message, 'error'); }
 }
 

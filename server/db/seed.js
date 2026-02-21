@@ -102,22 +102,26 @@ async function seed() {
 
         // --- Configurações do site ---
         const configs = [
+            { chave: 'nome_site', valor: 'CIEIB — Convenção de Igrejas Evangélicas Independentes do Brasil', desc: 'Nome do Site' },
+            { chave: 'meta_description', valor: 'CIEIB é uma convenção que reúne igrejas evangélicas independentes em todo o Brasil, promovendo unidade, comunhão e crescimento do Reino de Deus.', desc: 'Meta Description (SEO)' },
             { chave: 'site_telefone', valor: '(00) 0000-0000', desc: 'Telefone principal' },
             { chave: 'site_email', valor: 'contato@cieib.org.br', desc: 'Email principal' },
             { chave: 'site_whatsapp', valor: '5500000000000', desc: 'WhatsApp' },
-            { chave: 'site_endereco', valor: 'Rua Exemplo, 1000<br>Bairro Centro<br>CEP 00000-000<br>Cidade - UF', desc: 'Endereço' },
-            { chave: 'site_horario', valor: 'Seg a Sex: 09h às 17h', desc: 'Horário de funcionamento' },
-            { chave: 'stat_igrejas', valor: '500', desc: 'Contador: Igrejas afiliadas' },
-            { chave: 'stat_ministros', valor: '1200', desc: 'Contador: Ministros credenciados' },
-            { chave: 'stat_estados', valor: '26', desc: 'Contador: Estados alcançados' },
-            { chave: 'stat_convencoes', valor: '50', desc: 'Contador: Convenções regionais' },
             { chave: 'site_whatsapp_display', valor: '(00) 00000-0000', desc: 'WhatsApp para exibição' },
             { chave: 'site_email_atendimento', valor: 'atendimento@cieib.org.br', desc: 'Email de atendimento' },
+            { chave: 'site_endereco', valor: 'Rua Exemplo, 1000<br>Bairro Centro<br>CEP 00000-000<br>Cidade - UF', desc: 'Endereço' },
+            { chave: 'site_horario', valor: 'Seg a Sex: 09h às 17h', desc: 'Horário de funcionamento' },
+            { chave: 'site_logo_url', valor: '', desc: 'URL do Logo do Site' },
+            { chave: 'site_maps_embed', valor: '', desc: 'Código Embed do Google Maps (iframe)' },
             { chave: 'hero_badge', valor: 'Fundada com propósito e fé', desc: 'Badge do hero na home' },
             { chave: 'hero_titulo', valor: 'CONVENÇÃO DAS IGREJAS EVANGÉLICAS<br><span>INTERDENOMINACIONAL DO BRASIL</span>', desc: 'Título do hero na home' },
             { chave: 'hero_descricao', valor: 'Promovendo a unidade, comunhão e crescimento do Reino de Deus através da cooperação entre igrejas e ministros em todo o território nacional.', desc: 'Descrição do hero na home' },
             { chave: 'footer_sobre', valor: 'Convenção das Igrejas Evangélicas Interdenominacional do Brasil — promovendo a unidade e o crescimento do evangelho em todo o território nacional.', desc: 'Texto sobre no footer' },
             { chave: 'footer_copyright', valor: 'Copyright © CIEIB 2026. Todos os direitos reservados.', desc: 'Copyright no rodapé' },
+            { chave: 'stat_igrejas', valor: '500', desc: 'Contador: Igrejas afiliadas' },
+            { chave: 'stat_ministros', valor: '1200', desc: 'Contador: Ministros credenciados' },
+            { chave: 'stat_estados', valor: '26', desc: 'Contador: Estados alcançados' },
+            { chave: 'stat_convencoes', valor: '50', desc: 'Contador: Convenções regionais' },
         ];
 
         for (const c of configs) {

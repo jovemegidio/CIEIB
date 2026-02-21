@@ -429,6 +429,45 @@ async function loadSiteConfig() {
             }
         });
 
+        // Atualizar <title> com nome_site
+        if (config.nome_site) {
+            const pageName = document.title.split('|').pop().trim();
+            const baseName = config.nome_site.split('—')[0].trim();
+            if (document.title.includes('|')) {
+                document.title = document.title.split('|')[0].trim() + ' | ' + baseName;
+            } else {
+                document.title = baseName;
+            }
+        }
+
+        // Atualizar meta description
+        if (config.meta_description) {
+            let metaDesc = document.querySelector('meta[name="description"]');
+            if (metaDesc) {
+                metaDesc.setAttribute('content', config.meta_description);
+            } else {
+                metaDesc = document.createElement('meta');
+                metaDesc.name = 'description';
+                metaDesc.content = config.meta_description;
+                document.head.appendChild(metaDesc);
+            }
+        }
+
+        // Atualizar logo do site (se definido)
+        if (config.site_logo_url) {
+            document.querySelectorAll('.logo img, .footer-logo img').forEach(img => {
+                if (config.site_logo_url) img.src = config.site_logo_url;
+            });
+        }
+
+        // Atualizar embed do Google Maps (contato.html)
+        if (config.site_maps_embed) {
+            const mapContainer = document.getElementById('siteMapEmbed');
+            if (mapContainer) {
+                mapContainer.innerHTML = config.site_maps_embed;
+            }
+        }
+
         // Atualizar redes sociais (top-bar e footer)
         if (redes && redes.length > 0) {
             const socialHtml = redes.map(r => {

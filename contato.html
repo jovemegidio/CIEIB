@@ -200,12 +200,14 @@
                 </div>
             </div>
 
-            <!-- Map placeholder -->
-            <div style="margin-top: 60px; background: var(--light); border-radius: var(--radius-lg); overflow: hidden; height: 350px; display: flex; align-items: center; justify-content: center; border: 2px dashed var(--light-gray);">
-                <div style="text-align: center; color: var(--gray);">
-                    <i class="fas fa-map-marked-alt" style="font-size: 3rem; color: var(--secondary); margin-bottom: 12px; display: block;"></i>
-                    <p style="font-family: var(--font-primary); font-weight: 600;">Mapa de Localização</p>
-                    <p style="font-size: 0.85rem;">Insira aqui o iframe do Google Maps com a localização da sede.</p>
+            <!-- Mapa de Localização (carregado dinamicamente do admin) -->
+            <div id="siteMapEmbed" style="margin-top: 60px; background: var(--light); border-radius: var(--radius-lg); overflow: hidden; min-height: 350px;">
+                <div style="height: 350px; display: flex; align-items: center; justify-content: center; border: 2px dashed var(--light-gray); border-radius: var(--radius-lg);">
+                    <div style="text-align: center; color: var(--gray);">
+                        <i class="fas fa-map-marked-alt" style="font-size: 3rem; color: var(--secondary); margin-bottom: 12px; display: block;"></i>
+                        <p style="font-family: var(--font-primary); font-weight: 600;">Mapa de Localização</p>
+                        <p style="font-size: 0.85rem;">Configure o mapa no painel administrativo (Configurações → site_maps_embed)</p>
+                    </div>
                 </div>
             </div>
         </div>

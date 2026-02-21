@@ -767,14 +767,26 @@ router.get('/conteudos', adminAuth, async (req, res) => {
 
 router.post('/conteudos', adminAuth, async (req, res) => {
     try {
-        const { pagina, secao, titulo, conteudo, imagem_url, ordem } = req.body;
+        const { pagina, secao, titulo, conteudo, imagem_url, ordem, ativo } = req.body;
         const r = await pool.query(
-            `INSERT INTO pagina_conteudos (pagina, secao, titulo, conteudo, imagem_url, ordem)
-             VALUES ($1,$2,$3,$4,$5,$6)
-             ON CONFLICT (pagina, secao) DO UPDATE SET titulo=$3, conteudo=$4, imagem_url=$5, ordem=$6, updated_at=NOW()
+            `INSERT INTO pagina_conteudos (pagina, secao, titulo, conteudo, imagem_url, ordem, ativo)
+             VALUES ($1,$2,$3,$4,$5,$6,$7)
+             ON CONFLICT (pagina, secao) DO UPDATE SET titulo=$3, conteudo=$4, imagem_url=$5, ordem=$6, ativo=$7, updated_at=NOW()
              RETURNING *`,
-            [pagina, secao, titulo, conteudo, imagem_url, ordem || 0]
+            [pagina, secao, titulo, conteudo, imagem_url, ordem || 0, ativo !== false]
         );
+        res.json(r.rows[0]);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+router.put('/conteudos/:id', adminAuth, async (req, res) => {
+    try {
+        const { pagina, secao, titulo, conteudo, imagem_url, ordem, ativo } = req.body;
+        const r = await pool.query(
+            `UPDATE pagina_conteudos SET pagina=$1, secao=$2, titulo=$3, conteudo=$4, imagem_url=$5, ordem=$6, ativo=$7, updated_at=NOW() WHERE id=$8 RETURNING *`,
+            [pagina, secao, titulo, conteudo, imagem_url, ordem || 0, ativo !== false, req.params.id]
+        );
+        if (r.rows.length === 0) return res.status(404).json({ error: 'Conteúdo não encontrado' });
         res.json(r.rows[0]);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });

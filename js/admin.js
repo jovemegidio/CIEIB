@@ -714,11 +714,15 @@ function renderConteudosTable(filterPagina) {
     const el = document.getElementById('conteudosTable');
     const items = filterPagina ? allConteudos.filter(c => c.pagina === filterPagina) : allConteudos;
     if (items.length === 0) { el.innerHTML = '<p style="text-align:center;color:#aaa;padding:40px;">Nenhum conteúdo cadastrado</p>'; return; }
-    el.innerHTML = `<table class="admin-table"><thead><tr><th>Página</th><th>Seção</th><th>Título</th><th>Ações</th></tr></thead><tbody>
+    const fmtDt = d => d ? new Date(d).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+    el.innerHTML = `<table class="admin-table"><thead><tr><th>Página</th><th>Seção</th><th>Título</th><th>Ordem</th><th>Status</th><th>Atualizado</th><th>Ações</th></tr></thead><tbody>
         ${items.map(c => `<tr>
             <td><span class="badge badge-ativo">${c.pagina}</span></td>
             <td>${c.secao}</td>
             <td>${c.titulo || '-'}</td>
+            <td style="text-align:center;">${c.ordem || 0}</td>
+            <td>${c.ativo !== false ? '<span class="badge badge-ativo">Ativo</span>' : '<span class="badge badge-inativo">Inativo</span>'}</td>
+            <td style="font-size:0.78rem;color:#888;">${fmtDt(c.updated_at)}</td>
             <td class="actions-cell">
                 <button class="btn-table-action btn-table-edit" onclick="openConteudoModal(${c.id})"><i class="fas fa-edit"></i></button>
                 <button class="btn-table-action btn-table-delete" onclick="deleteItem('conteudos', ${c.id})"><i class="fas fa-trash"></i></button>
@@ -727,18 +731,112 @@ function renderConteudosTable(filterPagina) {
     </tbody></table>`;
 }
 
+function htmlToPlainEdit(html) {
+    if (!html) return '';
+    let text = html;
+    text = text.replace(/<br\s*\/?>/gi, '\n');
+    text = text.replace(/<\/p>\s*<p[^>]*>/gi, '\n\n');
+    text = text.replace(/<\/?p[^>]*>/gi, '');
+    text = text.replace(/<strong>(.*?)<\/strong>/gi, '**$1**');
+    text = text.replace(/<em>(.*?)<\/em>/gi, '_$1_');
+    text = text.replace(/<b>(.*?)<\/b>/gi, '**$1**');
+    text = text.replace(/<i>(.*?)<\/i>/gi, '_$1_');
+    text = text.replace(/<a\s+href="([^"]+)"[^>]*>(.*?)<\/a>/gi, '[$2]($1)');
+    text = text.replace(/<ul[^>]*>/gi, '').replace(/<\/ul>/gi, '');
+    text = text.replace(/<li[^>]*>(.*?)<\/li>/gi, '• $1\n');
+    text = text.replace(/<h[1-6][^>]*>(.*?)<\/h[1-6]>/gi, '## $1\n');
+    text = text.replace(/<[^>]+>/g, '');
+    text = text.replace(/&nbsp;/gi, ' ').replace(/&amp;/gi, '&').replace(/&lt;/gi, '<').replace(/&gt;/gi, '>').replace(/&quot;/gi, '"');
+    return text.trim();
+}
+
+function plainEditToHtml(text) {
+    if (!text) return '';
+    let html = text;
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/_(.+?)_/g, '<em>$1</em>');
+    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+    html = html.replace(/^## (.+)$/gm, '<h3>$1</h3>');
+    html = html.replace(/^• (.+)$/gm, '<li>$1</li>');
+    if (html.includes('<li>')) html = html.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
+    const paragraphs = html.split(/\n{2,}/);
+    if (paragraphs.length > 1) {
+        html = paragraphs.map(p => {
+            p = p.trim();
+            if (!p) return '';
+            if (/^<(h[1-6]|ul|ol|li|div|table)/i.test(p)) return p;
+            return '<p>' + p.replace(/\n/g, '<br>') + '</p>';
+        }).join('');
+    } else {
+        html = html.replace(/\n/g, '<br>');
+    }
+    return html;
+}
+
 function openConteudoModal(id) {
     const item = id ? allConteudos.find(c => c.id === id) : null;
+    const fmtDt = d => d ? new Date(d).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+    const cleanContent = htmlToPlainEdit(item?.conteudo);
     document.getElementById('modalTitle').textContent = item ? 'Editar Conteúdo' : 'Novo Conteúdo';
     document.getElementById('modalBody').innerHTML = `
+        ${item ? `<div style="display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:110px;background:#f0f4f8;border-radius:8px;padding:12px;text-align:center;">
+                <div style="font-size:16px;font-weight:700;color:var(--admin-primary)">${item.pagina}</div>
+                <div style="font-size:11px;color:#888;margin-top:2px;">Página</div>
+            </div>
+            <div style="flex:1;min-width:110px;background:#f0f4f8;border-radius:8px;padding:12px;text-align:center;">
+                <div style="font-size:16px;font-weight:700;color:var(--admin-secondary)">${item.secao}</div>
+                <div style="font-size:11px;color:#888;margin-top:2px;">Seção</div>
+            </div>
+            <div style="flex:1;min-width:110px;background:#f0f4f8;border-radius:8px;padding:12px;text-align:center;">
+                <div style="font-size:16px;font-weight:700;color:${item.ativo !== false ? '#27ae60' : '#e74c3c'}">${item.ativo !== false ? 'Ativo' : 'Inativo'}</div>
+                <div style="font-size:11px;color:#888;margin-top:2px;">Status</div>
+            </div>
+            <div style="flex:1;min-width:110px;background:#f0f4f8;border-radius:8px;padding:12px;text-align:center;">
+                <div style="font-size:14px;font-weight:600;color:#555">${fmtDt(item.updated_at)}</div>
+                <div style="font-size:11px;color:#888;margin-top:2px;">Atualizado</div>
+            </div>
+        </div>` : ''}
         <div class="form-grid">
-            <div class="admin-form-group"><label>Página</label><input type="text" id="mCmsPagina" value="${item?.pagina || ''}" placeholder="ex: quem-somos, home"></div>
-            <div class="admin-form-group"><label>Seção</label><input type="text" id="mCmsSecao" value="${item?.secao || ''}" placeholder="ex: missao, visao, historia"></div>
+            <div class="admin-form-group"><label>Página *</label>
+                <select id="mCmsPagina">
+                    <option value="">— Selecione —</option>
+                    ${['index','quem-somos','diretoria','noticias','contato','area-do-ministro'].map(p => `<option value="${p}" ${item?.pagina === p ? 'selected' : ''}>${p}</option>`).join('')}
+                    <option value="_outro" ${item?.pagina && !['index','quem-somos','diretoria','noticias','contato','area-do-ministro'].includes(item?.pagina) ? 'selected' : ''}>Outra...</option>
+                </select>
+                <input type="text" id="mCmsPaginaCustom" value="${item?.pagina && !['index','quem-somos','diretoria','noticias','contato','area-do-ministro'].includes(item?.pagina) ? item.pagina : ''}" placeholder="Nome da página" style="margin-top:6px;${item?.pagina && !['index','quem-somos','diretoria','noticias','contato','area-do-ministro'].includes(item?.pagina) ? '' : 'display:none;'}">
+            </div>
+            <div class="admin-form-group"><label>Seção *</label><input type="text" id="mCmsSecao" value="${item?.secao || ''}" placeholder="ex: intro, missao, visao, historia"></div>
         </div>
         <div class="admin-form-group"><label>Título</label><input type="text" id="mCmsTitulo" value="${item?.titulo || ''}"></div>
-        <div class="admin-form-group"><label>Conteúdo</label><textarea id="mCmsConteudo" style="min-height:160px;">${item?.conteudo || ''}</textarea></div>
-        ${adminUploadField('mCmsImg', 'Imagem', item?.imagem_url)}
+        <div class="admin-form-group">
+            <label>Conteúdo</label>
+            <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
+                <button type="button" class="btn-mini-format" onclick="cmsInsertFormat('**','**')" title="Negrito"><i class="fas fa-bold"></i></button>
+                <button type="button" class="btn-mini-format" onclick="cmsInsertFormat('_','_')" title="Itálico"><i class="fas fa-italic"></i></button>
+                <button type="button" class="btn-mini-format" onclick="cmsInsertFormat('\\n• ','')" title="Lista"><i class="fas fa-list-ul"></i></button>
+                <button type="button" class="btn-mini-format" onclick="cmsInsertFormat('## ','')" title="Subtítulo"><i class="fas fa-heading"></i></button>
+                <button type="button" class="btn-mini-format" onclick="cmsInsertLink()" title="Link"><i class="fas fa-link"></i></button>
+                <span style="flex:1;"></span>
+                <small style="color:#999;align-self:center;">**negrito** · _itálico_ · ## subtítulo · [texto](url)</small>
+            </div>
+            <textarea id="mCmsConteudo" style="min-height:180px;font-family:monospace;font-size:0.9rem;line-height:1.5;">${cleanContent}</textarea>
+        </div>
+        <div class="form-grid">
+            <div class="admin-form-group"><label>Ordem</label><input type="number" id="mCmsOrdem" min="0" value="${item?.ordem || 0}" placeholder="0"></div>
+            <div class="admin-form-group"><label>Status</label>
+                <select id="mCmsAtivo">
+                    <option value="true" ${item?.ativo !== false ? 'selected' : ''}>Ativo</option>
+                    <option value="false" ${item?.ativo === false ? 'selected' : ''}>Inativo</option>
+                </select>
+            </div>
+        </div>
+        ${adminUploadField('mCmsImg', 'Imagem da Seção', item?.imagem_url)}
     `;
+    // Toggle custom page input
+    document.getElementById('mCmsPagina').addEventListener('change', function() {
+        document.getElementById('mCmsPaginaCustom').style.display = this.value === '_outro' ? '' : 'none';
+    });
     document.getElementById('modalFooter').innerHTML = `
         <button class="btn-admin-secondary" onclick="closeModal()">Cancelar</button>
         <button class="btn-admin-primary" onclick="saveConteudo(${id || 'null'})"><i class="fas fa-save"></i> Salvar</button>
@@ -746,13 +844,37 @@ function openConteudoModal(id) {
     openModal();
 }
 
+function cmsInsertFormat(before, after) {
+    const ta = document.getElementById('mCmsConteudo');
+    const start = ta.selectionStart, end = ta.selectionEnd;
+    const selected = ta.value.substring(start, end);
+    ta.value = ta.value.substring(0, start) + before + selected + after + ta.value.substring(end);
+    ta.focus();
+    ta.selectionStart = start + before.length;
+    ta.selectionEnd = start + before.length + selected.length;
+}
+
+function cmsInsertLink() {
+    const ta = document.getElementById('mCmsConteudo');
+    const selected = ta.value.substring(ta.selectionStart, ta.selectionEnd) || 'texto';
+    const url = prompt('URL do link:', 'https://');
+    if (url) cmsInsertFormat(`[${selected}](${url})`.replace(selected, ''), '');
+}
+
 async function saveConteudo(id) {
+    let pagina = document.getElementById('mCmsPagina').value;
+    if (pagina === '_outro') pagina = document.getElementById('mCmsPaginaCustom').value.trim();
+    const secao = document.getElementById('mCmsSecao').value.trim();
+    if (!pagina || !secao) { showToast('Página e Seção são obrigatórios', 'error'); return; }
+    const rawText = document.getElementById('mCmsConteudo').value;
     const body = {
-        pagina: document.getElementById('mCmsPagina').value,
-        secao: document.getElementById('mCmsSecao').value,
+        pagina,
+        secao,
         titulo: document.getElementById('mCmsTitulo').value,
-        conteudo: document.getElementById('mCmsConteudo').value,
+        conteudo: plainEditToHtml(rawText),
         imagem_url: document.getElementById('mCmsImg').value,
+        ordem: parseInt(document.getElementById('mCmsOrdem').value) || 0,
+        ativo: document.getElementById('mCmsAtivo').value === 'true',
     };
     try {
         if (id) await AdminAPI.put(`/conteudos/${id}`, body);

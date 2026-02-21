@@ -170,6 +170,23 @@ const API = {
     verificarCredencial(codigo) { return this.get(`/credencial/verificar/${codigo}`); },
     renovarCredencial() { return this.post('/credencial/renovar'); },
 
+    // =============== PAGAMENTOS ===============
+    solicitarBoleto(contaId) { return this.post(`/contas/${contaId}/solicitar-boleto`); },
+
+    async enviarComprovantePix(contaId, file) {
+        const formData = new FormData();
+        formData.append('comprovante', file);
+        return this.upload(`/contas/${contaId}/enviar-comprovante`, formData);
+    },
+
+    solicitarCarteirinhaFisica(dados) {
+        return this.post('/contas/solicitar-carteirinha', dados);
+    },
+
+    getCarteirinhaStatus() {
+        return this.get('/contas/carteirinha-status');
+    },
+
     // =============== NOTIFICAÇÕES ===============
     getNotificacoes() { return this.get('/notificacoes'); },
     marcarNotificacaoLida(id) { return this.put(`/notificacoes/${id}/lida`); },

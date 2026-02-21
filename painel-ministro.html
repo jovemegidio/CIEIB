@@ -451,6 +451,7 @@
                                         <th>Saldo</th>
                                         <th>Serviço</th>
                                         <th>Status</th>
+                                        <th>Pagamento</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -465,6 +466,26 @@
                         <div class="empty-state-small">
                             <i class="fas fa-check-circle"></i>
                             <span>Nenhum registro quitado encontrado.</span>
+                        </div>
+
+                        <!-- Info: Links de Pagamento -->
+                        <div class="pagamento-info-box" style="margin-top:24px;">
+                            <div class="pgto-info-header">
+                                <i class="fas fa-info-circle"></i>
+                                <h4>Formas de Pagamento</h4>
+                            </div>
+                            <div class="pgto-opcoes-grid">
+                                <div class="pgto-opcao-card">
+                                    <div class="pgto-opcao-icon pgto-boleto-icon"><i class="fas fa-barcode"></i></div>
+                                    <h5>Boleto Bancário</h5>
+                                    <p>Solicite o boleto e pague na sua agência ou aplicativo bancário.</p>
+                                </div>
+                                <div class="pgto-opcao-card">
+                                    <div class="pgto-opcao-icon pgto-pix-icon"><i class="fas fa-qrcode"></i></div>
+                                    <h5>PIX</h5>
+                                    <p>Pague via PIX e envie o comprovante para confirmação rápida.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -716,12 +737,68 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- ===== CARTEIRINHA FÍSICA ===== -->
+                            <div class="carteirinha-fisica-section">
+                                <div class="panel-card">
+                                    <div class="panel-card-header">
+                                        <div class="phc-flex">
+                                            <h3 style="color:#fff"><i class="fas fa-id-card"></i> Carteirinha Física</h3>
+                                        </div>
+                                    </div>
+                                    <div class="panel-card-body">
+                                        <div class="carteirinha-info">
+                                            <div class="carteirinha-promo">
+                                                <div class="carteirinha-promo-icon"><i class="fas fa-id-card-alt"></i></div>
+                                                <div>
+                                                    <h4>Solicite sua Carteirinha Física</h4>
+                                                    <p>Tenha sua credencial ministerial em formato físico, impressa em PVC de alta qualidade com foto, QR Code e dados de verificação.</p>
+                                                </div>
+                                            </div>
+                                            <div class="carteirinha-valor-box">
+                                                <span class="carteirinha-valor-label">Valor:</span>
+                                                <span class="carteirinha-valor">R$ 25,00</span>
+                                                <span class="carteirinha-valor-info">Inclui confecção + envio</span>
+                                            </div>
+
+                                            <!-- Status de solicitação existente -->
+                                            <div class="carteirinha-status-box" id="carteirinhaStatusBox" style="display:none;">
+                                                <div class="carteirinha-status-header">
+                                                    <i class="fas fa-clock"></i>
+                                                    <span>Solicitação em andamento</span>
+                                                </div>
+                                                <div class="carteirinha-status-detail" id="carteirinhaStatusDetail"></div>
+                                            </div>
+
+                                            <!-- Formulário -->
+                                            <div class="carteirinha-form" id="carteirinhaForm">
+                                                <h5><i class="fas fa-map-marker-alt"></i> Endereço de Entrega</h5>
+                                                <div class="carteirinha-form-grid">
+                                                    <div class="dado-group full-width">
+                                                        <label for="carteirinha-endereco">Endereço Completo *</label>
+                                                        <textarea id="carteirinha-endereco" placeholder="Rua, número, bairro, cidade, estado, CEP..." rows="3" required></textarea>
+                                                    </div>
+                                                    <div class="dado-group">
+                                                        <label for="carteirinha-telefone">Telefone para contato</label>
+                                                        <input type="tel" id="carteirinha-telefone" placeholder="(00) 00000-0000">
+                                                    </div>
+                                                    <div class="dado-group">
+                                                        <label for="carteirinha-obs">Observação</label>
+                                                        <input type="text" id="carteirinha-obs" placeholder="Ex: entregar ao porteiro">
+                                                    </div>
+                                                </div>
+                                                <button class="phb-btn phb-btn-save carteirinha-submit-btn" onclick="solicitarCarteirinhaFisica()">
+                                                    <i class="fas fa-paper-plane"></i> Solicitar e Pagar (R$ 25,00)
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- ===== ABA 7: MENSAGENS DIRETAS ===== -->
             <div class="tab-panel" id="tab-mensagens">
                 <div class="panel-card">
                     <div class="panel-card-header">
@@ -1268,6 +1345,128 @@
                     <div class="cred-actions" style="justify-content:center;">
                         <button type="button" class="cred-btn cred-btn-cancel" id="credCancelBtn4">Fechar</button>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL DE PAGAMENTO ===== -->
+    <div class="pgto-modal-overlay" id="pgtoModalOverlay">
+        <div class="pgto-modal">
+            <div class="pgto-modal-header">
+                <h3><i class="fas fa-money-bill-wave"></i> <span id="pgtoModalTitle">Pagamento</span></h3>
+                <button class="pgto-modal-close" onclick="fecharModalPagamento()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="pgto-modal-body">
+                <!-- Info da conta -->
+                <div class="pgto-conta-info" id="pgtoContaInfo">
+                    <div class="pgto-conta-row">
+                        <span class="pgto-label">Serviço:</span>
+                        <span class="pgto-value" id="pgtoServico">---</span>
+                    </div>
+                    <div class="pgto-conta-row">
+                        <span class="pgto-label">Valor:</span>
+                        <span class="pgto-value pgto-valor-destaque" id="pgtoValor">---</span>
+                    </div>
+                    <div class="pgto-conta-row">
+                        <span class="pgto-label">Vencimento:</span>
+                        <span class="pgto-value" id="pgtoVencimento">---</span>
+                    </div>
+                </div>
+
+                <!-- Escolha da forma de pagamento -->
+                <div class="pgto-escolha" id="pgtoEscolha">
+                    <h4>Escolha a forma de pagamento:</h4>
+                    <div class="pgto-opcoes">
+                        <button class="pgto-opcao-btn" onclick="escolherFormaPagamento('boleto')">
+                            <div class="pgto-opcao-icone"><i class="fas fa-barcode"></i></div>
+                            <div class="pgto-opcao-texto">
+                                <strong>Boleto Bancário</strong>
+                                <small>Gere o boleto e pague no banco ou app</small>
+                            </div>
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        <button class="pgto-opcao-btn" onclick="escolherFormaPagamento('pix')">
+                            <div class="pgto-opcao-icone pgto-pix-cor"><i class="fas fa-qrcode"></i></div>
+                            <div class="pgto-opcao-texto">
+                                <strong>PIX</strong>
+                                <small>Pague via PIX e envie o comprovante</small>
+                            </div>
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tela Boleto -->
+                <div class="pgto-boleto-step" id="pgtoBoletoStep" style="display:none;">
+                    <div class="pgto-step-header">
+                        <button class="pgto-voltar-btn" onclick="voltarEscolhaPagamento()"><i class="fas fa-arrow-left"></i> Voltar</button>
+                        <h4><i class="fas fa-barcode"></i> Pagamento por Boleto</h4>
+                    </div>
+                    <div class="pgto-boleto-content">
+                        <div class="pgto-boleto-info">
+                            <i class="fas fa-info-circle"></i>
+                            <p>Ao clicar no botão abaixo, você será redirecionado para a página de pagamento segura onde poderá gerar o boleto bancário.</p>
+                        </div>
+                        <div class="pgto-boleto-valor">
+                            <span>Mensalidade Convencional</span>
+                            <strong>R$ 18,00</strong>
+                        </div>
+                        <button class="pgto-btn-boleto" onclick="solicitarBoleto()">
+                            <i class="fas fa-external-link-alt"></i> Gerar Boleto no Asaas
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tela PIX -->
+                <div class="pgto-pix-step" id="pgtoPixStep" style="display:none;">
+                    <div class="pgto-step-header">
+                        <button class="pgto-voltar-btn" onclick="voltarEscolhaPagamento()"><i class="fas fa-arrow-left"></i> Voltar</button>
+                        <h4><i class="fas fa-qrcode"></i> Pagamento por PIX</h4>
+                    </div>
+                    <div class="pgto-pix-content">
+                        <div class="pgto-pix-instrucoes">
+                            <div class="pgto-pix-passo">
+                                <span class="pgto-passo-num">1</span>
+                                <span>Faça o PIX para a conta da CIEIB</span>
+                            </div>
+                            <div class="pgto-pix-passo">
+                                <span class="pgto-passo-num">2</span>
+                                <span>Salve o comprovante de pagamento</span>
+                            </div>
+                            <div class="pgto-pix-passo">
+                                <span class="pgto-passo-num">3</span>
+                                <span>Anexe o comprovante abaixo</span>
+                            </div>
+                        </div>
+
+                        <div class="pgto-pix-upload-area" id="pgtoPixUploadArea">
+                            <input type="file" id="pgtoPixFile" accept=".jpg,.jpeg,.png,.pdf,.webp" style="display:none;" onchange="previewComprovante(this)">
+                            <div class="pgto-pix-drop" id="pgtoPixDrop" onclick="document.getElementById('pgtoPixFile').click()">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Clique ou arraste o comprovante aqui</p>
+                                <small>JPG, PNG, PDF ou WebP (máx. 5MB)</small>
+                            </div>
+                            <div class="pgto-pix-preview" id="pgtoPixPreview" style="display:none;">
+                                <div class="pgto-pix-preview-content" id="pgtoPixPreviewContent"></div>
+                                <button class="pgto-pix-remove" onclick="removerComprovante()"><i class="fas fa-trash"></i> Remover</button>
+                            </div>
+                        </div>
+
+                        <button class="pgto-btn-pix" id="pgtoEnviarPix" onclick="enviarComprovantePix()" disabled>
+                            <i class="fas fa-paper-plane"></i> Enviar Comprovante
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tela Sucesso -->
+                <div class="pgto-sucesso-step" id="pgtoSucessoStep" style="display:none;">
+                    <div class="pgto-sucesso-icon"><i class="fas fa-check-circle"></i></div>
+                    <h4 id="pgtoSucessoTitle">Solicitação Enviada!</h4>
+                    <p id="pgtoSucessoMsg">Sua solicitação foi registrada com sucesso.</p>
+                    <button class="pgto-btn-fechar" onclick="fecharModalPagamento()">
+                        <i class="fas fa-times"></i> Fechar
+                    </button>
                 </div>
             </div>
         </div>

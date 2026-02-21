@@ -217,6 +217,15 @@ function fillHistorico(data) {
     let html = '';
 
     abertos.forEach(c => {
+        const pgtoCol = c.status === 'ABERTO' ? `
+            <td>
+                <button class="btn-pagar-conta" onclick="abrirModalPagamento(${c.id}, '${(c.servico||'').replace(/'/g,"\\'")}', ${parseFloat(c.saldo).toFixed(2)}, '${c.data_vencimento}')">
+                    <i class="fas fa-money-bill-wave"></i> Pagar
+                </button>
+                ${c.forma_pagamento === 'pix' && c.comprovante_pix_url ? '<span class="pgto-badge pgto-badge-pix"><i class="fas fa-check"></i> PIX enviado</span>' : ''}
+                ${c.boleto_solicitado ? '<span class="pgto-badge pgto-badge-boleto"><i class="fas fa-barcode"></i> Boleto solic.</span>' : ''}
+            </td>` : '<td>-</td>';
+
         html += `<tr>
             <td>${c.convencao}</td>
             <td>${c.conta}</td>
@@ -231,6 +240,7 @@ function fillHistorico(data) {
             <td class="valor-aberto">R$${parseFloat(c.saldo).toFixed(2)}</td>
             <td>${c.servico}</td>
             <td><span class="status-badge status-aberto-badge">${c.status}</span></td>
+            ${pgtoCol}
         </tr>`;
     });
 
@@ -250,7 +260,7 @@ function fillHistorico(data) {
             <td><strong>${totals.pago.toFixed(2)}</strong></td>
             <td></td>
             <td class="valor-aberto"><strong>R$${totals.saldo.toFixed(2)}</strong></td>
-            <td colspan="2"></td>
+            <td colspan="3"></td>
         </tr>`;
     }
 
@@ -938,6 +948,7 @@ function initLazyTabs() {
             }
             if (target === 'credencial' && !credencialLoaded) {
                 loadCredencial();
+                loadCarteirinhaStatus();
                 credencialLoaded = true;
             }
         });
@@ -1478,6 +1489,235 @@ function compartilharCredencial() {
         }).catch(() => {});
     } else {
         copiarLinkVerificacao();
+    }
+}
+
+// ================================================================
+//  PAGAMENTO — Modal e lógica
+// ================================================================
+let pgtoContaAtual = null;
+
+function abrirModalPagamento(contaId, servico, valor, vencimento) {
+    pgtoContaAtual = { id: contaId, servico, valor, vencimento };
+
+    document.getElementById('pgtoServico').textContent = servico || '---';
+    document.getElementById('pgtoValor').textContent = `R$ ${parseFloat(valor).toFixed(2)}`;
+    document.getElementById('pgtoVencimento').textContent = vencimento ? formatDate(vencimento) : '---';
+    document.getElementById('pgtoModalTitle').textContent = `Pagamento — ${servico}`;
+
+    // Reset state
+    document.getElementById('pgtoEscolha').style.display = '';
+    document.getElementById('pgtoBoletoStep').style.display = 'none';
+    document.getElementById('pgtoPixStep').style.display = 'none';
+    document.getElementById('pgtoSucessoStep').style.display = 'none';
+    document.getElementById('pgtoContaInfo').style.display = '';
+    removerComprovante();
+
+    document.getElementById('pgtoModalOverlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function fecharModalPagamento() {
+    document.getElementById('pgtoModalOverlay').classList.remove('active');
+    document.body.style.overflow = '';
+    pgtoContaAtual = null;
+}
+
+function escolherFormaPagamento(forma) {
+    document.getElementById('pgtoEscolha').style.display = 'none';
+
+    if (forma === 'boleto') {
+        document.getElementById('pgtoBoletoStep').style.display = '';
+    } else {
+        document.getElementById('pgtoPixStep').style.display = '';
+    }
+}
+
+function voltarEscolhaPagamento() {
+    document.getElementById('pgtoBoletoStep').style.display = 'none';
+    document.getElementById('pgtoPixStep').style.display = 'none';
+    document.getElementById('pgtoEscolha').style.display = '';
+}
+
+async function solicitarBoleto() {
+    if (!pgtoContaAtual) return;
+
+    try {
+        const result = await API.solicitarBoleto(pgtoContaAtual.id);
+
+        // Abrir link do Asaas
+        window.open('https://www.asaas.com/c/opw88e6g4dn9xckp', '_blank');
+
+        // Mostrar sucesso
+        document.getElementById('pgtoBoletoStep').style.display = 'none';
+        document.getElementById('pgtoContaInfo').style.display = 'none';
+        document.getElementById('pgtoSucessoStep').style.display = '';
+        document.getElementById('pgtoSucessoTitle').textContent = 'Boleto Solicitado!';
+        document.getElementById('pgtoSucessoMsg').textContent = 'Você foi redirecionado para a página de pagamento. Após pagar, o status será atualizado automaticamente.';
+
+        showToast('Boleto solicitado! Página de pagamento aberta.', 'success');
+
+        // Reload historico
+        reloadHistorico();
+    } catch (err) {
+        showToast(err.message || 'Erro ao solicitar boleto', 'error');
+    }
+}
+
+function previewComprovante(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const preview = document.getElementById('pgtoPixPreview');
+    const content = document.getElementById('pgtoPixPreviewContent');
+    const dropArea = document.getElementById('pgtoPixDrop');
+    const btnEnviar = document.getElementById('pgtoEnviarPix');
+
+    if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            content.innerHTML = `<img src="${e.target.result}" alt="Comprovante" style="max-width:100%;max-height:200px;border-radius:8px;">
+                <p class="pgto-pix-filename"><i class="fas fa-file-image"></i> ${file.name}</p>`;
+        };
+        reader.readAsDataURL(file);
+    } else {
+        content.innerHTML = `<div class="pgto-pix-file-icon"><i class="fas fa-file-pdf"></i></div>
+            <p class="pgto-pix-filename">${file.name}</p>`;
+    }
+
+    dropArea.style.display = 'none';
+    preview.style.display = '';
+    btnEnviar.disabled = false;
+}
+
+function removerComprovante() {
+    const input = document.getElementById('pgtoPixFile');
+    if (input) input.value = '';
+
+    document.getElementById('pgtoPixDrop').style.display = '';
+    document.getElementById('pgtoPixPreview').style.display = 'none';
+    document.getElementById('pgtoPixPreviewContent').innerHTML = '';
+    document.getElementById('pgtoEnviarPix').disabled = true;
+}
+
+async function enviarComprovantePix() {
+    if (!pgtoContaAtual) return;
+    const file = document.getElementById('pgtoPixFile').files[0];
+    if (!file) return showToast('Selecione o comprovante', 'error');
+
+    const btn = document.getElementById('pgtoEnviarPix');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+
+    try {
+        await API.enviarComprovantePix(pgtoContaAtual.id, file);
+
+        // Mostrar sucesso
+        document.getElementById('pgtoPixStep').style.display = 'none';
+        document.getElementById('pgtoContaInfo').style.display = 'none';
+        document.getElementById('pgtoSucessoStep').style.display = '';
+        document.getElementById('pgtoSucessoTitle').textContent = 'Comprovante Enviado!';
+        document.getElementById('pgtoSucessoMsg').textContent = 'Seu comprovante PIX foi recebido. A confirmação do pagamento será feita pela administração.';
+
+        showToast('Comprovante PIX enviado com sucesso!', 'success');
+
+        // Reload historico
+        reloadHistorico();
+    } catch (err) {
+        showToast(err.message || 'Erro ao enviar comprovante', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Comprovante';
+    }
+}
+
+async function reloadHistorico() {
+    try {
+        const contasData = await API.getContas().catch(() => ({ contas: [], totais: {} }));
+        fillHistorico(contasData);
+        fillContasResumo(contasData);
+    } catch (e) { /* silently fail */ }
+}
+
+// Close modal on overlay click
+document.addEventListener('click', function(e) {
+    if (e.target.id === 'pgtoModalOverlay') fecharModalPagamento();
+});
+
+// ================================================================
+//  CARTEIRINHA FÍSICA
+// ================================================================
+async function loadCarteirinhaStatus() {
+    try {
+        const data = await API.getCarteirinhaStatus();
+        const statusBox = document.getElementById('carteirinhaStatusBox');
+        const form = document.getElementById('carteirinhaForm');
+
+        if (data.tem_solicitacao) {
+            const s = data.solicitacao;
+            statusBox.style.display = '';
+
+            const statusColors = {
+                'PENDENTE': '#f59e0b',
+                'PAGO': '#3b82f6',
+                'PRODUZINDO': '#8b5cf6',
+                'ENVIADO': '#10b981',
+                'ENTREGUE': '#059669'
+            };
+
+            document.getElementById('carteirinhaStatusDetail').innerHTML = `
+                <div class="carteirinha-status-item">
+                    <span>Status:</span>
+                    <strong style="color:${statusColors[s.status] || '#6b7280'}">${s.status}</strong>
+                </div>
+                <div class="carteirinha-status-item">
+                    <span>Solicitado em:</span>
+                    <strong>${new Date(s.created_at).toLocaleDateString('pt-BR')}</strong>
+                </div>
+                <div class="carteirinha-status-item">
+                    <span>Endereço:</span>
+                    <strong>${s.endereco_entrega}</strong>
+                </div>
+                ${s.status === 'PENDENTE' ? '<p class="carteirinha-pendente-aviso"><i class="fas fa-exclamation-triangle"></i> Pagamento pendente. <a href="https://www.asaas.com/c/rgza79nqnp1os846" target="_blank">Clique aqui para pagar</a></p>' : ''}
+            `;
+
+            // Se PENDENTE, ainda mostra o form mas com aviso
+            if (s.status !== 'PENDENTE') {
+                form.style.display = 'none';
+            }
+        }
+    } catch (err) {
+        console.error('Erro ao carregar status carteirinha:', err);
+    }
+}
+
+async function solicitarCarteirinhaFisica() {
+    const endereco = document.getElementById('carteirinha-endereco')?.value?.trim();
+    const telefone = document.getElementById('carteirinha-telefone')?.value?.trim();
+    const obs = document.getElementById('carteirinha-obs')?.value?.trim();
+
+    if (!endereco) {
+        showToast('Preencha o endereço de entrega', 'error');
+        return;
+    }
+
+    if (!confirm('Confirma a solicitação da carteirinha física por R$ 25,00?\nVocê será redirecionado para a página de pagamento.')) return;
+
+    try {
+        const result = await API.solicitarCarteirinhaFisica({
+            endereco_entrega: endereco,
+            telefone: telefone || null,
+            observacao: obs || null
+        });
+
+        showToast('Solicitação registrada! Redirecionando para pagamento...', 'success');
+
+        // Abrir link de pagamento
+        window.open('https://www.asaas.com/c/rgza79nqnp1os846', '_blank');
+
+        // Reload status
+        loadCarteirinhaStatus();
+    } catch (err) {
+        showToast(err.message || 'Erro ao solicitar carteirinha', 'error');
     }
 }
 

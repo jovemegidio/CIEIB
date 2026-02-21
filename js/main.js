@@ -256,6 +256,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ===== PUSH NOTIFICATIONS BAR (site público) =====
     loadSiteNotifications();
+
+    // ===== CARREGAMENTO DINÂMICO DE CONFIGURAÇÕES =====
+    loadSiteConfig();
 });
 
 // ---- Push Notification Bar para o site público (design profissional) ----
@@ -390,5 +393,69 @@ function dismissSiteNotif(id) {
         bar.style.opacity = '0';
         bar.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease';
         setTimeout(() => bar.remove(), 400);
+    }
+}
+
+// ---- Carregamento dinâmico das configurações do site ----
+async function loadSiteConfig() {
+    try {
+        let config, redes;
+
+        // Buscar todas as configurações
+        if (typeof API !== 'undefined' && API.getConfigAll) {
+            config = await API.getConfigAll();
+        } else {
+            const res = await fetch('/api/dashboard/config-all');
+            if (res.ok) config = await res.json();
+        }
+
+        // Buscar redes sociais
+        try {
+            if (typeof API !== 'undefined' && API.getRedesSociais) {
+                redes = await API.getRedesSociais();
+            } else {
+                const res = await fetch('/api/dashboard/redes-sociais');
+                if (res.ok) redes = await res.json();
+            }
+        } catch (e) { redes = []; }
+
+        if (!config) return;
+
+        // Injetar valores em todos os elementos com data-config
+        document.querySelectorAll('[data-config]').forEach(el => {
+            const key = el.dataset.config;
+            if (config[key] !== undefined && config[key] !== null && config[key] !== '') {
+                el.innerHTML = config[key];
+            }
+        });
+
+        // Atualizar redes sociais (top-bar e footer)
+        if (redes && redes.length > 0) {
+            const socialHtml = redes.map(r => {
+                const icon = r.icone || 'fas fa-link';
+                return `<a href="${r.url}" aria-label="${r.nome}" target="_blank" rel="noopener noreferrer"><i class="${icon}"></i></a>`;
+            }).join('');
+
+            const topBarSocial = document.getElementById('topBarSocial');
+            if (topBarSocial) topBarSocial.innerHTML = socialHtml;
+
+            const footerSocial = document.getElementById('footerSocial');
+            if (footerSocial) footerSocial.innerHTML = socialHtml;
+        }
+
+        // Atualizar WhatsApp float
+        if (config.site_whatsapp) {
+            const waFloat = document.getElementById('whatsappFloat');
+            if (waFloat) waFloat.href = 'https://wa.me/' + config.site_whatsapp;
+        }
+
+        // Atualizar hero (index.html)
+        if (config.hero_titulo) {
+            const heroTitulo = document.getElementById('heroTitulo');
+            if (heroTitulo) heroTitulo.innerHTML = config.hero_titulo;
+        }
+
+    } catch (err) {
+        // Falha silenciosa — conteúdo estático do HTML permanece como fallback
     }
 }

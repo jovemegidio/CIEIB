@@ -12,6 +12,27 @@ const API = {
     _mockData: {
         '/dashboard/stats': { igrejas: 156, ministros: 1243, estados: 22, convencoes: 8 },
         '/dashboard/config': { nome_site: 'CIEIB', tema: 'default' },
+        '/dashboard/config-all': {
+            site_telefone: '(00) 0000-0000',
+            site_email: 'contato@cieib.org.br',
+            site_whatsapp: '5500000000000',
+            site_whatsapp_display: '(00) 00000-0000',
+            site_endereco: 'Rua Exemplo, 1000<br>Bairro Centro<br>CEP 00000-000<br>Cidade - UF',
+            site_horario: 'Seg a Sex: 09h às 17h',
+            site_email_atendimento: 'atendimento@cieib.org.br',
+            hero_badge: 'Fundada com propósito e fé',
+            hero_titulo: 'CONVENÇÃO DAS IGREJAS EVANGÉLICAS<br><span>INTERDENOMINACIONAL DO BRASIL</span>',
+            hero_descricao: 'Promovendo a unidade, comunhão e crescimento do Reino de Deus através da cooperação entre igrejas e ministros em todo o território nacional.',
+            footer_sobre: 'Convenção das Igrejas Evangélicas Interdenominacional do Brasil — promovendo a unidade e o crescimento do evangelho em todo o território nacional.',
+            footer_copyright: 'Copyright © CIEIB 2026. Todos os direitos reservados.',
+            stat_igrejas: '500', stat_ministros: '1200', stat_estados: '26', stat_convencoes: '50'
+        },
+        '/dashboard/redes-sociais': [
+            { nome: 'Facebook', url: 'https://facebook.com/cieib', icone: 'fab fa-facebook-f', ordem: 1 },
+            { nome: 'Instagram', url: 'https://instagram.com/cieib', icone: 'fab fa-instagram', ordem: 2 },
+            { nome: 'YouTube', url: 'https://youtube.com/cieib', icone: 'fab fa-youtube', ordem: 3 },
+            { nome: 'WhatsApp', url: 'https://wa.me/5500000000000', icone: 'fab fa-whatsapp', ordem: 4 }
+        ],
         '/dashboard/eventos-proximos': [
             { titulo: '15ª Convenção Nacional CIEIB', data_evento: '2025-09-15T09:00:00', local: 'Brasília - DF', tipo: 'Convenção', hora_inicio: '09:00', hora_fim: '18:00' },
             { titulo: 'Seminário de Liderança Pastoral', data_evento: '2025-08-20T14:00:00', local: 'São Paulo - SP', tipo: 'Seminário', hora_inicio: '14:00', hora_fim: '21:00' },
@@ -192,6 +213,9 @@ const API = {
 
     getStats() { return this.get('/dashboard/stats'); },
     getConfig() { return this.get('/dashboard/config'); },
+    getConfigAll() { return this.get('/dashboard/config-all'); },
+    getRedesSociais() { return this.get('/dashboard/redes-sociais'); },
+    getConteudos(pagina) { return this.get(`/dashboard/conteudos/${pagina}`); },
     getEventosProximos() { return this.get('/dashboard/eventos-proximos'); },
     getDiretoria() { return this.get('/dashboard/diretoria'); },
 

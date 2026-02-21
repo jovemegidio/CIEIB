@@ -22,11 +22,11 @@
         <div class="container">
             <div class="top-bar-content">
                 <div class="top-bar-left">
-                    <span><i class="fas fa-clock"></i> Seg a Sex: 09h às 17h</span>
-                    <span><i class="fas fa-phone"></i> (00) 0000-0000</span>
-                    <span><i class="fas fa-envelope"></i> contato@cieib.org.br</span>
+                    <span><i class="fas fa-clock"></i> <span data-config="site_horario">Seg a Sex: 09h às 17h</span></span>
+                    <span><i class="fas fa-phone"></i> <span data-config="site_telefone">(00) 0000-0000</span></span>
+                    <span><i class="fas fa-envelope"></i> <span data-config="site_email">contato@cieib.org.br</span></span>
                 </div>
-                <div class="top-bar-right">
+                <div class="top-bar-right" id="topBarSocial">
                     <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
                     <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
                     <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
@@ -666,8 +666,8 @@
                         <div class="logo-icon"><i class="fas fa-dove"></i></div>
                         <span>CIEIB</span>
                     </div>
-                    <p>Convenção das Igrejas Evangélicas Interdenominacional do Brasil — promovendo a unidade e o crescimento do evangelho em todo o território nacional.</p>
-                    <div class="footer-social">
+                    <p data-config="footer_sobre">Convenção das Igrejas Evangélicas Interdenominacional do Brasil — promovendo a unidade e o crescimento do evangelho em todo o território nacional.</p>
+                    <div class="footer-social" id="footerSocial">
                         <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
                         <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
                         <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
@@ -700,22 +700,22 @@
                     <ul class="footer-contact">
                         <li>
                             <i class="fas fa-map-marker-alt"></i>
-                            <span>Rua Exemplo, 1000<br>Bairro Centro<br>CEP 00000-000<br>Cidade - UF</span>
+                            <span data-config="site_endereco">Rua Exemplo, 1000<br>Bairro Centro<br>CEP 00000-000<br>Cidade - UF</span>
                         </li>
                         <li>
                             <i class="fas fa-phone"></i>
-                            <span>(00) 0000-0000</span>
+                            <span data-config="site_telefone">(00) 0000-0000</span>
                         </li>
                         <li>
                             <i class="fas fa-envelope"></i>
-                            <span>contato@cieib.org.br</span>
+                            <span data-config="site_email">contato@cieib.org.br</span>
                         </li>
                     </ul>
                 </div>
                 <div class="footer-col">
                     <h3>Atendimento</h3>
                     <div class="footer-hours">
-                        <p><i class="fas fa-clock"></i> De 2ª a 6ª feira<br>de 09h às 17h</p>
+                        <p><i class="fas fa-clock"></i> <span data-config="site_horario">Seg a Sex: 09h às 17h</span></p>
                     </div>
                     <a href="contato.html" class="btn btn-outline btn-sm">Fale Conosco</a>
                     <div class="footer-dpo">
@@ -726,7 +726,7 @@
         </div>
         <div class="footer-bottom">
             <div class="container">
-                <p>Copyright &copy; CIEIB 2026. Todos os direitos reservados.</p>
+                <p data-config="footer_copyright">Copyright &copy; CIEIB 2026. Todos os direitos reservados.</p>
             </div>
         </div>
     </footer>
@@ -734,7 +734,7 @@
     <button class="back-to-top" id="backToTop" aria-label="Voltar ao topo">
         <i class="fas fa-chevron-up"></i>
     </button>
-    <a href="https://wa.me/5500000000000" class="whatsapp-float" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp (abre em nova janela)">
+    <a href="https://wa.me/5500000000000" class="whatsapp-float" id="whatsappFloat" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp (abre em nova janela)">
         <i class="fab fa-whatsapp"></i>
     </a>
 

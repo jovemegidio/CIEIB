@@ -22,11 +22,11 @@
         <div class="container">
             <div class="top-bar-content">
                 <div class="top-bar-left">
-                    <span><i class="fas fa-clock"></i> Seg a Sex: 09h às 17h</span>
-                    <span><i class="fas fa-phone"></i> (00) 0000-0000</span>
-                    <span><i class="fas fa-envelope"></i> contato@cieib.org.br</span>
+                    <span><i class="fas fa-clock"></i> <span data-config="site_horario">Seg a Sex: 09h às 17h</span></span>
+                    <span><i class="fas fa-phone"></i> <span data-config="site_telefone">(00) 0000-0000</span></span>
+                    <span><i class="fas fa-envelope"></i> <span data-config="site_email">contato@cieib.org.br</span></span>
                 </div>
-                <div class="top-bar-right">
+                <div class="top-bar-right" id="topBarSocial">
                     <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
                     <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
                     <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
@@ -105,28 +105,28 @@
     <!-- Page Content -->
     <section class="page-content">
         <div class="container">
-            <div style="max-width: 900px; margin: 0 auto;">
+            <div style="max-width: 900px; margin: 0 auto;" id="quemSomosContent">
                 <div class="section-header" style="text-align: left;">
                     <span class="section-tag">Nossa História</span>
                     <h2>Sobre a CIEIB</h2>
                 </div>
 
-                <p>A <strong>Convenção das Igrejas Evangélicas Interdenominacional do Brasil (CIEIB)</strong> é uma entidade religiosa de âmbito nacional, constituída como pessoa jurídica de direito privado, sem fins lucrativos, que congrega igrejas evangélicas e ministros do evangelho em todo o território brasileiro.</p>
+                <div id="qsIntro"><p>A <strong>Convenção das Igrejas Evangélicas Interdenominacional do Brasil (CIEIB)</strong> é uma entidade religiosa de âmbito nacional, constituída como pessoa jurídica de direito privado, sem fins lucrativos, que congrega igrejas evangélicas e ministros do evangelho em todo o território brasileiro.</p>
 
-                <p>Fundada com o propósito de promover a unidade, comunhão e cooperação entre as igrejas e ministros filiados, a CIEIB atua como instrumento de fortalecimento e expansão do Reino de Deus, respeitando a autonomia administrativa de cada congregação.</p>
+                <p>Fundada com o propósito de promover a unidade, comunhão e cooperação entre as igrejas e ministros filiados, a CIEIB atua como instrumento de fortalecimento e expansão do Reino de Deus, respeitando a autonomia administrativa de cada congregação.</p></div>
 
-                <div style="background: var(--light); border-radius: var(--radius-lg); padding: 40px; margin: 40px 0; border-left: 5px solid var(--secondary);">
+                <div id="qsMissao" style="background: var(--light); border-radius: var(--radius-lg); padding: 40px; margin: 40px 0; border-left: 5px solid var(--secondary);">
                     <h3 style="margin-bottom: 16px;"><i class="fas fa-bullseye" style="color: var(--secondary); margin-right: 8px;"></i> Missão</h3>
                     <p style="margin-bottom: 0;">Promover a comunhão, cooperação e edificação mútua entre as igrejas e ministros filiados, fortalecendo a pregação do evangelho e a expansão do Reino de Deus em todo o Brasil e no mundo.</p>
                 </div>
 
-                <div style="background: var(--light); border-radius: var(--radius-lg); padding: 40px; margin: 40px 0; border-left: 5px solid var(--primary);">
+                <div id="qsVisao" style="background: var(--light); border-radius: var(--radius-lg); padding: 40px; margin: 40px 0; border-left: 5px solid var(--primary);">
                     <h3 style="margin-bottom: 16px;"><i class="fas fa-eye" style="color: var(--primary); margin-right: 8px;"></i> Visão</h3>
                     <p style="margin-bottom: 0;">Ser reconhecida como uma convenção referência em unidade ministerial, ética e compromisso com a Palavra de Deus, promovendo o crescimento saudável das igrejas e a formação de líderes capacitados para o ministério.</p>
                 </div>
 
                 <h3 style="margin-top: 40px;"><i class="fas fa-star" style="color: var(--secondary); margin-right: 8px;"></i> Valores</h3>
-                <div class="values-grid-inline" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                <div id="qsValores" class="values-grid-inline" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
                     <div style="background: var(--white); border: 1px solid var(--light-gray); border-radius: var(--radius); padding: 20px; display: flex; align-items: center; gap: 12px;">
                         <i class="fas fa-bible" style="color: var(--secondary); font-size: 1.3rem;"></i>
                         <div>
@@ -158,7 +158,7 @@
                 </div>
 
                 <h3 style="margin-top: 40px;"><i class="fas fa-tasks" style="color: var(--secondary); margin-right: 8px;"></i> O que fazemos</h3>
-                <ul style="margin-top: 16px; padding-left: 0;">
+                <ul id="qsAtividades" style="margin-top: 16px; padding-left: 0;">
                     <li style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; padding: 12px; background: var(--light); border-radius: var(--radius);">
                         <i class="fas fa-check-circle" style="color: var(--success); margin-top: 4px;"></i>
                         <span>Credenciamento e filiação de ministros e igrejas</span>
@@ -195,8 +195,8 @@
                         <div class="logo-icon"><i class="fas fa-dove"></i></div>
                         <span>CIEIB</span>
                     </div>
-                    <p>Convenção das Igrejas Evangélicas Interdenominacional do Brasil — promovendo a unidade e o crescimento do evangelho em todo o território nacional.</p>
-                    <div class="footer-social">
+                    <p data-config="footer_sobre">Convenção das Igrejas Evangélicas Interdenominacional do Brasil — promovendo a unidade e o crescimento do evangelho em todo o território nacional.</p>
+                    <div class="footer-social" id="footerSocial">
                         <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
                         <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
                         <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
@@ -229,22 +229,22 @@
                     <ul class="footer-contact">
                         <li>
                             <i class="fas fa-map-marker-alt"></i>
-                            <span>Rua Exemplo, 1000<br>Bairro Centro<br>CEP 00000-000<br>Cidade - UF</span>
+                            <span data-config="site_endereco">Rua Exemplo, 1000<br>Bairro Centro<br>CEP 00000-000<br>Cidade - UF</span>
                         </li>
                         <li>
                             <i class="fas fa-phone"></i>
-                            <span>(00) 0000-0000</span>
+                            <span data-config="site_telefone">(00) 0000-0000</span>
                         </li>
                         <li>
                             <i class="fas fa-envelope"></i>
-                            <span>contato@cieib.org.br</span>
+                            <span data-config="site_email">contato@cieib.org.br</span>
                         </li>
                     </ul>
                 </div>
                 <div class="footer-col">
                     <h3>Atendimento</h3>
                     <div class="footer-hours">
-                        <p><i class="fas fa-clock"></i> De 2ª a 6ª feira<br>de 09h às 17h</p>
+                        <p><i class="fas fa-clock"></i> <span data-config="site_horario">Seg a Sex: 09h às 17h</span></p>
                     </div>
                     <a href="contato.html" class="btn btn-outline btn-sm">Fale Conosco</a>
                     <div class="footer-dpo">
@@ -255,7 +255,7 @@
         </div>
         <div class="footer-bottom">
             <div class="container">
-                <p>Copyright &copy; CIEIB 2026. Todos os direitos reservados.</p>
+                <p data-config="footer_copyright">Copyright &copy; CIEIB 2026. Todos os direitos reservados.</p>
             </div>
         </div>
     </footer>
@@ -263,10 +263,70 @@
     <button class="back-to-top" id="backToTop" aria-label="Voltar ao topo">
         <i class="fas fa-chevron-up"></i>
     </button>
-    <a href="https://wa.me/5500000000000" class="whatsapp-float" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp (abre em nova janela)">
+    <a href="https://wa.me/5500000000000" class="whatsapp-float" id="whatsappFloat" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp (abre em nova janela)">
         <i class="fab fa-whatsapp"></i>
     </a>
 
+    <script src="js/api.js"></script>
     <script src="js/main.js"></script>
+    <script>
+        // Carregar conteúdos dinâmicos da página Quem Somos
+        (async function loadQuemSomos() {
+            try {
+                const conteudos = await API.getConteudos('quem-somos');
+                if (!conteudos || conteudos.length === 0) return;
+
+                conteudos.forEach(c => {
+                    switch (c.secao) {
+                        case 'intro':
+                            const introEl = document.getElementById('qsIntro');
+                            if (introEl) introEl.innerHTML = c.conteudo;
+                            break;
+                        case 'missao':
+                            const missaoEl = document.getElementById('qsMissao');
+                            if (missaoEl) missaoEl.querySelector('p').textContent = c.conteudo;
+                            break;
+                        case 'visao':
+                            const visaoEl = document.getElementById('qsVisao');
+                            if (visaoEl) visaoEl.querySelector('p').textContent = c.conteudo;
+                            break;
+                        case 'valores':
+                            try {
+                                const valores = JSON.parse(c.conteudo);
+                                const valoresEl = document.getElementById('qsValores');
+                                if (valoresEl && valores.length) {
+                                    valoresEl.innerHTML = valores.map(v => `
+                                        <div style="background: var(--white); border: 1px solid var(--light-gray); border-radius: var(--radius); padding: 20px; display: flex; align-items: center; gap: 12px;">
+                                            <i class="fas ${v.icone}" style="color: var(--secondary); font-size: 1.3rem;"></i>
+                                            <div>
+                                                <strong style="color: var(--primary-dark);">${v.titulo}</strong>
+                                                <p style="font-size: 0.85rem; margin: 0;">${v.desc}</p>
+                                            </div>
+                                        </div>
+                                    `).join('');
+                                }
+                            } catch (e) {}
+                            break;
+                        case 'atividades':
+                            try {
+                                const atividades = JSON.parse(c.conteudo);
+                                const atividadesEl = document.getElementById('qsAtividades');
+                                if (atividadesEl && atividades.length) {
+                                    atividadesEl.innerHTML = atividades.map(a => `
+                                        <li style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; padding: 12px; background: var(--light); border-radius: var(--radius);">
+                                            <i class="fas fa-check-circle" style="color: var(--success); margin-top: 4px;"></i>
+                                            <span>${a}</span>
+                                        </li>
+                                    `).join('');
+                                }
+                            } catch (e) {}
+                            break;
+                    }
+                });
+            } catch (err) {
+                console.log('Conteúdo Quem Somos carregado do HTML estático (fallback)');
+            }
+        })();
+    </script>
 </body>
 </html>

@@ -105,12 +105,19 @@ async function seed() {
             { chave: 'site_telefone', valor: '(00) 0000-0000', desc: 'Telefone principal' },
             { chave: 'site_email', valor: 'contato@cieib.org.br', desc: 'Email principal' },
             { chave: 'site_whatsapp', valor: '5500000000000', desc: 'WhatsApp' },
-            { chave: 'site_endereco', valor: 'Rua Exemplo, 1000 - Bairro Centro - CEP 00000-000 - Cidade/UF', desc: 'Endereço' },
+            { chave: 'site_endereco', valor: 'Rua Exemplo, 1000<br>Bairro Centro<br>CEP 00000-000<br>Cidade - UF', desc: 'Endereço' },
             { chave: 'site_horario', valor: 'Seg a Sex: 09h às 17h', desc: 'Horário de funcionamento' },
             { chave: 'stat_igrejas', valor: '500', desc: 'Contador: Igrejas afiliadas' },
             { chave: 'stat_ministros', valor: '1200', desc: 'Contador: Ministros credenciados' },
             { chave: 'stat_estados', valor: '26', desc: 'Contador: Estados alcançados' },
             { chave: 'stat_convencoes', valor: '50', desc: 'Contador: Convenções regionais' },
+            { chave: 'site_whatsapp_display', valor: '(00) 00000-0000', desc: 'WhatsApp para exibição' },
+            { chave: 'site_email_atendimento', valor: 'atendimento@cieib.org.br', desc: 'Email de atendimento' },
+            { chave: 'hero_badge', valor: 'Fundada com propósito e fé', desc: 'Badge do hero na home' },
+            { chave: 'hero_titulo', valor: 'CONVENÇÃO DAS IGREJAS EVANGÉLICAS<br><span>INTERDENOMINACIONAL DO BRASIL</span>', desc: 'Título do hero na home' },
+            { chave: 'hero_descricao', valor: 'Promovendo a unidade, comunhão e crescimento do Reino de Deus através da cooperação entre igrejas e ministros em todo o território nacional.', desc: 'Descrição do hero na home' },
+            { chave: 'footer_sobre', valor: 'Convenção das Igrejas Evangélicas Interdenominacional do Brasil — promovendo a unidade e o crescimento do evangelho em todo o território nacional.', desc: 'Texto sobre no footer' },
+            { chave: 'footer_copyright', valor: 'Copyright © CIEIB 2026. Todos os direitos reservados.', desc: 'Copyright no rodapé' },
         ];
 
         for (const c of configs) {
@@ -195,6 +202,34 @@ async function seed() {
                     { pergunta: 'Qual é a base da autoridade ministerial segundo a Bíblia?', opcoes: ['Poder político', 'Riqueza', 'Chamado divino e caráter', 'Popularidade'], correta: 2 },
                 ])
             ]);
+        }
+
+        // --- Conteúdos de página: Quem Somos ---
+        const conteudosQuemSomos = [
+            { pagina: 'quem-somos', secao: 'intro', titulo: 'Sobre a CIEIB', conteudo: '<p>A <strong>Convenção das Igrejas Evangélicas Interdenominacional do Brasil (CIEIB)</strong> é uma entidade religiosa de âmbito nacional, constituída como pessoa jurídica de direito privado, sem fins lucrativos, que congrega igrejas evangélicas e ministros do evangelho em todo o território brasileiro.</p><p>Fundada com o propósito de promover a unidade, comunhão e cooperação entre as igrejas e ministros filiados, a CIEIB atua como instrumento de fortalecimento e expansão do Reino de Deus, respeitando a autonomia administrativa de cada congregação.</p>', ordem: 1 },
+            { pagina: 'quem-somos', secao: 'missao', titulo: 'Missão', conteudo: 'Promover a comunhão, cooperação e edificação mútua entre as igrejas e ministros filiados, fortalecendo a pregação do evangelho e a expansão do Reino de Deus em todo o Brasil e no mundo.', ordem: 2 },
+            { pagina: 'quem-somos', secao: 'visao', titulo: 'Visão', conteudo: 'Ser reconhecida como uma convenção referência em unidade ministerial, ética e compromisso com a Palavra de Deus, promovendo o crescimento saudável das igrejas e a formação de líderes capacitados para o ministério.', ordem: 3 },
+            { pagina: 'quem-somos', secao: 'valores', titulo: 'Valores', conteudo: JSON.stringify([
+                { icone: 'fa-bible', titulo: 'Fidelidade à Palavra', desc: 'Compromisso inabalável com as Escrituras Sagradas.' },
+                { icone: 'fa-hands-helping', titulo: 'Cooperação', desc: 'Trabalho conjunto para o avanço do evangelho.' },
+                { icone: 'fa-balance-scale', titulo: 'Ética Ministerial', desc: 'Conduta íntegra e transparente em todas as ações.' },
+                { icone: 'fa-heart', titulo: 'Comunhão', desc: 'Relacionamento fraterno entre igrejas e ministros.' }
+            ]), ordem: 4 },
+            { pagina: 'quem-somos', secao: 'atividades', titulo: 'O que fazemos', conteudo: JSON.stringify([
+                'Credenciamento e filiação de ministros e igrejas',
+                'Promoção de congressos, seminários e eventos de capacitação',
+                'Mediação e apoio jurídico às igrejas filiadas',
+                'Formação teológica e ministerial',
+                'Apoio a missões nacionais e internacionais'
+            ]), ordem: 5 }
+        ];
+
+        for (const c of conteudosQuemSomos) {
+            await pool.query(`
+                INSERT INTO pagina_conteudos (pagina, secao, titulo, conteudo, ordem)
+                VALUES ($1, $2, $3, $4, $5)
+                ON CONFLICT (pagina, secao) DO UPDATE SET titulo=$3, conteudo=$4, ordem=$5
+            `, [c.pagina, c.secao, c.titulo, c.conteudo, c.ordem]);
         }
 
         // --- Notificações do site (públicas) ---

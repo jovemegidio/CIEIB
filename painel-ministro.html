@@ -35,8 +35,8 @@
                     <div class="pnav-dropdown">
                         <a href="#" class="pnav-link"><i class="fas fa-shield-alt"></i> Segurança <i class="fas fa-chevron-down" style="font-size:0.6rem;"></i></a>
                         <div class="pnav-dropdown-menu">
-                            <a href="#">Alterar Senha</a>
-                            <a href="#">Dados de Acesso</a>
+                            <a href="#" id="btnAlterarSenha"><i class="fas fa-key"></i> Alterar Senha</a>
+                            <a href="#" id="btnDadosAcesso"><i class="fas fa-user-cog"></i> Dados de Acesso</a>
                         </div>
                     </div>
                     <a href="#" class="pnav-link"><i class="fas fa-headset"></i> Suporte</a>
@@ -782,6 +782,99 @@
                         </button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL ALTERAR SENHA ==================== -->
+    <div class="sec-overlay" id="senhaOverlay">
+        <div class="sec-modal">
+            <button class="sec-close" data-close="senhaOverlay" aria-label="Fechar">&times;</button>
+            <div class="sec-header sec-header-senha">
+                <div class="sec-header-icon"><i class="fas fa-key"></i></div>
+                <div>
+                    <h3>Alterar Senha</h3>
+                    <p>Atualize sua senha de acesso ao painel</p>
+                </div>
+            </div>
+            <form class="sec-body" id="formAlterarSenha">
+                <div class="sec-field">
+                    <label for="senhaAtual"><i class="fas fa-lock"></i> Senha Atual</label>
+                    <div class="sec-input-wrap">
+                        <input type="password" id="senhaAtual" required autocomplete="current-password" placeholder="Digite sua senha atual">
+                        <button type="button" class="sec-eye" data-target="senhaAtual" aria-label="Mostrar senha"><i class="fas fa-eye"></i></button>
+                    </div>
+                </div>
+                <div class="sec-field">
+                    <label for="novaSenha"><i class="fas fa-lock-open"></i> Nova Senha</label>
+                    <div class="sec-input-wrap">
+                        <input type="password" id="novaSenha" required minlength="6" autocomplete="new-password" placeholder="Mínimo 6 caracteres">
+                        <button type="button" class="sec-eye" data-target="novaSenha" aria-label="Mostrar senha"><i class="fas fa-eye"></i></button>
+                    </div>
+                    <div class="sec-strength" id="senhaStrength">
+                        <div class="sec-strength-bar"><div class="sec-strength-fill" id="senhaStrengthFill"></div></div>
+                        <span id="senhaStrengthText">Força da senha</span>
+                    </div>
+                </div>
+                <div class="sec-field">
+                    <label for="confirmarSenha"><i class="fas fa-check-circle"></i> Confirmar Nova Senha</label>
+                    <div class="sec-input-wrap">
+                        <input type="password" id="confirmarSenha" required minlength="6" autocomplete="new-password" placeholder="Repita a nova senha">
+                        <button type="button" class="sec-eye" data-target="confirmarSenha" aria-label="Mostrar senha"><i class="fas fa-eye"></i></button>
+                    </div>
+                    <span class="sec-match-msg" id="senhaMatchMsg"></span>
+                </div>
+                <div class="sec-actions">
+                    <button type="button" class="sec-btn sec-btn-cancel" data-close="senhaOverlay">Cancelar</button>
+                    <button type="submit" class="sec-btn sec-btn-primary" id="btnSalvarSenha">
+                        <i class="fas fa-save"></i> Salvar Nova Senha
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL DADOS DE ACESSO ==================== -->
+    <div class="sec-overlay" id="acessoOverlay">
+        <div class="sec-modal">
+            <button class="sec-close" data-close="acessoOverlay" aria-label="Fechar">&times;</button>
+            <div class="sec-header sec-header-acesso">
+                <div class="sec-header-icon"><i class="fas fa-user-cog"></i></div>
+                <div>
+                    <h3>Dados de Acesso</h3>
+                    <p>Gerencie suas informações de contato e login</p>
+                </div>
+            </div>
+            <div class="sec-body">
+                <div class="sec-info-card">
+                    <div class="sec-info-label"><i class="fas fa-id-card"></i> CPF (Login)</div>
+                    <div class="sec-info-value" id="acessoCpf">---</div>
+                    <span class="sec-info-badge"><i class="fas fa-lock"></i> Não editável</span>
+                </div>
+                <form id="formDadosAcesso">
+                    <div class="sec-field">
+                        <label for="acessoEmail"><i class="fas fa-envelope"></i> E-mail</label>
+                        <input type="email" id="acessoEmail" placeholder="seu@email.com">
+                    </div>
+                    <div class="sec-field">
+                        <label for="acessoTelefone"><i class="fas fa-phone"></i> Telefone</label>
+                        <input type="tel" id="acessoTelefone" placeholder="(00) 00000-0000">
+                    </div>
+                    <div class="sec-field">
+                        <label for="acessoWhatsapp"><i class="fab fa-whatsapp"></i> WhatsApp</label>
+                        <input type="tel" id="acessoWhatsapp" placeholder="(00) 00000-0000">
+                    </div>
+                    <div class="sec-info-box">
+                        <i class="fas fa-info-circle"></i>
+                        <p>O CPF é utilizado como identificador único e não pode ser alterado. Para correções, entre em contato com a administração.</p>
+                    </div>
+                    <div class="sec-actions">
+                        <button type="button" class="sec-btn sec-btn-cancel" data-close="acessoOverlay">Cancelar</button>
+                        <button type="submit" class="sec-btn sec-btn-primary" id="btnSalvarAcesso">
+                            <i class="fas fa-save"></i> Salvar Alterações
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

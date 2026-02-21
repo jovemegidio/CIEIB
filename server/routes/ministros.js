@@ -38,6 +38,7 @@ router.get('/me', auth, async (req, res) => {
                    sexo, data_nascimento, pais_nascimento, estado_nascimento,
                    cidade_nascimento, nacionalidade, estado_civil, nome_conjuge,
                    data_nasc_conjuge, pai, mae, rg, orgao_expedidor, email,
+                   telefone, whatsapp,
                    biometria, data_registro, registro, foto_url, status
             FROM ministros WHERE id = $1
         `, [req.userId]);
@@ -100,6 +101,32 @@ router.put('/me', auth, async (req, res) => {
     } catch (err) {
         console.error('Erro ao atualizar ministro:', err);
         res.status(500).json({ error: 'Erro ao atualizar dados' });
+    }
+});
+
+// PUT /api/ministros/me/acesso — Atualizar dados de acesso (email, telefone, whatsapp)
+router.put('/me/acesso', auth, async (req, res) => {
+    try {
+        const { email, telefone, whatsapp } = req.body;
+
+        await pool.query(`
+            UPDATE ministros SET
+                email = COALESCE($1, email),
+                telefone = COALESCE($2, telefone),
+                whatsapp = COALESCE($3, whatsapp),
+                updated_at = NOW()
+            WHERE id = $4
+        `, [email || null, telefone || null, whatsapp || null, req.userId]);
+
+        await pool.query(
+            'INSERT INTO logs_acesso (ministro_id, acao, ip) VALUES ($1, $2, $3)',
+            [req.userId, 'ATUALIZAR_DADOS_ACESSO', req.ip]
+        );
+
+        res.json({ message: 'Dados de acesso atualizados com sucesso' });
+    } catch (err) {
+        console.error('Erro ao atualizar dados de acesso:', err);
+        res.status(500).json({ error: 'Erro ao atualizar dados de acesso' });
     }
 });
 

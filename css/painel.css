@@ -1890,6 +1890,386 @@
 }
 
 /* ==============================================================
+   MODAIS DE SEGURANÇA (Alterar Senha / Dados de Acesso)
+   ============================================================== */
+
+.sec-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    padding: 20px;
+}
+
+.sec-overlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.sec-modal {
+    background: #fff;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 480px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    position: relative;
+    transform: translateY(30px) scale(0.95);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.sec-overlay.open .sec-modal {
+    transform: translateY(0) scale(1);
+}
+
+.sec-close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.3rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: all 0.2s;
+    line-height: 1;
+}
+
+.sec-close:hover {
+    background: rgba(255, 255, 255, 0.35);
+    color: #fff;
+    transform: rotate(90deg);
+}
+
+/* Header */
+.sec-header {
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+    overflow: hidden;
+}
+
+.sec-header::after {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 120px;
+    height: 120px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.sec-header-senha {
+    background: linear-gradient(135deg, #1a3a5c 0%, #2c5282 50%, #3b6cb5 100%);
+}
+
+.sec-header-acesso {
+    background: linear-gradient(135deg, #065f46 0%, #059669 50%, #10b981 100%);
+}
+
+.sec-header-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1.5px solid rgba(255, 255, 255, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.sec-header-icon i {
+    font-size: 1.2rem;
+    color: #fff;
+}
+
+.sec-header h3 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #fff;
+    margin: 0;
+}
+
+.sec-header p {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.75);
+    margin: 2px 0 0;
+}
+
+/* Body */
+.sec-body {
+    padding: 24px;
+}
+
+.sec-field {
+    margin-bottom: 18px;
+}
+
+.sec-field label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 6px;
+}
+
+.sec-field label i {
+    color: var(--secondary);
+    font-size: 0.78rem;
+}
+
+.sec-input-wrap {
+    position: relative;
+}
+
+.sec-field input {
+    width: 100%;
+    padding: 11px 44px 11px 14px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-family: 'Open Sans', sans-serif;
+    color: var(--dark);
+    background: #f8fafc;
+    transition: all 0.2s;
+    box-sizing: border-box;
+}
+
+.sec-field input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(26, 58, 92, 0.1);
+}
+
+.sec-field input::placeholder {
+    color: #a0aec0;
+}
+
+.sec-eye {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #a0aec0;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 4px;
+    transition: color 0.2s;
+}
+
+.sec-eye:hover {
+    color: var(--primary);
+}
+
+/* Password strength */
+.sec-strength {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.sec-strength-bar {
+    flex: 1;
+    height: 5px;
+    border-radius: 3px;
+    background: #e2e8f0;
+    overflow: hidden;
+}
+
+.sec-strength-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+.sec-strength-fill.weak     { width: 25%; background: #ef4444; }
+.sec-strength-fill.fair     { width: 50%; background: #f59e0b; }
+.sec-strength-fill.good     { width: 75%; background: #3b82f6; }
+.sec-strength-fill.strong   { width: 100%; background: #10b981; }
+
+#senhaStrengthText {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--gray);
+    white-space: nowrap;
+}
+
+/* Match message */
+.sec-match-msg {
+    display: block;
+    font-size: 0.73rem;
+    font-weight: 600;
+    margin-top: 5px;
+    min-height: 16px;
+}
+
+.sec-match-msg.match    { color: #10b981; }
+.sec-match-msg.no-match { color: #ef4444; }
+
+/* Info card (CPF) */
+.sec-info-card {
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.sec-info-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--gray);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sec-info-label i {
+    color: var(--secondary);
+}
+
+.sec-info-value {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--dark);
+    letter-spacing: 1px;
+}
+
+.sec-info-badge {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 16px;
+    background: #fef3c7;
+    color: #92400e;
+    font-size: 0.65rem;
+    font-weight: 700;
+}
+
+/* Info box */
+.sec-info-box {
+    display: flex;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #f0f7ff;
+    border: 1px solid #d0e3f7;
+    margin-bottom: 20px;
+}
+
+.sec-info-box i {
+    color: #3b82f6;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.sec-info-box p {
+    font-size: 0.78rem;
+    color: #4b5563;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Actions */
+.sec-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    padding-top: 4px;
+}
+
+.sec-btn {
+    padding: 11px 22px;
+    border-radius: 10px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sec-btn-cancel {
+    background: #f3f4f6;
+    color: #6b7280;
+    border: 1px solid #e5e7eb;
+}
+
+.sec-btn-cancel:hover {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.sec-btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(26, 58, 92, 0.3);
+}
+
+.sec-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(26, 58, 92, 0.4);
+}
+
+.sec-btn-primary:disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    transform: none;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .sec-modal { max-width: 100%; border-radius: 12px; }
+    .sec-body { padding: 18px; }
+    .sec-actions { flex-direction: column; }
+    .sec-btn { justify-content: center; width: 100%; }
+}
+
+/* ==============================================================
    MODAL MATRÍCULA
    ============================================================== */
 

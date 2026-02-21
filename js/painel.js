@@ -1195,3 +1195,210 @@ async function marcarTodasLidas() {
         showToast('Todas as notificações marcadas como lidas', 'success');
     } catch (err) {}
 }
+
+// ================================================================
+//  SEGURANÇA — Alterar Senha / Dados de Acesso
+// ================================================================
+
+// ---- Helpers ----
+function openSecModal(id) {
+    document.getElementById(id).classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeSecModal(id) {
+    document.getElementById(id).classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+function formatPhone(v) {
+    const d = v.replace(/\D/g, '').slice(0, 11);
+    if (d.length <= 2) return `(${d}`;
+    if (d.length <= 7) return `(${d.slice(0,2)}) ${d.slice(2)}`;
+    return `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;
+}
+
+function formatCpfDisplay(cpf) {
+    const d = (cpf || '').replace(/\D/g, '');
+    if (d.length !== 11) return cpf || '---';
+    return `${d.slice(0,3)}.${d.slice(3,6)}.${d.slice(6,9)}-${d.slice(9)}`;
+}
+
+// ---- Password Strength ----
+function checkPasswordStrength(pw) {
+    let score = 0;
+    if (pw.length >= 6) score++;
+    if (pw.length >= 10) score++;
+    if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) score++;
+    if (/\d/.test(pw)) score++;
+    if (/[^a-zA-Z0-9]/.test(pw)) score++;
+
+    if (score <= 1) return { cls: 'weak', text: 'Fraca' };
+    if (score === 2) return { cls: 'fair', text: 'Razoável' };
+    if (score === 3) return { cls: 'good', text: 'Boa' };
+    return { cls: 'strong', text: 'Forte' };
+}
+
+// ---- Init Security Events ----
+document.addEventListener('DOMContentLoaded', () => {
+    // Open modals
+    document.getElementById('btnAlterarSenha')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('formAlterarSenha')?.reset();
+        document.getElementById('senhaStrengthFill').className = 'sec-strength-fill';
+        document.getElementById('senhaStrengthText').textContent = 'Força da senha';
+        document.getElementById('senhaMatchMsg').textContent = '';
+        document.getElementById('senhaMatchMsg').className = 'sec-match-msg';
+        openSecModal('senhaOverlay');
+    });
+
+    document.getElementById('btnDadosAcesso')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        loadDadosAcesso();
+        openSecModal('acessoOverlay');
+    });
+
+    // Close buttons
+    document.querySelectorAll('[data-close]').forEach(btn => {
+        btn.addEventListener('click', () => closeSecModal(btn.getAttribute('data-close')));
+    });
+
+    // Overlay click to close
+    document.querySelectorAll('.sec-overlay').forEach(ov => {
+        ov.addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeSecModal(ov.id);
+        });
+    });
+
+    // Toggle password visibility
+    document.querySelectorAll('.sec-eye').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const input = document.getElementById(btn.getAttribute('data-target'));
+            if (!input) return;
+            const isPass = input.type === 'password';
+            input.type = isPass ? 'text' : 'password';
+            btn.innerHTML = isPass ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>';
+        });
+    });
+
+    // Password strength indicator
+    document.getElementById('novaSenha')?.addEventListener('input', (e) => {
+        const val = e.target.value;
+        const fill = document.getElementById('senhaStrengthFill');
+        const text = document.getElementById('senhaStrengthText');
+        if (!val) {
+            fill.className = 'sec-strength-fill';
+            text.textContent = 'Força da senha';
+            return;
+        }
+        const s = checkPasswordStrength(val);
+        fill.className = `sec-strength-fill ${s.cls}`;
+        text.textContent = s.text;
+
+        // Also check match
+        checkSenhaMatch();
+    });
+
+    // Confirm password match
+    document.getElementById('confirmarSenha')?.addEventListener('input', checkSenhaMatch);
+
+    // Phone formatting
+    ['acessoTelefone', 'acessoWhatsapp'].forEach(id => {
+        document.getElementById(id)?.addEventListener('input', (e) => {
+            e.target.value = formatPhone(e.target.value);
+        });
+    });
+
+    // ---- Form: Alterar Senha ----
+    document.getElementById('formAlterarSenha')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const senhaAtual = document.getElementById('senhaAtual').value;
+        const novaSenha = document.getElementById('novaSenha').value;
+        const confirmar = document.getElementById('confirmarSenha').value;
+
+        if (novaSenha.length < 6) {
+            showToast('A nova senha deve ter no mínimo 6 caracteres', 'error');
+            return;
+        }
+
+        if (novaSenha !== confirmar) {
+            showToast('As senhas não coincidem', 'error');
+            return;
+        }
+
+        const btn = document.getElementById('btnSalvarSenha');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+
+        try {
+            await API.alterarSenha(senhaAtual, novaSenha);
+            showToast('Senha alterada com sucesso!', 'success');
+            closeSecModal('senhaOverlay');
+        } catch (err) {
+            showToast(err.message || 'Erro ao alterar senha', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    });
+
+    // ---- Form: Dados de Acesso ----
+    document.getElementById('formDadosAcesso')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const email = document.getElementById('acessoEmail').value.trim();
+        const telefone = document.getElementById('acessoTelefone').value.trim();
+        const whatsapp = document.getElementById('acessoWhatsapp').value.trim();
+
+        const btn = document.getElementById('btnSalvarAcesso');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+
+        try {
+            await API.atualizarDadosAcesso({ email, telefone, whatsapp });
+            showToast('Dados de acesso atualizados com sucesso!', 'success');
+            closeSecModal('acessoOverlay');
+        } catch (err) {
+            showToast(err.message || 'Erro ao atualizar dados de acesso', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    });
+});
+
+function checkSenhaMatch() {
+    const nova = document.getElementById('novaSenha')?.value || '';
+    const confirmar = document.getElementById('confirmarSenha')?.value || '';
+    const msg = document.getElementById('senhaMatchMsg');
+    if (!msg) return;
+
+    if (!confirmar) {
+        msg.textContent = '';
+        msg.className = 'sec-match-msg';
+        return;
+    }
+
+    if (nova === confirmar) {
+        msg.textContent = '✓ Senhas coincidem';
+        msg.className = 'sec-match-msg match';
+    } else {
+        msg.textContent = '✗ Senhas não coincidem';
+        msg.className = 'sec-match-msg no-match';
+    }
+}
+
+async function loadDadosAcesso() {
+    try {
+        const m = await API.getMinistro();
+        document.getElementById('acessoCpf').textContent = formatCpfDisplay(m.cpf);
+        document.getElementById('acessoEmail').value = m.email || '';
+        document.getElementById('acessoTelefone').value = m.telefone ? formatPhone(m.telefone) : '';
+        document.getElementById('acessoWhatsapp').value = m.whatsapp ? formatPhone(m.whatsapp) : '';
+    } catch (err) {
+        showToast('Erro ao carregar dados de acesso', 'error');
+    }
+}

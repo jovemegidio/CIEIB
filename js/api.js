@@ -219,9 +219,12 @@ const API = {
     getEventosProximos() { return this.get('/dashboard/eventos-proximos'); },
     getDiretoria() { return this.get('/dashboard/diretoria'); },
 
-    // =============== ALTERAR SENHA ===============
+    // =============== SEGURANÇA ===============
     alterarSenha(senhaAtual, novaSenha) {
         return this.post('/auth/change-password', { senhaAtual, novaSenha });
+    },
+    atualizarDadosAcesso(dados) {
+        return this.put('/ministros/me/acesso', dados);
     },
 
     // =============== CURSOS / FACULDADES ===============

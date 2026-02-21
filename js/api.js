@@ -197,8 +197,12 @@ const API = {
 
     // =============== MENSAGENS ===============
     getMensagens() { return this.get('/mensagens'); },
-    enviarMensagem(assunto, conteudo) { return this.post('/mensagens', { assunto, conteudo }); },
+    getMensagem(id) { return this.get(`/mensagens/${id}`); },
+    getMensagensNaoLidas() { return this.get('/mensagens/nao-lidas'); },
+    enviarMensagem(destinatario, assunto, conteudo) { return this.post('/mensagens', { destinatario, assunto, conteudo }); },
+    responderMensagem(id, conteudo) { return this.post(`/mensagens/${id}/responder`, { conteudo }); },
     marcarLida(id) { return this.put(`/mensagens/${id}/lida`); },
+    excluirMensagem(id) { return this.delete(`/mensagens/${id}`); },
 
     // =============== SITE PÚBLICO ===============
     getNoticias(page = 1, limit = 10, categoria = '') {

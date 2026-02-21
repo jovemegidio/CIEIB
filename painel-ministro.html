@@ -701,17 +701,106 @@
                         </div>
                     </div>
                     <div class="panel-card-body">
+                        <!-- Toolbar -->
                         <div class="msg-toolbar">
-                            <div class="hist-search">
-                                <input type="text" placeholder="Busca Rápida" class="busca-rapida">
-                                <button class="busca-btn"><i class="fas fa-search"></i></button>
+                            <div class="msg-filter-tabs">
+                                <button class="msg-filter-btn active" data-filter="todas"><i class="fas fa-envelope-open-text"></i> Todas</button>
+                                <button class="msg-filter-btn" data-filter="recebidas"><i class="fas fa-inbox"></i> Recebidas</button>
+                                <button class="msg-filter-btn" data-filter="enviadas"><i class="fas fa-paper-plane"></i> Enviadas</button>
                             </div>
-                            <button class="phb-btn phb-btn-save"><i class="fas fa-plus"></i> Nova Mensagem</button>
+                            <div class="msg-toolbar-right">
+                                <div class="msg-search-box">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" id="msgSearchInput" placeholder="Buscar mensagens...">
+                                </div>
+                                <button class="msg-nova-btn" id="btnNovaMensagem"><i class="fas fa-plus"></i> Nova Mensagem</button>
+                            </div>
                         </div>
-                        <div class="empty-state">
-                            <i class="fas fa-inbox"></i>
-                            <h4>Registros não encontrados</h4>
-                            <p>Não há mensagens diretas para exibir no momento.</p>
+                        <!-- Stats -->
+                        <div class="msg-stats" id="msgStats">
+                            <span class="msg-stat"><i class="fas fa-envelope"></i> <b id="msgTotal">0</b> total</span>
+                            <span class="msg-stat msg-stat-unread"><i class="fas fa-circle"></i> <b id="msgNaoLidas">0</b> não lidas</span>
+                            <span class="msg-stat"><i class="fas fa-inbox"></i> <b id="msgRecebidas">0</b> recebidas</span>
+                            <span class="msg-stat"><i class="fas fa-paper-plane"></i> <b id="msgEnviadas">0</b> enviadas</span>
+                        </div>
+                        <!-- Message list -->
+                        <div class="msg-list" id="msgList"></div>
+                        <!-- Empty state -->
+                        <div class="msg-empty" id="msgEmpty" style="display:none;">
+                            <div class="msg-empty-icon"><i class="fas fa-inbox"></i></div>
+                            <h4>Nenhuma mensagem</h4>
+                            <p>Sua caixa de mensagens está vazia.</p>
+                            <button class="msg-nova-btn" onclick="openMsgModal()"><i class="fas fa-plus"></i> Enviar primeira mensagem</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== MODAL: NOVA MENSAGEM ===== -->
+            <div class="msg-modal-overlay" id="msgModalOverlay">
+                <div class="msg-modal">
+                    <div class="msg-modal-header">
+                        <h3><i class="fas fa-pen-to-square"></i> Nova Mensagem</h3>
+                        <button class="msg-modal-close" onclick="closeMsgModal()"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="msg-modal-body">
+                        <!-- Compose step -->
+                        <div class="msg-step" id="msgStepCompose">
+                            <div class="msg-form-group">
+                                <label><i class="fas fa-building"></i> Destinatário</label>
+                                <select id="msgDestinatario">
+                                    <option value="Secretaria CIEIB">Secretaria CIEIB</option>
+                                    <option value="Departamento Financeiro">Departamento Financeiro</option>
+                                    <option value="Departamento de Educação">Departamento de Educação</option>
+                                    <option value="Presidência">Presidência</option>
+                                    <option value="Departamento Jurídico">Departamento Jurídico</option>
+                                </select>
+                            </div>
+                            <div class="msg-form-group">
+                                <label><i class="fas fa-tag"></i> Assunto</label>
+                                <input type="text" id="msgAssunto" placeholder="Digite o assunto da mensagem..." maxlength="200">
+                            </div>
+                            <div class="msg-form-group">
+                                <label><i class="fas fa-comment-dots"></i> Mensagem</label>
+                                <textarea id="msgConteudo" rows="8" placeholder="Escreva sua mensagem aqui..." maxlength="5000"></textarea>
+                                <span class="msg-char-count"><span id="msgCharCount">0</span>/5000</span>
+                            </div>
+                            <div class="msg-form-actions">
+                                <button class="msg-btn-cancel" onclick="closeMsgModal()">Cancelar</button>
+                                <button class="msg-btn-send" id="btnEnviarMsg"><i class="fas fa-paper-plane"></i> Enviar Mensagem</button>
+                            </div>
+                        </div>
+                        <!-- Success step -->
+                        <div class="msg-step" id="msgStepSuccess" style="display:none;">
+                            <div class="msg-success-icon"><i class="fas fa-check-circle"></i></div>
+                            <h3 class="msg-success-title">Mensagem Enviada!</h3>
+                            <p class="msg-success-text">Sua mensagem foi enviada com sucesso para <b id="msgSuccessDest"></b>. Você receberá uma resposta em breve.</p>
+                            <button class="msg-btn-send" onclick="closeMsgModal()"><i class="fas fa-times"></i> Fechar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== MODAL: DETALHE DA MENSAGEM ===== -->
+            <div class="msg-detail-overlay" id="msgDetailOverlay">
+                <div class="msg-detail-panel">
+                    <div class="msg-detail-header">
+                        <button class="msg-detail-back" onclick="closeMsgDetail()"><i class="fas fa-arrow-left"></i> Voltar</button>
+                        <div class="msg-detail-actions">
+                            <button class="msg-detail-action" id="btnResponderMsg" title="Responder"><i class="fas fa-reply"></i></button>
+                            <button class="msg-detail-action msg-action-delete" id="btnExcluirMsg" title="Excluir"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <div class="msg-detail-body" id="msgDetailBody">
+                        <!-- Filled by JS -->
+                    </div>
+                    <!-- Reply form (hidden by default) -->
+                    <div class="msg-reply-box" id="msgReplyBox" style="display:none;">
+                        <h4><i class="fas fa-reply"></i> Responder</h4>
+                        <textarea id="msgReplyContent" rows="4" placeholder="Escreva sua resposta..." maxlength="5000"></textarea>
+                        <div class="msg-reply-actions">
+                            <button class="msg-btn-cancel" onclick="cancelReply()">Cancelar</button>
+                            <button class="msg-btn-send" id="btnEnviarReply"><i class="fas fa-paper-plane"></i> Enviar Resposta</button>
                         </div>
                     </div>
                 </div>

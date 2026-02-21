@@ -84,11 +84,6 @@ async function loadMinistroData() {
         // Carregar notificações
         loadNotificacoes();
 
-        // Atualizar badge de notificações
-        const naoLidas = mensagens.filter(m => !m.lida).length;
-        const badge = document.querySelector('.notif-badge');
-        if (badge) badge.textContent = naoLidas;
-
     } catch (err) {
         console.error('Erro ao carregar dados:', err);
         showToast('Erro ao carregar dados do painel', 'error');
@@ -291,41 +286,388 @@ function fillEventos(inscricoes) {
     if (pagination) pagination.textContent = `[1 a ${inscricoes.length} de ${inscricoes.length}]`;
 }
 
-// ---- Preencher mensagens (aba 5) ----
+// ================================================================
+//  MENSAGENS DIRETAS — Sistema Completo
+// ================================================================
+let allMensagens = [];
+let currentMsgFilter = 'todas';
+let currentMsgSearch = '';
+let currentMsgDetail = null;
+
 function fillMensagens(mensagens) {
-    const container = document.querySelector('#tab-mensagens .panel-card-body');
-    if (!container) return;
+    allMensagens = mensagens || [];
+    renderMsgStats();
+    renderMsgList();
+    initMsgEvents();
+}
 
-    // Manter toolbar
-    const toolbar = container.querySelector('.msg-toolbar');
+function renderMsgStats() {
+    const total = allMensagens.length;
+    const naoLidas = allMensagens.filter(m => !m.lida && m.tipo === 'recebida').length;
+    const recebidas = allMensagens.filter(m => m.tipo === 'recebida').length;
+    const enviadas = allMensagens.filter(m => m.tipo === 'enviada').length;
 
-    if (mensagens.length === 0) {
-        return; // Mantém o estado vazio padrão do HTML
+    const el = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+    el('msgTotal', total);
+    el('msgNaoLidas', naoLidas);
+    el('msgRecebidas', recebidas);
+    el('msgEnviadas', enviadas);
+
+    // Update notification badge
+    const badge = document.querySelector('.notif-badge');
+    if (badge) badge.textContent = naoLidas;
+}
+
+function getFilteredMensagens() {
+    let filtered = [...allMensagens];
+    if (currentMsgFilter === 'recebidas') filtered = filtered.filter(m => m.tipo === 'recebida');
+    else if (currentMsgFilter === 'enviadas') filtered = filtered.filter(m => m.tipo === 'enviada');
+    if (currentMsgSearch) {
+        const q = currentMsgSearch.toLowerCase();
+        filtered = filtered.filter(m =>
+            (m.assunto || '').toLowerCase().includes(q) ||
+            (m.conteudo || '').toLowerCase().includes(q) ||
+            (m.remetente || '').toLowerCase().includes(q) ||
+            (m.destinatario || '').toLowerCase().includes(q)
+        );
+    }
+    return filtered;
+}
+
+function renderMsgList() {
+    const listEl = document.getElementById('msgList');
+    const emptyEl = document.getElementById('msgEmpty');
+    if (!listEl) return;
+
+    const filtered = getFilteredMensagens();
+
+    if (filtered.length === 0) {
+        listEl.innerHTML = '';
+        if (emptyEl) {
+            emptyEl.style.display = 'block';
+            if (allMensagens.length > 0 && filtered.length === 0) {
+                emptyEl.querySelector('h4').textContent = 'Nenhum resultado';
+                emptyEl.querySelector('p').textContent = 'Nenhuma mensagem corresponde ao filtro atual.';
+            } else {
+                emptyEl.querySelector('h4').textContent = 'Nenhuma mensagem';
+                emptyEl.querySelector('p').textContent = 'Sua caixa de mensagens está vazia.';
+            }
+        }
+        return;
     }
 
-    const emptyState = container.querySelector('.empty-state');
-    if (emptyState) emptyState.remove();
+    if (emptyEl) emptyEl.style.display = 'none';
 
-    const msgList = document.createElement('div');
-    msgList.className = 'msg-list';
+    listEl.innerHTML = filtered.map(m => {
+        const isEnviada = m.tipo === 'enviada';
+        const nome = isEnviada ? (m.destinatario || 'Secretaria CIEIB') : (m.remetente || 'CIEIB');
+        const inicial = nome.charAt(0).toUpperCase();
+        const avClass = isEnviada ? 'msg-av-enviada' : 'msg-av-recebida';
+        const naoLida = !m.lida && !isEnviada ? 'msg-nao-lida' : '';
+        const dataFormatada = formatDateMsg(m.data_envio);
+        const preview = (m.conteudo || '').substring(0, 120);
 
-    mensagens.forEach(m => {
-        const div = document.createElement('div');
-        div.className = `msg-item ${m.lida ? '' : 'msg-nao-lida'}`;
-        div.style.cssText = 'padding:14px;border-bottom:1px solid #eee;cursor:pointer;transition:background 0.2s;';
-        div.innerHTML = `
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-                <strong style="font-size:0.9rem;">${m.assunto}</strong>
-                <span style="font-size:0.75rem;color:#999;">${formatDate(m.data_envio)}</span>
+        let badges = '';
+        if (isEnviada) badges += '<span class="msg-badge msg-badge-enviada"><i class="fas fa-paper-plane"></i> Enviada</span>';
+        else badges += '<span class="msg-badge msg-badge-recebida"><i class="fas fa-inbox"></i> Recebida</span>';
+        if (!m.lida && !isEnviada) badges += '<span class="msg-badge msg-badge-nao-lida">Nova</span>';
+        if (m.respondida) badges += '<span class="msg-badge msg-badge-respondida"><i class="fas fa-reply"></i> Respondida</span>';
+
+        return `
+            <div class="msg-item ${naoLida}" data-msg-id="${m.id}">
+                <div class="msg-item-avatar ${avClass}">${inicial}</div>
+                <div class="msg-item-content">
+                    <div class="msg-item-top">
+                        <span class="msg-item-sender">${isEnviada ? 'Para: ' : ''}${nome}</span>
+                        <span class="msg-item-date">${dataFormatada}</span>
+                    </div>
+                    <div class="msg-item-subject">${m.assunto || '(sem assunto)'}</div>
+                    <div class="msg-item-preview">${preview}</div>
+                    <div class="msg-item-badges">${badges}</div>
+                </div>
             </div>
-            <p style="font-size:0.82rem;color:#666;margin-top:4px;">${(m.conteudo || '').substring(0, 100)}...</p>
         `;
-        div.addEventListener('mouseover', () => div.style.background = '#f9f9f9');
-        div.addEventListener('mouseout', () => div.style.background = '');
-        msgList.appendChild(div);
+    }).join('');
+
+    // Click handlers
+    listEl.querySelectorAll('.msg-item').forEach(el => {
+        el.addEventListener('click', () => {
+            const id = parseInt(el.dataset.msgId);
+            openMsgDetail(id);
+        });
+    });
+}
+
+function formatDateMsg(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now - d;
+    const diffMin = Math.floor(diffMs / 60000);
+    const diffH = Math.floor(diffMs / 3600000);
+
+    if (diffMin < 1) return 'Agora';
+    if (diffMin < 60) return `${diffMin}min atrás`;
+    if (diffH < 24) return `${diffH}h atrás`;
+
+    const isThisYear = d.getFullYear() === now.getFullYear();
+    if (isThisYear) {
+        return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+    }
+    return d.toLocaleDateString('pt-BR');
+}
+
+function formatDateTimeFull(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('pt-BR', {
+        weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+    });
+}
+
+// ---- Init messaging events ----
+let msgEventsInitialized = false;
+function initMsgEvents() {
+    if (msgEventsInitialized) return;
+    msgEventsInitialized = true;
+
+    // Filter tabs
+    document.querySelectorAll('.msg-filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.msg-filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentMsgFilter = btn.dataset.filter;
+            renderMsgList();
+        });
     });
 
-    container.appendChild(msgList);
+    // Search
+    const searchInput = document.getElementById('msgSearchInput');
+    if (searchInput) {
+        let debounce;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(debounce);
+            debounce = setTimeout(() => {
+                currentMsgSearch = searchInput.value.trim();
+                renderMsgList();
+            }, 300);
+        });
+    }
+
+    // Nova Mensagem button
+    document.getElementById('btnNovaMensagem')?.addEventListener('click', openMsgModal);
+
+    // Char counter
+    document.getElementById('msgConteudo')?.addEventListener('input', (e) => {
+        const count = document.getElementById('msgCharCount');
+        if (count) count.textContent = e.target.value.length;
+    });
+
+    // Send message
+    document.getElementById('btnEnviarMsg')?.addEventListener('click', enviarMensagemHandler);
+
+    // Reply
+    document.getElementById('btnResponderMsg')?.addEventListener('click', showReplyBox);
+    document.getElementById('btnEnviarReply')?.addEventListener('click', enviarRespostaHandler);
+
+    // Delete
+    document.getElementById('btnExcluirMsg')?.addEventListener('click', excluirMensagemHandler);
+}
+
+// ---- Compose Modal ----
+function openMsgModal() {
+    const overlay = document.getElementById('msgModalOverlay');
+    if (!overlay) return;
+    document.getElementById('msgStepCompose').style.display = 'block';
+    document.getElementById('msgStepSuccess').style.display = 'none';
+    document.getElementById('msgDestinatario').value = 'Secretaria CIEIB';
+    document.getElementById('msgAssunto').value = '';
+    document.getElementById('msgConteudo').value = '';
+    document.getElementById('msgCharCount').textContent = '0';
+    document.getElementById('btnEnviarMsg').disabled = false;
+    overlay.classList.add('active');
+}
+
+function closeMsgModal() {
+    document.getElementById('msgModalOverlay')?.classList.remove('active');
+}
+
+async function enviarMensagemHandler() {
+    const destinatario = document.getElementById('msgDestinatario').value;
+    const assunto = document.getElementById('msgAssunto').value.trim();
+    const conteudo = document.getElementById('msgConteudo').value.trim();
+
+    if (!assunto || !conteudo) {
+        showToast('Preencha o assunto e a mensagem', 'error');
+        return;
+    }
+
+    const btn = document.getElementById('btnEnviarMsg');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+
+    try {
+        const nova = await API.enviarMensagem(destinatario, assunto, conteudo);
+        allMensagens.unshift(nova);
+        renderMsgStats();
+        renderMsgList();
+
+        // Show success
+        document.getElementById('msgStepCompose').style.display = 'none';
+        document.getElementById('msgStepSuccess').style.display = 'block';
+        document.getElementById('msgSuccessDest').textContent = destinatario;
+
+        showToast('Mensagem enviada com sucesso!', 'success');
+    } catch (err) {
+        console.error('Erro ao enviar:', err);
+        showToast('Erro ao enviar mensagem', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Mensagem';
+    }
+}
+
+// ---- Detail View ----
+async function openMsgDetail(id) {
+    const overlay = document.getElementById('msgDetailOverlay');
+    const body = document.getElementById('msgDetailBody');
+    if (!overlay || !body) return;
+
+    body.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-spin" style="font-size:2rem;color:#aaa;"></i><p style="margin-top:12px;color:#aaa;">Carregando...</p></div>';
+    document.getElementById('msgReplyBox').style.display = 'none';
+    overlay.classList.add('active');
+
+    try {
+        const msg = await API.getMensagem(id);
+        currentMsgDetail = msg;
+
+        // Update local array (mark as read)
+        const idx = allMensagens.findIndex(m => m.id === id);
+        if (idx >= 0) {
+            allMensagens[idx].lida = true;
+            renderMsgStats();
+            renderMsgList();
+        }
+
+        const isEnviada = msg.tipo === 'enviada';
+        const nome = isEnviada ? (msg.destinatario || 'Secretaria CIEIB') : (msg.remetente || 'CIEIB');
+        const inicial = nome.charAt(0).toUpperCase();
+        const avBg = isEnviada ? 'background:linear-gradient(135deg,#0f9d58,#0b7d45);' : 'background:linear-gradient(135deg,var(--primary),#2a5a8c);';
+        const badgeClass = isEnviada ? 'msg-badge-enviada' : 'msg-badge-recebida';
+        const badgeText = isEnviada ? 'Enviada' : 'Recebida';
+
+        let responseHtml = '';
+        if (msg.resposta) {
+            responseHtml = `
+                <div class="msg-det-response">
+                    <h4><i class="fas fa-reply"></i> Resposta</h4>
+                    <p>${msg.resposta}</p>
+                    ${msg.respondido_em ? `<div class="msg-det-response-date">${formatDateTimeFull(msg.respondido_em)}</div>` : ''}
+                </div>
+            `;
+        }
+
+        // Check for reply thread
+        const replies = allMensagens.filter(m => m.mensagem_pai_id === msg.id);
+        let repliesHtml = '';
+        if (replies.length > 0) {
+            repliesHtml = replies.map(r => `
+                <div class="msg-det-response">
+                    <h4><i class="fas fa-reply"></i> ${r.tipo === 'enviada' ? 'Sua resposta' : 'Resposta recebida'}</h4>
+                    <p>${r.conteudo}</p>
+                    <div class="msg-det-response-date">${formatDateTimeFull(r.data_envio)}</div>
+                </div>
+            `).join('');
+        }
+
+        body.innerHTML = `
+            <h2 class="msg-det-subject">${msg.assunto || '(sem assunto)'}</h2>
+            <div class="msg-det-meta">
+                <div class="msg-det-avatar" style="${avBg}">${inicial}</div>
+                <div class="msg-det-info">
+                    <div class="msg-det-sender">${isEnviada ? 'Para: ' : 'De: '}${nome}</div>
+                    <div class="msg-det-date">${formatDateTimeFull(msg.data_envio)}</div>
+                </div>
+                <span class="msg-det-badge ${badgeClass}">${badgeText}</span>
+            </div>
+            <div class="msg-det-content">${msg.conteudo || ''}</div>
+            ${responseHtml}
+            ${repliesHtml}
+        `;
+    } catch (err) {
+        console.error('Erro ao carregar mensagem:', err);
+        body.innerHTML = '<div style="text-align:center;padding:40px;color:#e74c3c;"><i class="fas fa-exclamation-circle" style="font-size:2rem;"></i><p style="margin-top:12px;">Erro ao carregar mensagem.</p></div>';
+    }
+}
+
+function closeMsgDetail() {
+    document.getElementById('msgDetailOverlay')?.classList.remove('active');
+    currentMsgDetail = null;
+}
+
+// ---- Reply ----
+function showReplyBox() {
+    const box = document.getElementById('msgReplyBox');
+    if (!box) return;
+    box.style.display = 'block';
+    document.getElementById('msgReplyContent').value = '';
+    document.getElementById('msgReplyContent').focus();
+}
+
+function cancelReply() {
+    document.getElementById('msgReplyBox').style.display = 'none';
+}
+
+async function enviarRespostaHandler() {
+    if (!currentMsgDetail) return;
+    const conteudo = document.getElementById('msgReplyContent').value.trim();
+    if (!conteudo) {
+        showToast('Escreva uma resposta', 'error');
+        return;
+    }
+
+    const btn = document.getElementById('btnEnviarReply');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+
+    try {
+        const reply = await API.responderMensagem(currentMsgDetail.id, conteudo);
+        allMensagens.unshift(reply);
+
+        // Mark original as responded
+        const idx = allMensagens.findIndex(m => m.id === currentMsgDetail.id);
+        if (idx >= 0) allMensagens[idx].respondida = true;
+
+        renderMsgStats();
+        renderMsgList();
+
+        showToast('Resposta enviada com sucesso!', 'success');
+        closeMsgDetail();
+    } catch (err) {
+        console.error('Erro ao responder:', err);
+        showToast('Erro ao enviar resposta', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Resposta';
+    }
+}
+
+// ---- Delete ----
+async function excluirMensagemHandler() {
+    if (!currentMsgDetail) return;
+    if (!confirm('Tem certeza que deseja excluir esta mensagem?')) return;
+
+    try {
+        await API.excluirMensagem(currentMsgDetail.id);
+        allMensagens = allMensagens.filter(m => m.id !== currentMsgDetail.id);
+        renderMsgStats();
+        renderMsgList();
+        closeMsgDetail();
+        showToast('Mensagem excluída', 'success');
+    } catch (err) {
+        console.error('Erro ao excluir:', err);
+        showToast('Erro ao excluir mensagem', 'error');
+    }
 }
 
 // ---- Mobile Nav Toggle ----

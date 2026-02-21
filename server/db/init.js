@@ -120,9 +120,16 @@ CREATE TABLE IF NOT EXISTS mensagens (
     id SERIAL PRIMARY KEY,
     ministro_id INTEGER REFERENCES ministros(id) ON DELETE CASCADE,
     remetente VARCHAR(200),
+    destinatario VARCHAR(200) DEFAULT 'Secretaria CIEIB',
     assunto VARCHAR(300),
     conteudo TEXT,
+    tipo VARCHAR(20) DEFAULT 'recebida',
     lida BOOLEAN DEFAULT FALSE,
+    respondida BOOLEAN DEFAULT FALSE,
+    resposta TEXT,
+    respondido_em TIMESTAMP,
+    mensagem_pai_id INTEGER REFERENCES mensagens(id) ON DELETE SET NULL,
+    excluida BOOLEAN DEFAULT FALSE,
     data_envio TIMESTAMP DEFAULT NOW()
 );
 

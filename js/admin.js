@@ -233,6 +233,7 @@ function navigateTo(section) {
         redes: loadRedes,
         midias: loadMidias,
         notificacoes: loadNotifSite,
+        suporte: loadAdminSuporte,
     };
     if (loaders[section]) loaders[section]();
 }
@@ -3032,3 +3033,226 @@ document.addEventListener('click', (e) => {
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeModal();
 });
+
+// ================================================================
+// SUPORTE — Gestão de Chamados
+// ================================================================
+const supCatMap = {
+    duvida: '💬 Dúvida', financeiro: '💰 Financeiro', curso: '📚 Cursos',
+    credencial: '🪪 Credencial', cadastro: '📝 Cadastro', tecnico: '🔧 Técnico',
+    sugestao: '💡 Sugestão', outro: '📌 Outro'
+};
+
+const supStatusMap = {
+    aberto: { label: 'Aberto', color: '#ef4444', bg: '#fef2f2' },
+    em_andamento: { label: 'Em Andamento', color: '#f59e0b', bg: '#fffbeb' },
+    respondido: { label: 'Respondido', color: '#3b82f6', bg: '#eff6ff' },
+    fechado: { label: 'Fechado', color: '#6b7280', bg: '#f3f4f6' }
+};
+
+const supPrioMap = {
+    baixa: { label: 'Baixa', color: '#10b981' },
+    normal: { label: 'Normal', color: '#3b82f6' },
+    alta: { label: 'Alta', color: '#f59e0b' },
+    urgente: { label: 'Urgente', color: '#ef4444' }
+};
+
+async function loadAdminSuporte() {
+    try {
+        const status = document.getElementById('supFilterStatus')?.value || '';
+        const qs = status ? `?status=${status}` : '';
+
+        const [tickets, stats] = await Promise.all([
+            AdminAPI.get(`/suporte${qs}`),
+            AdminAPI.get('/suporte/stats')
+        ]);
+
+        // Stats row
+        const statsRow = document.getElementById('supStatsRow');
+        if (statsRow) {
+            statsRow.innerHTML = [
+                { label: 'Abertos', val: stats.aberto, color: '#ef4444', icon: 'exclamation-circle' },
+                { label: 'Em Andamento', val: stats.em_andamento, color: '#f59e0b', icon: 'spinner' },
+                { label: 'Respondidos', val: stats.respondido, color: '#3b82f6', icon: 'reply' },
+                { label: 'Fechados', val: stats.fechado, color: '#6b7280', icon: 'check-circle' },
+                { label: 'Total', val: stats.total, color: '#1a3a5c', icon: 'list' }
+            ].map(s => `
+                <div style="flex:1;min-width:120px;background:${s.color}10;border:1px solid ${s.color}30;border-radius:10px;padding:12px 16px;text-align:center;">
+                    <div style="font-size:1.4rem;font-weight:700;color:${s.color};">${s.val}</div>
+                    <div style="font-size:0.75rem;color:#6b7280;margin-top:2px;"><i class="fas fa-${s.icon}" style="color:${s.color};margin-right:4px;"></i>${s.label}</div>
+                </div>
+            `).join('');
+        }
+
+        // Badge
+        const badge = document.getElementById('suporteBadge');
+        if (badge) {
+            if (stats.aberto > 0) { badge.textContent = stats.aberto; badge.style.display = 'inline'; }
+            else { badge.style.display = 'none'; }
+        }
+
+        // Tickets table
+        const container = document.getElementById('supTicketsAdmin');
+        if (!tickets || tickets.length === 0) {
+            container.innerHTML = '<p style="text-align:center;color:#9ca3af;padding:40px 0;"><i class="fas fa-inbox" style="font-size:2rem;display:block;margin-bottom:10px;"></i>Nenhum chamado encontrado.</p>';
+            return;
+        }
+
+        container.innerHTML = `
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Protocolo</th>
+                        <th>Ministro</th>
+                        <th>Categoria</th>
+                        <th>Assunto</th>
+                        <th>Prioridade</th>
+                        <th>Status</th>
+                        <th>Data</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${tickets.map(t => {
+                        const st = supStatusMap[t.status] || supStatusMap.aberto;
+                        const pr = supPrioMap[t.prioridade] || supPrioMap.normal;
+                        return `<tr>
+                            <td><code style="background:#f3f4f6;padding:2px 8px;border-radius:4px;font-size:0.78rem;">${t.protocolo}</code></td>
+                            <td>
+                                <div style="font-weight:600;font-size:0.85rem;">${t.ministro_nome || 'N/A'}</div>
+                                <div style="font-size:0.72rem;color:#9ca3af;">${t.ministro_cargo || ''}</div>
+                            </td>
+                            <td style="font-size:0.82rem;">${supCatMap[t.categoria] || t.categoria}</td>
+                            <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.85rem;" title="${(t.assunto||'').replace(/"/g,'&quot;')}">${t.assunto}</td>
+                            <td><span style="color:${pr.color};font-weight:600;font-size:0.78rem;"><i class="fas fa-circle" style="font-size:0.5rem;vertical-align:middle;margin-right:3px;"></i>${pr.label}</span></td>
+                            <td><span style="background:${st.bg};color:${st.color};padding:3px 10px;border-radius:12px;font-size:0.75rem;font-weight:600;">${st.label}</span></td>
+                            <td style="font-size:0.78rem;color:#6b7280;">${new Date(t.created_at).toLocaleDateString('pt-BR')}</td>
+                            <td>
+                                <div style="display:flex;gap:4px;">
+                                    <button class="btn-icon" title="Ver detalhes" onclick="openSupTicketDetail(${t.id})"><i class="fas fa-eye"></i></button>
+                                    ${t.status !== 'fechado' ? `<button class="btn-icon" title="Responder" onclick="openSupResponder(${t.id})"><i class="fas fa-reply"></i></button>` : ''}
+                                    <button class="btn-icon btn-danger-icon" title="Excluir" onclick="deleteSupTicket(${t.id})"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>`;
+                    }).join('')}
+                </tbody>
+            </table>
+        `;
+    } catch (err) {
+        console.error('Erro ao carregar suporte:', err);
+        document.getElementById('supTicketsAdmin').innerHTML = '<p style="color:#ef4444;text-align:center;">Erro ao carregar chamados</p>';
+    }
+}
+
+async function openSupTicketDetail(id) {
+    try {
+        const tickets = await AdminAPI.get('/suporte');
+        const t = tickets.find(tk => tk.id === id);
+        if (!t) return showToast('Chamado não encontrado', 'error');
+
+        const st = supStatusMap[t.status] || supStatusMap.aberto;
+        const pr = supPrioMap[t.prioridade] || supPrioMap.normal;
+
+        openModal('Detalhes do Chamado #' + t.protocolo, `
+            <div style="display:grid;gap:14px;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                    <div><label style="font-size:0.75rem;color:#9ca3af;display:block;">Protocolo</label><strong>${t.protocolo}</strong></div>
+                    <div><label style="font-size:0.75rem;color:#9ca3af;display:block;">Status</label><span style="background:${st.bg};color:${st.color};padding:3px 10px;border-radius:12px;font-size:0.8rem;font-weight:600;">${st.label}</span></div>
+                    <div><label style="font-size:0.75rem;color:#9ca3af;display:block;">Ministro</label><strong>${t.ministro_nome || 'N/A'}</strong> <small style="color:#9ca3af;">${t.ministro_cargo || ''}</small></div>
+                    <div><label style="font-size:0.75rem;color:#9ca3af;display:block;">Prioridade</label><span style="color:${pr.color};font-weight:600;">${pr.label}</span></div>
+                    <div><label style="font-size:0.75rem;color:#9ca3af;display:block;">Categoria</label>${supCatMap[t.categoria] || t.categoria}</div>
+                    <div><label style="font-size:0.75rem;color:#9ca3af;display:block;">Data</label>${new Date(t.created_at).toLocaleString('pt-BR')}</div>
+                </div>
+                <div><label style="font-size:0.75rem;color:#9ca3af;display:block;">Assunto</label><strong>${t.assunto}</strong></div>
+                <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px;">
+                    <label style="font-size:0.75rem;color:#9ca3af;display:block;margin-bottom:6px;">Mensagem</label>
+                    <p style="margin:0;white-space:pre-wrap;font-size:0.9rem;">${t.mensagem}</p>
+                </div>
+                ${t.resposta ? `
+                    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px;">
+                        <label style="font-size:0.75rem;color:#3b82f6;display:block;margin-bottom:6px;"><i class="fas fa-reply"></i> Resposta — ${t.respondido_por || 'Admin'} (${t.respondido_em ? new Date(t.respondido_em).toLocaleString('pt-BR') : ''})</label>
+                        <p style="margin:0;white-space:pre-wrap;font-size:0.9rem;">${t.resposta}</p>
+                    </div>
+                ` : '<p style="color:#9ca3af;font-style:italic;margin:0;">Ainda sem resposta.</p>'}
+                <div style="display:flex;gap:8px;justify-content:flex-end;padding-top:8px;">
+                    <select id="supDetailStatus" style="padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:0.85rem;">
+                        <option value="aberto" ${t.status==='aberto'?'selected':''}>Aberto</option>
+                        <option value="em_andamento" ${t.status==='em_andamento'?'selected':''}>Em Andamento</option>
+                        <option value="respondido" ${t.status==='respondido'?'selected':''}>Respondido</option>
+                        <option value="fechado" ${t.status==='fechado'?'selected':''}>Fechado</option>
+                    </select>
+                    <button class="btn-admin-primary" onclick="changeSupStatus(${t.id})" style="font-size:0.85rem;padding:8px 16px;">
+                        <i class="fas fa-save"></i> Salvar Status
+                    </button>
+                </div>
+            </div>
+        `);
+    } catch (err) { showToast('Erro ao abrir chamado', 'error'); }
+}
+
+function openSupResponder(id) {
+    openModal('Responder Chamado', `
+        <div style="display:grid;gap:14px;">
+            <div>
+                <label style="font-size:0.82rem;font-weight:600;display:block;margin-bottom:6px;"><i class="fas fa-reply" style="color:#3b82f6;margin-right:5px;"></i>Sua Resposta</label>
+                <textarea id="supRespostaText" rows="5" style="width:100%;padding:12px;border:2px solid #e5e7eb;border-radius:10px;font-size:0.9rem;font-family:inherit;resize:vertical;box-sizing:border-box;" placeholder="Digite a resposta ao chamado..."></textarea>
+            </div>
+            <div>
+                <label style="font-size:0.82rem;font-weight:600;display:block;margin-bottom:6px;">Status após resposta</label>
+                <select id="supRespostaStatus" style="width:100%;padding:10px 12px;border:2px solid #e5e7eb;border-radius:10px;font-size:0.9rem;">
+                    <option value="respondido">Respondido</option>
+                    <option value="fechado">Fechado</option>
+                    <option value="em_andamento">Em Andamento</option>
+                </select>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;">
+                <button class="btn-admin-secondary" onclick="closeModal()" style="padding:10px 20px;">Cancelar</button>
+                <button class="btn-admin-primary" onclick="enviarSupResposta(${id})" style="padding:10px 20px;">
+                    <i class="fas fa-paper-plane"></i> Enviar Resposta
+                </button>
+            </div>
+        </div>
+    `);
+}
+
+async function enviarSupResposta(id) {
+    const resposta = document.getElementById('supRespostaText')?.value?.trim();
+    const status = document.getElementById('supRespostaStatus')?.value || 'respondido';
+
+    if (!resposta) return showToast('Digite uma resposta', 'error');
+
+    try {
+        await AdminAPI.put(`/suporte/${id}/responder`, { resposta, status });
+        showToast('Resposta enviada com sucesso!', 'success');
+        closeModal();
+        loadAdminSuporte();
+    } catch (err) {
+        showToast(err.message || 'Erro ao enviar resposta', 'error');
+    }
+}
+
+async function changeSupStatus(id) {
+    const status = document.getElementById('supDetailStatus')?.value;
+    if (!status) return;
+
+    try {
+        await AdminAPI.put(`/suporte/${id}/status`, { status });
+        showToast('Status atualizado!', 'success');
+        closeModal();
+        loadAdminSuporte();
+    } catch (err) {
+        showToast(err.message || 'Erro ao atualizar status', 'error');
+    }
+}
+
+async function deleteSupTicket(id) {
+    if (!confirm('Excluir este chamado permanentemente?')) return;
+    try {
+        await AdminAPI.del(`/suporte/${id}`);
+        showToast('Chamado excluído', 'success');
+        loadAdminSuporte();
+    } catch (err) {
+        showToast(err.message || 'Erro ao excluir', 'error');
+    }
+}

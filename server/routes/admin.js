@@ -985,4 +985,94 @@ router.delete('/midias/:id', adminAuth, async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// ================================================================
+// SUPORTE — Gestão de Chamados
+// ================================================================
+
+// GET /api/admin/suporte — Listar todos os chamados (com filtro de status)
+router.get('/suporte', adminAuth, async (req, res) => {
+    try {
+        const { status } = req.query;
+        let query = `
+            SELECT st.*, m.nome as ministro_nome, m.cpf as ministro_cpf, m.cargo as ministro_cargo
+            FROM suporte_tickets st
+            LEFT JOIN ministros m ON m.id = st.ministro_id
+        `;
+        const params = [];
+        if (status) {
+            query += ' WHERE st.status = $1';
+            params.push(status);
+        }
+        query += ' ORDER BY st.created_at DESC';
+        const r = await pool.query(query, params);
+        res.json(r.rows);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// GET /api/admin/suporte/stats — Contadores por status
+router.get('/suporte/stats', adminAuth, async (req, res) => {
+    try {
+        const r = await pool.query(`
+            SELECT status, COUNT(*)::int as total FROM suporte_tickets GROUP BY status
+        `);
+        const stats = { aberto: 0, em_andamento: 0, respondido: 0, fechado: 0, total: 0 };
+        r.rows.forEach(row => {
+            stats[row.status] = row.total;
+            stats.total += row.total;
+        });
+        res.json(stats);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// PUT /api/admin/suporte/:id/responder — Responder a um chamado
+router.put('/suporte/:id/responder', adminAuth, async (req, res) => {
+    try {
+        const { resposta, status } = req.body;
+        if (!resposta) return res.status(400).json({ error: 'Resposta é obrigatória' });
+
+        const admin = await pool.query('SELECT nome FROM administradores WHERE id = $1', [req.adminId]);
+        const adminNome = admin.rows[0]?.nome || 'Administrador';
+        const novoStatus = status || 'respondido';
+
+        const r = await pool.query(`
+            UPDATE suporte_tickets
+            SET resposta = $1, respondido_por = $2, respondido_em = NOW(), status = $3, updated_at = NOW()
+            WHERE id = $4 RETURNING *
+        `, [resposta, adminNome, novoStatus, req.params.id]);
+
+        if (r.rows.length === 0) return res.status(404).json({ error: 'Chamado não encontrado' });
+
+        // Notificar o ministro
+        await pool.query(
+            `INSERT INTO notificacoes (ministro_id, titulo, mensagem, tipo) VALUES ($1, $2, $3, 'info')`,
+            [r.rows[0].ministro_id, 'Resposta ao seu chamado', `Seu chamado #${r.rows[0].protocolo} foi respondido. Confira na Central de Suporte.`]
+        );
+
+        res.json(r.rows[0]);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// PUT /api/admin/suporte/:id/status — Alterar status do chamado
+router.put('/suporte/:id/status', adminAuth, async (req, res) => {
+    try {
+        const { status } = req.body;
+        if (!status) return res.status(400).json({ error: 'Status é obrigatório' });
+
+        const r = await pool.query(
+            'UPDATE suporte_tickets SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
+            [status, req.params.id]
+        );
+        if (r.rows.length === 0) return res.status(404).json({ error: 'Chamado não encontrado' });
+        res.json(r.rows[0]);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// DELETE /api/admin/suporte/:id — Excluir chamado
+router.delete('/suporte/:id', adminAuth, async (req, res) => {
+    try {
+        await pool.query('DELETE FROM suporte_tickets WHERE id = $1', [req.params.id]);
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 module.exports = router;

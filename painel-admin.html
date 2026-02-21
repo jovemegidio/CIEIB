@@ -85,6 +85,10 @@
                     <i class="fas fa-envelope"></i><span>Contatos</span>
                     <span class="sidebar-badge" id="contatosBadge" style="display:none;">0</span>
                 </a>
+                <a href="#" class="sidebar-link" data-section="suporte">
+                    <i class="fas fa-headset"></i><span>Suporte</span>
+                    <span class="sidebar-badge" id="suporteBadge" style="display:none;">0</span>
+                </a>
                 <div class="sidebar-section-title">Configurações</div>
                 <a href="#" class="sidebar-link" data-section="configuracoes">
                     <i class="fas fa-cog"></i><span>Config. do Site</span>
@@ -342,6 +346,28 @@
                 <div class="admin-card">
                     <div class="admin-card-body">
                         <div class="admin-table-responsive" id="notifSiteTable"><p class="loading-text">Carregando...</p></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== SUPORTE ===== -->
+            <section class="admin-section" id="sec-suporte">
+                <div class="section-topbar">
+                    <h2><i class="fas fa-headset"></i> Central de Suporte</h2>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <select id="supFilterStatus" class="admin-select" style="padding:8px 12px;border-radius:8px;border:1px solid #ddd;font-size:0.85rem;" onchange="loadAdminSuporte()">
+                            <option value="">Todos os Status</option>
+                            <option value="aberto">Abertos</option>
+                            <option value="em_andamento">Em Andamento</option>
+                            <option value="respondido">Respondidos</option>
+                            <option value="fechado">Fechados</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="admin-stats-row" id="supStatsRow" style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;"></div>
+                <div class="admin-card">
+                    <div class="admin-card-body">
+                        <div id="supTicketsAdmin"><p class="loading-text">Carregando chamados...</p></div>
                     </div>
                 </div>
             </section>

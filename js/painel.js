@@ -2212,7 +2212,7 @@ function resetSupForm() {
             </div>
             <div class="sup-field">
                 <label for="supMensagem"><i class="fas fa-comment-dots"></i> Mensagem</label>
-                <textarea id="supMensagem" rows="5" placeholder="Descreva detalhadamente sua dúvida ou solicitação..." required maxlength="2000"></textarea>
+                <textarea id="supMensagem" rows="4" placeholder="Descreva detalhadamente sua dúvida ou solicitação..." required maxlength="2000"></textarea>
                 <span class="sup-char-count"><span id="supCharCount">0</span>/2000</span>
             </div>
             <div class="sup-field">

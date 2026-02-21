@@ -489,6 +489,56 @@ router.post('/ministros/:id/upload-boleto', adminAuth, upload.single('arquivo'),
     } catch (err) { res.status(500).json({ error: 'Erro ao fazer upload' }); }
 });
 
+// Upload de documento de membro (admin)
+router.post('/ministros/:id/documentos', adminAuth, upload.single('file'), async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ error: 'Nenhum arquivo enviado' });
+        const url = `/uploads/${req.file.filename}`;
+        const tipo = req.body.tipo || 'outro';
+        const mid = req.params.id;
+
+        // Check if ministro_documentos row exists
+        const existing = await pool.query('SELECT id FROM ministro_documentos WHERE ministro_id = $1', [mid]);
+
+        // Map tipo to column name (document fields stored as URLs)
+        const validColumns = {
+            documento_identidade: 'documento_identidade_url',
+            cpf_documento: 'cpf_documento_url',
+            comprovante_endereco: 'comprovante_endereco_url',
+            credencial_eclesiastica: 'credencial_eclesiastica_url',
+            foto_3x4: 'foto_3x4_url',
+            certidao_casamento: 'certidao_casamento_url',
+            diploma_teologia: 'diploma_teologia_url',
+            carta_recomendacao: 'carta_recomendacao_url',
+        };
+
+        if (existing.rows.length > 0) {
+            const col = validColumns[tipo];
+            if (col) {
+                await pool.query(`UPDATE ministro_documentos SET ${col} = $1, updated_at = NOW() WHERE ministro_id = $2`, [url, mid]);
+            }
+        } else {
+            const col = validColumns[tipo];
+            if (col) {
+                await pool.query(`INSERT INTO ministro_documentos (ministro_id, ${col}) VALUES ($1, $2)`, [mid, url]);
+            } else {
+                await pool.query('INSERT INTO ministro_documentos (ministro_id, observacoes) VALUES ($1, $2)', [mid, `${tipo}: ${url}`]);
+            }
+        }
+
+        // Log
+        await pool.query(
+            'INSERT INTO ministro_historico (ministro_id, acao, descricao, admin_nome) VALUES ($1, $2, $3, $4)',
+            [mid, 'DOCUMENTO UPLOAD', `Documento "${tipo}" enviado pelo admin`, 'Administrador']
+        );
+
+        res.json({ url, tipo, filename: req.file.filename });
+    } catch (err) {
+        console.error('Erro upload doc:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // ================================================================
 // CREDENCIAIS DIGITAIS
 // ================================================================

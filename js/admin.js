@@ -911,7 +911,7 @@ async function loadMembrosStats() {
 function renderMinistrosTable(data) {
     const el = document.getElementById('ministrosTable');
     if (!data.ministros || data.ministros.length === 0) {
-        el.innerHTML = '<p style="text-align:center;color:#aaa;padding:40px;">Nenhum membro encontrado</p>';
+        el.innerHTML = '<div style="text-align:center;padding:60px 20px;"><i class="fas fa-users" style="font-size:2.5rem;color:#ddd;display:block;margin-bottom:12px;"></i><p style="color:#aaa;font-size:0.88rem;">Nenhum membro encontrado</p><p style="color:#ccc;font-size:0.75rem;margin-top:4px;">Tente ajustar os filtros de busca</p></div>';
         return;
     }
 
@@ -925,33 +925,30 @@ function renderMinistrosTable(data) {
         return `<span class="badge ${map[s] || 'badge-inativo'}">${s || 'N/A'}</span>`;
     };
 
-    const anuidadeBadge = (s) => {
-        const map = { paga: 'badge-paga', pendente: 'badge-pendente', vencida: 'badge-vencida' };
-        return `<span class="badge ${map[s] || 'badge-pendente'}">${(s || 'pendente').charAt(0).toUpperCase() + (s || 'pendente').slice(1)}</span>`;
-    };
+    // Count active filters
+    const activeFilters = [
+        document.getElementById('filtroStatus')?.value,
+        document.getElementById('filtroAnuidade')?.value,
+        document.getElementById('filtroCredencial')?.value
+    ].filter(Boolean).length;
+    const searchVal = document.getElementById('ministrosSearch')?.value || '';
+    const totalInfo = `<div class="membros-table-info"><span><i class="fas fa-users"></i> ${data.total || data.ministros.length} membro(s) encontrado(s)</span>${activeFilters > 0 || searchVal ? `<span class="mti-filters"><i class="fas fa-filter"></i> ${activeFilters} filtro(s) ${searchVal ? '+ busca' : ''}</span>` : ''}</div>`;
 
-    const credBadge = (s) => {
-        const map = { ativa: 'badge-ativa', pendente: 'badge-pendente', vencida: 'badge-vencida' };
-        return `<span class="badge ${map[s] || 'badge-pendente'}">${(s || 'pendente').charAt(0).toUpperCase() + (s || 'pendente').slice(1)}</span>`;
-    };
-
-    el.innerHTML = `<table class="admin-table"><thead><tr>
-        <th style="width:48px;"></th><th>Nome</th><th>CPF</th><th>Cargo</th><th>Cidade/UF</th>
-        <th>Status</th><th>Anuidade</th><th>Credencial</th><th>Ações</th>
+    el.innerHTML = totalInfo + `<table class="admin-table"><thead><tr>
+        <th style="width:48px;"></th><th>Nome</th><th>CPF</th><th>Cargo</th><th>Registro</th>
+        <th>Status</th><th>Ações</th>
     </tr></thead><tbody>
-        ${data.ministros.map(m => `<tr class="membro-row" onclick="openMembroDetail(${m.id})" style="cursor:pointer;">
+        ${data.ministros.map(m => `<tr class="membro-row" ondblclick="openMembroDetail(${m.id})" title="Duplo clique para abrir detalhes">
             <td>
-                <div class="membros-avatar" style="width:34px;height:34px;font-size:0.72rem;">
+                <div class="membros-avatar" style="width:36px;height:36px;font-size:0.72rem;">
                     ${m.foto_url ? `<img src="${m.foto_url}" alt="">` : getInitials(m.nome)}
                 </div>
             </td>
-            <td><strong style="font-size:0.82rem;">${m.nome}</strong><br><span style="font-size:0.68rem;color:#999;">${m.registro || 'Sem registro'}</span></td>
-            <td style="font-size:0.8rem;">${m.cpf || '-'}</td>
-            <td style="font-size:0.8rem;">${m.cargo || '-'}</td>
-            <td style="font-size:0.8rem;">${m.cidade && m.uf ? `${m.cidade}/${m.uf}` : '-'}</td>
+            <td><strong style="font-size:0.83rem;">${m.nome}</strong></td>
+            <td style="font-size:0.8rem;font-family:monospace;">${m.cpf || '-'}</td>
+            <td style="font-size:0.8rem;">${formatCargo(m.cargo)}</td>
+            <td style="font-size:0.78rem;color:#999;">${m.registro || '—'}</td>
             <td>${statusBadge(m.status)}</td>
-            <td>${anuidadeBadge(m.anuidade_status)}</td>
-            <td>${credBadge(m.credencial_status)}</td>
             <td class="actions-cell" onclick="event.stopPropagation()">
                 <button class="btn-table-action btn-table-view" onclick="openMembroDetail(${m.id})" title="Ver detalhes"><i class="fas fa-eye"></i></button>
                 <button class="btn-table-action btn-table-edit" onclick="toggleMinistroStatus(${m.id}, '${m.status}')" title="${m.status === 'ATIVO' ? 'Desativar' : 'Ativar'}">
@@ -969,6 +966,16 @@ function renderMinistrosTable(data) {
             .map(p => `<button class="${p === data.page ? 'active' : ''}" onclick="loadAdminMinistros(${p})">${p}</button>`)
             .join('');
     } else { pagEl.innerHTML = ''; }
+}
+
+function formatCargo(cargo) {
+    if (!cargo) return '-';
+    const map = {
+        'PASTOR': 'Pastor(a)', 'MISSIONÁRIO': 'Missionário(a)', 'EVANGELISTA': 'Evangelista',
+        'PRESBÍTERO': 'Presbítero(a)', 'DIÁCONO': 'Diácono/Diaconisa', 'COOPERADOR': 'Cooperador(a)',
+        'OBREIRO': 'Obreiro(a)'
+    };
+    return map[cargo] || cargo.charAt(0) + cargo.slice(1).toLowerCase();
 }
 
 async function toggleMinistroStatus(id, currentStatus) {
@@ -1022,7 +1029,7 @@ async function exportarRelatorio(formato) {
 }
 
 // ================================================================
-// DETALHE DO MEMBRO — Painel lateral
+// DETALHE DO MEMBRO — Modal centralizado completo
 // ================================================================
 async function openMembroDetail(id) {
     try {
@@ -1035,6 +1042,19 @@ async function openMembroDetail(id) {
             return parts.length > 1 ? parts[0][0] + parts[parts.length - 1][0] : (parts[0] || 'M')[0];
         };
 
+        // Header subtitle
+        document.getElementById('mdpSubtitle').textContent = `${m.cargo || 'Sem cargo'} — ${m.registro || 'Sem registro'}`;
+
+        // WhatsApp button
+        const wppBtn = document.getElementById('mdpBtnWhatsapp');
+        const wppNum = (m.whatsapp || m.telefone || '').replace(/\D/g, '');
+        if (wppNum) {
+            wppBtn.style.display = '';
+            wppBtn.onclick = () => window.open(`https://wa.me/55${wppNum}`, '_blank');
+        } else {
+            wppBtn.style.display = 'none';
+        }
+
         document.getElementById('mdpProfileArea').innerHTML = `
             <div class="mdp-profile">
                 <div class="mdp-profile-avatar">
@@ -1042,22 +1062,27 @@ async function openMembroDetail(id) {
                 </div>
                 <div class="mdp-profile-info">
                     <h4>${m.nome}</h4>
-                    <p>${m.cargo || 'Sem cargo'} — ${m.nome_igreja || 'Sem igreja'}</p>
+                    <p>${formatCargo(m.cargo)} — ${m.nome_igreja || 'Sem igreja vinculada'}</p>
                     <p>CPF: ${m.cpf} ${m.registro ? `| Registro: ${m.registro}` : ''}</p>
                     <div class="mdp-profile-badges">
                         <span class="badge ${m.status === 'ATIVO' ? 'badge-ativo' : m.status === 'PENDENTE' ? 'badge-pendente' : 'badge-inativo'}">${m.status}</span>
-                        <span class="badge ${m.anuidade_status === 'paga' ? 'badge-paga' : 'badge-pendente'}">Anuid. ${(m.anuidade_status || 'pendente')}</span>
-                        <span class="badge ${m.credencial_status === 'ativa' ? 'badge-ativa' : 'badge-pendente'}">Cred. ${(m.credencial_status || 'pendente')}</span>
+                        <span class="badge ${m.anuidade_status === 'paga' ? 'badge-paga' : m.anuidade_status === 'vencida' ? 'badge-vencida' : 'badge-pendente'}">Anuid. ${(m.anuidade_status || 'pendente')}</span>
+                        <span class="badge ${m.credencial_status === 'ativa' ? 'badge-ativa' : m.credencial_status === 'vencida' ? 'badge-vencida' : 'badge-pendente'}">Cred. ${(m.credencial_status || 'pendente')}</span>
                     </div>
+                </div>
+                <div class="mdp-profile-quick-actions">
+                    <button class="mdp-quick-btn" onclick="openBoletoModal(${m.id})"><i class="fas fa-plus-circle"></i> Novo Boleto</button>
+                    <button class="mdp-quick-btn" onclick="openCredencialModal(${m.id})"><i class="fas fa-id-badge"></i> Nova Credencial</button>
                 </div>
             </div>
         `;
 
-        // Render first tab
+        // Reset tabs and render first
         switchMdpTab('dados');
 
-        // Show panel
+        // Show modal
         document.getElementById('membroDetailOverlay').classList.add('active');
+        document.body.style.overflow = 'hidden';
     } catch (err) {
         showToast('Erro ao carregar detalhes do membro', 'error');
     }
@@ -1065,6 +1090,7 @@ async function openMembroDetail(id) {
 
 function closeMembroDetail() {
     document.getElementById('membroDetailOverlay').classList.remove('active');
+    document.body.style.overflow = '';
     currentMembro = null;
 }
 
@@ -1109,11 +1135,11 @@ function switchMdpTab(tab) {
                     <div class="mdp-info-item"><label>Bairro</label><span>${m.endereco.bairro || '—'}</span></div>
                     <div class="mdp-info-item"><label>Cidade/UF</label><span>${m.endereco.cidade || '—'}/${m.endereco.uf || '—'}</span></div>
                 </div>
-            ` : '<p style="color:#aaa;font-size:0.82rem;">Endereço não cadastrado</p>'}
+            ` : '<p style="color:#aaa;font-size:0.82rem;padding:8px;">Endereço não cadastrado</p>'}
 
             <div class="mdp-section-title"><i class="fas fa-church"></i> Dados Ministeriais</div>
             <div class="mdp-info-grid">
-                <div class="mdp-info-item"><label>Cargo</label><span>${m.cargo || '—'}</span></div>
+                <div class="mdp-info-item"><label>Cargo</label><span>${formatCargo(m.cargo)}</span></div>
                 <div class="mdp-info-item"><label>Função Ministerial</label><span>${m.funcao_ministerial || '—'}</span></div>
                 <div class="mdp-info-item"><label>Igreja</label><span>${m.nome_igreja || '—'}</span></div>
                 <div class="mdp-info-item"><label>Tempo de Ministério</label><span>${m.tempo_ministerio || '—'}</span></div>
@@ -1138,11 +1164,57 @@ function switchMdpTab(tab) {
                     </div>
                 `).join('')}
             ` : ''}
+        `;
+    }
 
-            ${m.observacoes_admin ? `
-                <div class="mdp-section-title"><i class="fas fa-sticky-note"></i> Observações do Admin</div>
-                <p style="font-size:0.82rem;color:#555;background:#f8f9fc;padding:12px;border-radius:8px;">${m.observacoes_admin}</p>
-            ` : ''}
+    else if (tab === 'documentos') {
+        const docs = m.documentos || {};
+        const docTypes = [
+            { key: 'documento_identidade', label: 'RG / Identidade', icon: 'fa-id-card' },
+            { key: 'cpf_documento', label: 'CPF', icon: 'fa-file-alt' },
+            { key: 'comprovante_endereco', label: 'Comprovante de Residência', icon: 'fa-home' },
+            { key: 'credencial_eclesiastica', label: 'Credencial Eclesiástica', icon: 'fa-certificate' },
+            { key: 'foto_3x4', label: 'Foto 3x4', icon: 'fa-camera' },
+            { key: 'certidao_casamento', label: 'Certidão de Casamento', icon: 'fa-ring' },
+            { key: 'diploma_teologia', label: 'Diploma de Teologia', icon: 'fa-graduation-cap' },
+            { key: 'carta_recomendacao', label: 'Carta de Recomendação', icon: 'fa-envelope-open-text' },
+        ];
+
+        content.innerHTML = `
+            <div class="mdp-section-title"><i class="fas fa-folder-open"></i> Documentos do Membro</div>
+            <p style="font-size:0.78rem;color:var(--admin-gray);margin-bottom:16px;">Documentos enviados pelo ministro durante o cadastro. Você pode visualizar e fazer upload de novos documentos.</p>
+            <div class="mdp-docs-grid">
+                ${docTypes.map(dt => {
+                    const url = docs[dt.key] || null;
+                    const hasFile = !!url;
+                    return `
+                        <div class="mdp-doc-card ${hasFile ? 'has-file' : 'no-file'}">
+                            <div class="mdp-doc-icon"><i class="fas ${dt.icon}"></i></div>
+                            <h5>${dt.label}</h5>
+                            <p>${hasFile ? '✓ Arquivo enviado' : 'Não enviado'}</p>
+                            <div class="mdp-doc-actions">
+                                ${hasFile ? `<a href="${url}" target="_blank" class="mdp-btn-view" style="color:#1565c0;background:#e3f2fd;"><i class="fas fa-eye"></i> Ver</a>` : ''}
+                                <button class="mdp-btn-edit" style="background:#fff3e0;color:#e65100;" onclick="uploadDocumentoMembro(${m.id}, '${dt.key}', '${dt.label}')"><i class="fas fa-upload"></i> ${hasFile ? 'Trocar' : 'Enviar'}</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+
+            <div class="mdp-section-title" style="margin-top:28px;"><i class="fas fa-upload"></i> Upload Rápido de Documento</div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+                <div style="flex:1;min-width:200px;">
+                    <label style="display:block;font-size:0.72rem;font-weight:700;color:var(--admin-gray);text-transform:uppercase;margin-bottom:4px;">Tipo de Documento</label>
+                    <select id="mdpDocTipo" style="width:100%;padding:9px 12px;border:1.5px solid var(--admin-border);border-radius:8px;font-family:inherit;font-size:0.82rem;">
+                        ${docTypes.map(dt => `<option value="${dt.key}">${dt.label}</option>`).join('')}
+                        <option value="outro">Outro Documento</option>
+                    </select>
+                </div>
+                <div>
+                    <input type="file" id="mdpDocFile" accept="image/*,.pdf" style="display:none;" onchange="doUploadDocMembro(${m.id})">
+                    <button class="btn-admin-primary" style="padding:9px 18px;" onclick="document.getElementById('mdpDocFile').click()"><i class="fas fa-cloud-upload-alt"></i> Selecionar Arquivo</button>
+                </div>
+            </div>
         `;
     }
 
@@ -1153,17 +1225,17 @@ function switchMdpTab(tab) {
         content.innerHTML = `
             <div style="display:flex;justify-content:space-between;align-items:center;">
                 <div class="mdp-section-title" style="margin-top:0;"><i class="fas fa-barcode"></i> Boletos / Anuidades</div>
-                <button class="btn-admin-primary" style="font-size:0.78rem;padding:6px 14px;" onclick="openBoletoModal(${m.id})"><i class="fas fa-plus"></i> Novo Boleto</button>
+                <button class="btn-admin-primary" style="font-size:0.78rem;padding:8px 16px;" onclick="openBoletoModal(${m.id})"><i class="fas fa-plus"></i> Novo Boleto</button>
             </div>
 
             ${boletos.length === 0 ? `
-                <div class="mdp-empty"><i class="fas fa-receipt"></i><p>Nenhum boleto registrado</p></div>
+                <div class="mdp-empty"><i class="fas fa-receipt"></i><p>Nenhum boleto registrado</p><p style="font-size:0.72rem;color:#bbb;margin-top:4px;">Clique em "Novo Boleto" para criar</p></div>
             ` : boletos.map(b => `
                 <div class="mdp-list-item">
                     <div class="mdp-list-item-info">
-                        <h5>${b.tipo === 'anuidade' ? '📄 Anuidade' : '📄 Mensalidade'} — ${b.referencia || ''} ${b.ano || ''}</h5>
+                        <h5>${b.tipo === 'anuidade' ? '📄 Anuidade' : b.tipo === 'mensalidade' ? '📑 Mensalidade' : '📋 Taxa'} — ${b.referencia || ''} ${b.ano || ''}</h5>
                         <p>Vencimento: ${fmtDate(b.data_vencimento)} | Valor: R$ ${parseFloat(b.valor || 0).toFixed(2)} | <span class="badge ${b.status === 'pago' ? 'badge-paga' : b.status === 'vencido' ? 'badge-vencida' : 'badge-pendente'}">${(b.status || 'pendente').toUpperCase()}</span></p>
-                        ${b.data_pagamento ? `<p style="color:#0f9d58;font-size:0.7rem;">Pago em ${fmtDate(b.data_pagamento)} — R$ ${parseFloat(b.valor_pago || 0).toFixed(2)}</p>` : ''}
+                        ${b.data_pagamento ? `<p style="color:#0f9d58;font-size:0.7rem;">✓ Pago em ${fmtDate(b.data_pagamento)} — R$ ${parseFloat(b.valor_pago || 0).toFixed(2)}</p>` : ''}
                     </div>
                     <div class="mdp-list-item-actions">
                         ${b.arquivo_boleto_url ? `<a href="${b.arquivo_boleto_url}" target="_blank" class="mdp-btn-view" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none;width:30px;height:30px;border-radius:6px;" title="Ver boleto"><i class="fas fa-file-pdf"></i></a>` : ''}
@@ -1194,11 +1266,11 @@ function switchMdpTab(tab) {
         content.innerHTML = `
             <div style="display:flex;justify-content:space-between;align-items:center;">
                 <div class="mdp-section-title" style="margin-top:0;"><i class="fas fa-id-badge"></i> Credenciais Digitais</div>
-                <button class="btn-admin-primary" style="font-size:0.78rem;padding:6px 14px;" onclick="openCredencialModal(${m.id})"><i class="fas fa-plus"></i> Nova Credencial</button>
+                <button class="btn-admin-primary" style="font-size:0.78rem;padding:8px 16px;" onclick="openCredencialModal(${m.id})"><i class="fas fa-plus"></i> Nova Credencial</button>
             </div>
 
             ${creds.length === 0 ? `
-                <div class="mdp-empty"><i class="fas fa-id-badge"></i><p>Nenhuma credencial emitida</p></div>
+                <div class="mdp-empty"><i class="fas fa-id-badge"></i><p>Nenhuma credencial emitida</p><p style="font-size:0.72rem;color:#bbb;margin-top:4px;">Clique em "Nova Credencial" para emitir</p></div>
             ` : creds.map(c => `
                 <div class="mdp-list-item" style="flex-direction:column;align-items:flex-start;gap:10px;">
                     <div style="display:flex;justify-content:space-between;width:100%;align-items:center;">
@@ -1243,6 +1315,89 @@ function switchMdpTab(tab) {
                 </div>
             `}
         `;
+    }
+
+    else if (tab === 'observacoes') {
+        content.innerHTML = `
+            <div class="mdp-section-title" style="margin-top:0;"><i class="fas fa-sticky-note"></i> Observações Administrativas</div>
+            <p style="font-size:0.78rem;color:var(--admin-gray);margin-bottom:14px;">Anotações internas visíveis apenas para administradores. Use para registrar informações relevantes sobre o membro.</p>
+            <div class="mdp-obs-area">
+                <textarea class="mdp-obs-textarea" id="mdpObsTexto" placeholder="Digite suas observações sobre este membro...">${m.observacoes_admin || ''}</textarea>
+                <div class="mdp-obs-save">
+                    <button class="btn-admin-primary" onclick="salvarObservacoesMembro(${m.id})"><i class="fas fa-save"></i> Salvar Observações</button>
+                </div>
+            </div>
+
+            <div class="mdp-section-title"><i class="fas fa-tags"></i> Informações Rápidas</div>
+            <div class="mdp-info-grid">
+                <div class="mdp-info-item"><label>Status do Cadastro</label><span class="badge ${m.status === 'ATIVO' ? 'badge-ativo' : m.status === 'PENDENTE' ? 'badge-pendente' : 'badge-inativo'}">${m.status}</span></div>
+                <div class="mdp-info-item"><label>Anuidade</label><span class="badge ${m.anuidade_status === 'paga' ? 'badge-paga' : m.anuidade_status === 'vencida' ? 'badge-vencida' : 'badge-pendente'}">${(m.anuidade_status || 'pendente').toUpperCase()}</span></div>
+                <div class="mdp-info-item"><label>Credencial</label><span class="badge ${m.credencial_status === 'ativa' ? 'badge-ativa' : m.credencial_status === 'vencida' ? 'badge-vencida' : 'badge-pendente'}">${(m.credencial_status || 'pendente').toUpperCase()}</span></div>
+                <div class="mdp-info-item"><label>Data de Cadastro</label><span>${fmtDate(m.created_at)}</span></div>
+            </div>
+        `;
+    }
+}
+
+// ---- Upload de documento para membro ----
+function uploadDocumentoMembro(membroId, docKey, docLabel) {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*,.pdf';
+    input.onchange = async () => {
+        const file = input.files[0];
+        if (!file) return;
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('tipo', docKey);
+            const res = await fetch(`/api/admin/ministros/${membroId}/documentos`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${AdminAPI.token()}` },
+                body: formData
+            });
+            if (!res.ok) throw new Error('Erro no upload');
+            showToast(`${docLabel} enviado com sucesso!`, 'success');
+            openMembroDetail(membroId);
+        } catch (err) {
+            showToast(err.message, 'error');
+        }
+    };
+    input.click();
+}
+
+async function doUploadDocMembro(membroId) {
+    const tipo = document.getElementById('mdpDocTipo').value;
+    const fileInput = document.getElementById('mdpDocFile');
+    const file = fileInput.files[0];
+    if (!file) return;
+    try {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('tipo', tipo);
+        const res = await fetch(`/api/admin/ministros/${membroId}/documentos`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${AdminAPI.token()}` },
+            body: formData
+        });
+        if (!res.ok) throw new Error('Erro no upload');
+        showToast('Documento enviado com sucesso!', 'success');
+        openMembroDetail(membroId);
+    } catch (err) {
+        showToast(err.message, 'error');
+    }
+    fileInput.value = '';
+}
+
+// ---- Salvar observações do membro ----
+async function salvarObservacoesMembro(membroId) {
+    const obs = document.getElementById('mdpObsTexto').value;
+    try {
+        await AdminAPI.put(`/ministros/${membroId}`, { observacoes_admin: obs });
+        if (currentMembro) currentMembro.observacoes_admin = obs;
+        showToast('Observações salvas!', 'success');
+    } catch (err) {
+        showToast(err.message, 'error');
     }
 }
 

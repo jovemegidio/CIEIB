@@ -496,6 +496,16 @@ ALTER TABLE ministros ADD COLUMN IF NOT EXISTS data_ordenacao DATE;
 ALTER TABLE ministros ADD COLUMN IF NOT EXISTS igreja_ordenacao VARCHAR(200);
 ALTER TABLE ministros ADD COLUMN IF NOT EXISTS cidade_ordenacao VARCHAR(100);
 
+-- Colunas de URL de documentos na tabela ministro_documentos
+ALTER TABLE ministro_documentos ADD COLUMN IF NOT EXISTS documento_identidade_url VARCHAR(500);
+ALTER TABLE ministro_documentos ADD COLUMN IF NOT EXISTS cpf_documento_url VARCHAR(500);
+ALTER TABLE ministro_documentos ADD COLUMN IF NOT EXISTS comprovante_endereco_url VARCHAR(500);
+ALTER TABLE ministro_documentos ADD COLUMN IF NOT EXISTS credencial_eclesiastica_url VARCHAR(500);
+ALTER TABLE ministro_documentos ADD COLUMN IF NOT EXISTS foto_3x4_url VARCHAR(500);
+ALTER TABLE ministro_documentos ADD COLUMN IF NOT EXISTS certidao_casamento_url VARCHAR(500);
+ALTER TABLE ministro_documentos ADD COLUMN IF NOT EXISTS diploma_teologia_url VARCHAR(500);
+ALTER TABLE ministro_documentos ADD COLUMN IF NOT EXISTS carta_recomendacao_url VARCHAR(500);
+
 `;
 
 async function initDB() {

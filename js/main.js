@@ -52,14 +52,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (link) {
             link.setAttribute('aria-haspopup', 'true');
             link.setAttribute('aria-expanded', 'false');
+            link.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768) {
+                    e.preventDefault();
+                    dropdown.classList.toggle('active');
+                    link.setAttribute('aria-expanded', dropdown.classList.contains('active').toString());
+                }
+            });
         }
-        link.addEventListener('click', (e) => {
-            if (window.innerWidth <= 768) {
-                e.preventDefault();
-                dropdown.classList.toggle('active');
-                link.setAttribute('aria-expanded', dropdown.classList.contains('active').toString());
-            }
-        });
     });
 
     // Close nav on link click (mobile)
@@ -107,11 +107,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ===== Counter Animation =====
+    // ===== Counter Animation (com sufixo "+") =====
     const statNumbers = document.querySelectorAll('.stat-number');
 
     const animateCounter = (el) => {
         const target = parseInt(el.getAttribute('data-target'));
+        if (!target || target <= 0) return;
         const duration = 2000;
         const step = target / (duration / 16);
         let current = 0;
@@ -119,25 +120,33 @@ document.addEventListener('DOMContentLoaded', () => {
         const timer = setInterval(() => {
             current += step;
             if (current >= target) {
-                el.textContent = target;
+                el.textContent = target.toLocaleString('pt-BR') + '+';
                 clearInterval(timer);
             } else {
-                el.textContent = Math.floor(current);
+                el.textContent = Math.floor(current).toLocaleString('pt-BR');
             }
         }, 16);
     };
 
-    // Intersection Observer for counters
-    const counterObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                animateCounter(entry.target);
-                counterObserver.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.5 });
+    // Aguardar loadStats() do index.html antes de iniciar contadores
+    // O observer só dispara quando o elemento fica visível, então o API já terá retornado
+    function initCounterObserver() {
+        const counterObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounter(entry.target);
+                    counterObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
 
-    statNumbers.forEach(num => counterObserver.observe(num));
+        statNumbers.forEach(num => counterObserver.observe(num));
+    }
+
+    // Pequeno delay para permitir que loadStats() do index.html atualize data-target
+    if (statNumbers.length > 0) {
+        setTimeout(initCounterObserver, 300);
+    }
 
     // ===== Fade-in Animation =====
     const fadeElements = document.querySelectorAll('.fade-in');

@@ -37,11 +37,19 @@ router.post('/newsletter', async (req, res) => {
             return res.status(400).json({ error: 'E-mail é obrigatório' });
         }
 
-        // Upsert - se já existe, não duplica
+        // Verificar se email já está cadastrado na newsletter
+        const existing = await pool.query(
+            "SELECT id FROM contatos WHERE email = $1 AND assunto = 'Newsletter'",
+            [email]
+        );
+
+        if (existing.rows.length > 0) {
+            return res.json({ message: 'E-mail já cadastrado na newsletter!' });
+        }
+
         await pool.query(`
             INSERT INTO contatos (nome, email, assunto, mensagem)
             VALUES ($1, $2, $3, $4)
-            ON CONFLICT DO NOTHING
         `, ['Newsletter', email, 'Newsletter', 'Cadastro na newsletter']);
 
         res.json({ message: 'E-mail cadastrado com sucesso!' });

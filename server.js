@@ -31,7 +31,7 @@ app.use(express.urlencoded({ extended: true }));
 // Rate limiting
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 min
-    max: 100,
+    max: 300,
     message: { error: 'Muitas requisições. Tente novamente em 15 minutos.' }
 });
 app.use('/api/', apiLimiter);
@@ -117,7 +117,7 @@ app.use('/api/suporte', suporteRoutes);
 // ---- SPA Fallback: Rotas HTML com cache-busting ----
 const htmlPages = [
     'index', 'quem-somos', 'diretoria', 'noticias',
-    'contato', 'area-do-ministro', 'painel-ministro', 'verificar-credencial', 'painel-admin'
+    'contato', 'area-do-ministro', 'painel-ministro', 'verificar-credencial', 'painel-admin', 'lgpd'
 ];
 
 htmlPages.forEach(page => {

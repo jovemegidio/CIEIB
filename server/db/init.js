@@ -429,6 +429,31 @@ CREATE TABLE IF NOT EXISTS suporte_tickets (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
+-- ===== SOLICITAÇÕES DE CARTEIRINHA FÍSICA =====
+CREATE TABLE IF NOT EXISTS solicitacoes_carteirinha (
+    id SERIAL PRIMARY KEY,
+    ministro_id INTEGER REFERENCES ministros(id) ON DELETE CASCADE,
+    nome_completo VARCHAR(200),
+    cargo VARCHAR(100),
+    endereco_entrega TEXT NOT NULL,
+    telefone VARCHAR(30),
+    observacao TEXT,
+    link_pagamento VARCHAR(500),
+    status VARCHAR(20) DEFAULT 'PENDENTE',
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Colunas extras em contas_receber
+ALTER TABLE contas_receber ADD COLUMN IF NOT EXISTS forma_pagamento VARCHAR(30);
+ALTER TABLE contas_receber ADD COLUMN IF NOT EXISTS boleto_solicitado BOOLEAN DEFAULT FALSE;
+ALTER TABLE contas_receber ADD COLUMN IF NOT EXISTS boleto_solicitado_em TIMESTAMP;
+ALTER TABLE contas_receber ADD COLUMN IF NOT EXISTS comprovante_pix_url VARCHAR(500);
+
+-- Colunas extras em eventos
+ALTER TABLE eventos ADD COLUMN IF NOT EXISTS tipo VARCHAR(50);
+ALTER TABLE eventos ADD COLUMN IF NOT EXISTS hora_fim TIME;
+
 ALTER TABLE ministros ADD COLUMN IF NOT EXISTS telefone VARCHAR(20);
 ALTER TABLE ministros ADD COLUMN IF NOT EXISTS whatsapp VARCHAR(20);
 ALTER TABLE ministros ADD COLUMN IF NOT EXISTS escolaridade VARCHAR(50);

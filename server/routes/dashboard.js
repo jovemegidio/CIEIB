@@ -4,21 +4,51 @@
 const router = require('express').Router();
 const pool = require('../db/connection');
 
-// GET /api/dashboard/stats — Estatísticas públicas do site
+// GET /api/dashboard/stats — Estatísticas REAIS do banco de dados
 router.get('/stats', async (req, res) => {
     try {
-        const result = await pool.query(`
-            SELECT chave, valor FROM configuracoes
-            WHERE chave LIKE 'stat_%'
-        `);
+        // Contar ministros credenciados (status ATIVO)
+        const ministrosResult = await pool.query(
+            "SELECT COUNT(*) as total FROM ministros WHERE status = 'ATIVO'"
+        );
 
-        const stats = {};
-        result.rows.forEach(row => {
-            stats[row.chave.replace('stat_', '')] = parseInt(row.valor) || row.valor;
+        // Contar igrejas distintas dos ministros
+        const igrejasResult = await pool.query(
+            "SELECT COUNT(DISTINCT nome_igreja) as total FROM ministros WHERE nome_igreja IS NOT NULL AND nome_igreja != ''"
+        );
+
+        // Contar estados alcançados (do endereço dos ministros)
+        const estadosResult = await pool.query(
+            `SELECT COUNT(DISTINCT me.uf) as total FROM ministro_endereco me
+             JOIN ministros m ON m.id = me.ministro_id
+             WHERE me.uf IS NOT NULL AND me.uf != '' AND m.status = 'ATIVO'`
+        );
+
+        // Contar convenções regionais
+        const convencoesResult = await pool.query(
+            "SELECT COUNT(DISTINCT sigla) as total FROM ministro_convencoes WHERE status = 'ATIVO'"
+        );
+
+        // Buscar valores mínimos do configuracoes (admin pode definir valores de exibição)
+        const configResult = await pool.query(
+            "SELECT chave, valor FROM configuracoes WHERE chave LIKE 'stat_%'"
+        );
+        const configStats = {};
+        configResult.rows.forEach(row => {
+            configStats[row.chave.replace('stat_', '')] = parseInt(row.valor) || 0;
         });
 
-        res.json(stats);
+        // Usar o MAIOR valor entre dados reais e configuração do admin
+        const realStats = {
+            igrejas: Math.max(parseInt(igrejasResult.rows[0].total) || 0, configStats.igrejas || 0),
+            ministros: Math.max(parseInt(ministrosResult.rows[0].total) || 0, configStats.ministros || 0),
+            estados: Math.max(parseInt(estadosResult.rows[0].total) || 0, configStats.estados || 0),
+            convencoes: Math.max(parseInt(convencoesResult.rows[0].total) || 0, configStats.convencoes || 0)
+        };
+
+        res.json(realStats);
     } catch (err) {
+        console.error('Erro ao buscar stats:', err);
         // Fallback com valores padrão
         res.json({
             igrejas: 500,

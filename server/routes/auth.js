@@ -19,9 +19,10 @@ router.post('/login', async (req, res) => {
         // Limpar CPF (só números)
         const cpfLimpo = cpf.replace(/\D/g, '');
 
+        // Buscar por CPF ou por número de credencial/registro
         const result = await pool.query(
-            'SELECT id, cpf, senha, nome, status FROM ministros WHERE cpf = $1',
-            [cpfLimpo]
+            'SELECT id, cpf, senha, nome, status FROM ministros WHERE cpf = $1 OR registro = $2',
+            [cpfLimpo, cpf.trim()]
         );
 
         if (result.rows.length === 0) {

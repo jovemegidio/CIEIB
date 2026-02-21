@@ -741,6 +741,9 @@ body.admin-body {
 .badge-aberto { background: #fff3e0; color: #e65100; }
 .badge-warning { background: #fef9e7; color: #b7950b; }
 .badge-destaque { background: rgba(200,169,81,0.15); color: var(--admin-secondary-dark); }
+.badge-info-notif { background: #e8f0fe; color: #1a4a7a; }
+.badge-evento-notif { background: #f3e8ff; color: #6d28d9; }
+.badge-curso-notif { background: #e0f7fa; color: #0e7490; }
 
 /* ==== CMS FILTERS ==== */
 .cms-filters {

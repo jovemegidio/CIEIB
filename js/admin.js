@@ -2278,30 +2278,77 @@ function renderNotifSiteTable() {
     const el = document.getElementById('notifSiteTable');
     if (allNotifSite.length === 0) { el.innerHTML = '<p style="text-align:center;color:#aaa;padding:40px;">Nenhuma notificação cadastrada</p>'; return; }
     const tipoLabels = { info:'ℹ️ Info', success:'✅ Sucesso', warning:'⚠️ Aviso', error:'🔴 Urgente', evento:'📅 Evento', curso:'🎓 Curso', destaque:'⭐ Destaque' };
+    const tipoBadge = { info:'badge-info-notif', success:'badge-ativo', warning:'badge-warning', error:'badge-inativo', evento:'badge-evento-notif', curso:'badge-curso-notif', destaque:'badge-destaque' };
     const fmtDt = d => d ? new Date(d).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
-    el.innerHTML = `<table class="admin-table"><thead><tr><th>Título</th><th>Mensagem</th><th>Tipo</th><th>Início</th><th>Fim</th><th>Ativa</th><th>Ações</th></tr></thead><tbody>
-        ${allNotifSite.map(n => `<tr>
+    const now = new Date();
+    el.innerHTML = `<table class="admin-table"><thead><tr><th>Título</th><th>Mensagem</th><th>Tipo</th><th>Vigência</th><th>Ativa</th><th>Ações</th></tr></thead><tbody>
+        ${allNotifSite.map(n => {
+            const inicio = n.data_inicio ? new Date(n.data_inicio) : null;
+            const fim = n.data_fim ? new Date(n.data_fim) : null;
+            const expirada = fim && fim < now;
+            const aindaNao = inicio && inicio > now;
+            let statusLabel = n.ativa ? '<span class="badge badge-ativo">Ativa</span>' : '<span class="badge badge-inativo">Inativa</span>';
+            if (n.ativa && expirada) statusLabel = '<span class="badge badge-warning">Expirada</span>';
+            if (n.ativa && aindaNao) statusLabel = '<span class="badge badge-warning">Agendada</span>';
+            return `<tr>
             <td><strong>${n.titulo}</strong></td>
             <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${n.mensagem || ''}</td>
-            <td><span class="badge badge-ativo">${tipoLabels[n.tipo] || n.tipo}</span></td>
-            <td style="font-size:0.8rem;">${fmtDt(n.data_inicio)}</td>
-            <td style="font-size:0.8rem;">${fmtDt(n.data_fim)}</td>
-            <td>${n.ativa ? '<span class="badge badge-ativo">Sim</span>' : '<span class="badge badge-inativo">Não</span>'}</td>
+            <td><span class="badge ${tipoBadge[n.tipo] || 'badge-ativo'}">${tipoLabels[n.tipo] || n.tipo}</span></td>
+            <td style="font-size:0.78rem;line-height:1.4;">${fmtDt(n.data_inicio)}<br>${fim ? '→ ' + fmtDt(n.data_fim) : '<span style="color:#aaa">Sem fim</span>'}</td>
+            <td>${statusLabel}</td>
             <td class="actions-cell">
                 <button class="btn-table-action btn-table-edit" onclick="openNotifSiteModal(${n.id})"><i class="fas fa-edit"></i></button>
                 <button class="btn-table-action btn-table-delete" onclick="deleteItem('notificacoes-site', ${n.id})"><i class="fas fa-trash"></i></button>
             </td>
-        </tr>`).join('')}
+        </tr>`;
+        }).join('')}
     </tbody></table>`;
 }
 
 function openNotifSiteModal(id) {
     const item = id ? allNotifSite.find(n => n.id === id) : null;
     const fmtDate = (d) => d ? new Date(d).toISOString().slice(0, 16) : '';
+    const fmtDtBr = d => d ? new Date(d).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+    const tipoIcons = { info:'fa-info-circle', success:'fa-check-circle', warning:'fa-exclamation-triangle', error:'fa-exclamation-circle', evento:'fa-calendar-alt', curso:'fa-graduation-cap', destaque:'fa-star' };
+    const tipoBgs = { info:'#1a4a7a', success:'#047857', warning:'#b45309', error:'#b91c1c', evento:'#6d28d9', curso:'#0e7490', destaque:'linear-gradient(135deg,#1a3a5c,#c8a951)' };
+    const tipoNames = { info:'Informação', success:'Sucesso', warning:'Aviso', error:'Urgente', evento:'Evento', curso:'Curso', destaque:'Destaque' };
+
+    const now = new Date();
+    const inicio = item?.data_inicio ? new Date(item.data_inicio) : null;
+    const fim = item?.data_fim ? new Date(item.data_fim) : null;
+    const expirada = fim && fim < now;
+    const agendada = inicio && inicio > now;
+    let vigencia = item?.ativa ? '🟢 Visível agora' : '⚪ Desativada';
+    let vigCor = item?.ativa ? '#27ae60' : '#aaa';
+    if (item?.ativa && expirada) { vigencia = '🟡 Expirada'; vigCor = '#f39c12'; }
+    if (item?.ativa && agendada) { vigencia = '🔵 Agendada'; vigCor = '#3498db'; }
+
     document.getElementById('modalTitle').textContent = item ? 'Editar Notificação do Site' : 'Nova Notificação do Site';
     document.getElementById('modalBody').innerHTML = `
+        ${item ? `<div style="display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:110px;background:#f0f4f8;border-radius:8px;padding:12px;text-align:center;">
+                <div style="font-size:18px;font-weight:700;color:${vigCor}">${vigencia}</div>
+                <div style="font-size:11px;color:#888;margin-top:2px;">Situação</div>
+            </div>
+            <div style="flex:1;min-width:110px;background:#f0f4f8;border-radius:8px;padding:12px;text-align:center;">
+                <div style="font-size:18px;"><i class="fas ${tipoIcons[item.tipo] || 'fa-info-circle'}" style="color:${tipoBgs[item.tipo] || '#1a4a7a'}"></i> ${tipoNames[item.tipo] || item.tipo}</div>
+                <div style="font-size:11px;color:#888;margin-top:2px;">Tipo</div>
+            </div>
+            <div style="flex:1;min-width:110px;background:#f0f4f8;border-radius:8px;padding:12px;text-align:center;">
+                <div style="font-size:14px;font-weight:600;color:#555">${fmtDtBr(item.created_at)}</div>
+                <div style="font-size:11px;color:#888;margin-top:2px;">Criada em</div>
+            </div>
+        </div>
+        <div style="margin-bottom:18px;border-radius:10px;overflow:hidden;color:#fff;padding:14px 18px;display:flex;align-items:center;gap:12px;background:${tipoBgs[item.tipo] || '#1a4a7a'};">
+            <i class="fas ${tipoIcons[item.tipo] || 'fa-info-circle'}" style="font-size:20px;opacity:0.9;"></i>
+            <div style="flex:1;">
+                <strong style="font-size:0.95rem;">${item.titulo}</strong>
+                ${item.mensagem ? `<span style="margin-left:8px;opacity:0.9;font-size:0.85rem;">${item.mensagem}</span>` : ''}
+            </div>
+            ${item.link ? `<span style="background:rgba(255,255,255,0.2);padding:4px 12px;border-radius:6px;font-size:0.78rem;">Saiba mais →</span>` : ''}
+        </div>` : ''}
         <div class="admin-form-group"><label>Título *</label><input type="text" id="mNotifTitle" value="${item?.titulo || ''}" placeholder="Ex: 15ª Convenção Nacional"></div>
-        <div class="admin-form-group"><label>Mensagem</label><textarea id="mNotifMsg" placeholder="Ex: Inscrições abertas até 30 de agosto!">${item?.mensagem || ''}</textarea></div>
+        <div class="admin-form-group"><label>Mensagem</label><textarea id="mNotifMsg" rows="2" placeholder="Ex: Inscrições abertas até 30 de agosto!">${item?.mensagem || ''}</textarea></div>
         <div class="form-grid">
             <div class="admin-form-group"><label>Tipo / Cor</label>
                 <select id="mNotifTipo">

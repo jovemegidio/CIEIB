@@ -379,7 +379,8 @@ router.put('/ministros/:id', adminAuth, async (req, res) => {
     try {
         const { nome, cargo, email, telefone, whatsapp, status, nome_igreja, funcao_ministerial,
                 tempo_ministerio, data_consagracao, escolaridade, registro, observacoes_admin,
-                anuidade_status, credencial_status, aprovado } = req.body;
+                anuidade_status, credencial_status, aprovado,
+                data_batismo, data_ordenacao, igreja_ordenacao, cidade_ordenacao } = req.body;
         const r = await pool.query(`
             UPDATE ministros SET
                 nome = COALESCE($1, nome), cargo = COALESCE($2, cargo), email = COALESCE($3, email),
@@ -389,11 +390,15 @@ router.put('/ministros/:id', adminAuth, async (req, res) => {
                 escolaridade = COALESCE($11, escolaridade), registro = COALESCE($12, registro),
                 observacoes_admin = COALESCE($13, observacoes_admin), anuidade_status = COALESCE($14, anuidade_status),
                 credencial_status = COALESCE($15, credencial_status), aprovado = COALESCE($16, aprovado),
+                data_batismo = COALESCE($17, data_batismo), data_ordenacao = COALESCE($18, data_ordenacao),
+                igreja_ordenacao = COALESCE($19, igreja_ordenacao), cidade_ordenacao = COALESCE($20, cidade_ordenacao),
                 updated_at = NOW()
-            WHERE id = $17 RETURNING id, nome, status
+            WHERE id = $21 RETURNING id, nome, status
         `, [nome, cargo, email, telefone, whatsapp, status, nome_igreja, funcao_ministerial,
             tempo_ministerio, data_consagracao || null, escolaridade, registro, observacoes_admin,
-            anuidade_status, credencial_status, aprovado, req.params.id]);
+            anuidade_status, credencial_status, aprovado,
+            data_batismo || null, data_ordenacao || null, igreja_ordenacao, cidade_ordenacao,
+            req.params.id]);
 
         // Log histórico
         await pool.query(

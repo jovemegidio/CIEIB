@@ -53,20 +53,22 @@ router.post('/', async (req, res) => {
             escolaridade,
             // Dados ministeriais
             cargo, nome_igreja, funcao_ministerial, tempo_ministerio,
-            data_consagracao,
-            // Senha
-            senha,
+            data_consagracao, data_batismo, data_ordenacao,
+            igreja_ordenacao, cidade_ordenacao,
             // Filhos
             filhos
         } = req.body;
 
         // Validações obrigatórias
-        if (!nome || !cpf || !senha || !email) {
-            return res.status(400).json({ error: 'Nome, CPF, email e senha são obrigatórios.' });
+        if (!nome || !cpf || !email) {
+            return res.status(400).json({ error: 'Nome, CPF e email são obrigatórios.' });
         }
 
         // Limpar CPF
         const cpfLimpo = cpf.replace(/\D/g, '');
+
+        // Gerar senha automaticamente: 6 primeiros dígitos do CPF
+        const senhaAutoGerada = cpfLimpo.substring(0, 6);
 
         // Verificar se CPF já existe
         const exists = await client.query('SELECT id FROM ministros WHERE cpf = $1', [cpfLimpo]);
@@ -74,8 +76,8 @@ router.post('/', async (req, res) => {
             return res.status(409).json({ error: 'CPF já cadastrado no sistema. Se você já possui cadastro, faça login.' });
         }
 
-        // Hash da senha
-        const senhaHash = await bcrypt.hash(senha, 10);
+        // Hash da senha (auto-gerada)
+        const senhaHash = await bcrypt.hash(senhaAutoGerada, 10);
 
         // Inserir ministro
         const result = await client.query(`
@@ -85,9 +87,11 @@ router.post('/', async (req, res) => {
                 estado_civil, nome_conjuge, data_nasc_conjuge, pai, mae,
                 email, telefone, whatsapp, escolaridade,
                 cargo, nome_igreja, funcao_ministerial, tempo_ministerio,
-                data_consagracao, conv_estadual, status, aprovado
+                data_consagracao, data_batismo, data_ordenacao,
+                igreja_ordenacao, cidade_ordenacao,
+                conv_estadual, status, aprovado
             ) VALUES (
-                $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,
+                $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,
                 'CIEIB', 'ATIVO', false
             )
             RETURNING id
@@ -98,7 +102,9 @@ router.post('/', async (req, res) => {
             estado_civil, nome_conjuge, data_nasc_conjuge || null,
             pai, mae, email, telefone, whatsapp,
             escolaridade, cargo || 'PASTOR', nome_igreja,
-            funcao_ministerial, tempo_ministerio, data_consagracao || null
+            funcao_ministerial, tempo_ministerio, data_consagracao || null,
+            data_batismo || null, data_ordenacao || null,
+            igreja_ordenacao || null, cidade_ordenacao || null
         ]);
 
         const ministroId = result.rows[0].id;

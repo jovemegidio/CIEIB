@@ -491,6 +491,10 @@ CREATE TABLE IF NOT EXISTS ministro_historico (
 ALTER TABLE ministros ADD COLUMN IF NOT EXISTS observacoes_admin TEXT;
 ALTER TABLE ministros ADD COLUMN IF NOT EXISTS anuidade_status VARCHAR(20) DEFAULT 'pendente';
 ALTER TABLE ministros ADD COLUMN IF NOT EXISTS credencial_status VARCHAR(20) DEFAULT 'pendente';
+ALTER TABLE ministros ADD COLUMN IF NOT EXISTS data_batismo DATE;
+ALTER TABLE ministros ADD COLUMN IF NOT EXISTS data_ordenacao DATE;
+ALTER TABLE ministros ADD COLUMN IF NOT EXISTS igreja_ordenacao VARCHAR(200);
+ALTER TABLE ministros ADD COLUMN IF NOT EXISTS cidade_ordenacao VARCHAR(100);
 
 `;
 

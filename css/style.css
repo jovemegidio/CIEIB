@@ -2915,3 +2915,196 @@ img {
         align-items: flex-start;
     }
 }
+
+/* ==================== LGPD / PRIVACY PAGE ==================== */
+.lgpd-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px 0 60px;
+}
+
+.lgpd-dpo-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    background: linear-gradient(135deg, #1a3a5c, #2c5a8c);
+    color: #fff;
+    padding: 28px 32px;
+    border-radius: 16px;
+    margin-bottom: 36px;
+    box-shadow: 0 8px 30px rgba(26,58,92,0.2);
+}
+
+.lgpd-dpo-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(200,169,81,0.2);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    color: #c8a951;
+    flex-shrink: 0;
+}
+
+.lgpd-dpo-info h3 {
+    font-size: 1.15rem;
+    margin-bottom: 8px;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.lgpd-dpo-info p {
+    font-size: 0.9rem;
+    opacity: 0.85;
+    line-height: 1.5;
+    margin-bottom: 12px;
+}
+
+.lgpd-dpo-contact {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.lgpd-dpo-contact span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.88rem;
+}
+
+.lgpd-dpo-contact a {
+    color: #c8a951;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.lgpd-dpo-contact a:hover {
+    text-decoration: underline;
+}
+
+.lgpd-content {
+    background: #fff;
+    border-radius: 16px;
+    padding: 36px 40px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+}
+
+.lgpd-updated {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #f0f7ff;
+    color: #1a3a5c;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-bottom: 28px;
+}
+
+.lgpd-section {
+    margin-bottom: 32px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.lgpd-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.lgpd-section h2 {
+    font-size: 1.2rem;
+    color: #1a3a5c;
+    font-family: 'Montserrat', sans-serif;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.lgpd-section h2 i {
+    color: #c8a951;
+    font-size: 1rem;
+}
+
+.lgpd-section p {
+    font-size: 0.92rem;
+    color: #444;
+    line-height: 1.7;
+    margin-bottom: 10px;
+}
+
+.lgpd-section ul {
+    padding-left: 20px;
+    margin: 12px 0;
+}
+
+.lgpd-section ul li {
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 6px;
+}
+
+.lgpd-section a {
+    color: #1a3a5c;
+    font-weight: 600;
+}
+
+.lgpd-rights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 16px;
+    margin: 20px 0;
+}
+
+.lgpd-right-item {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 18px 20px;
+    border: 1px solid #eee;
+    transition: all 0.2s ease;
+}
+
+.lgpd-right-item:hover {
+    border-color: #c8a951;
+    box-shadow: 0 4px 12px rgba(200,169,81,0.1);
+}
+
+.lgpd-right-item i {
+    font-size: 1.3rem;
+    color: #c8a951;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.lgpd-right-item strong {
+    display: block;
+    font-size: 0.92rem;
+    color: #1a3a5c;
+    margin-bottom: 4px;
+}
+
+.lgpd-right-item p {
+    font-size: 0.82rem;
+    color: #777;
+    line-height: 1.5;
+    margin: 0;
+}
+
+@media (max-width: 600px) {
+    .lgpd-dpo-card {
+        flex-direction: column;
+        padding: 20px;
+    }
+    .lgpd-content {
+        padding: 24px 20px;
+    }
+    .lgpd-rights-grid {
+        grid-template-columns: 1fr;
+    }
+}

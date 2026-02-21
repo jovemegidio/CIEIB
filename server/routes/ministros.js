@@ -38,8 +38,10 @@ router.get('/me', auth, async (req, res) => {
                    sexo, data_nascimento, pais_nascimento, estado_nascimento,
                    cidade_nascimento, nacionalidade, estado_civil, nome_conjuge,
                    data_nasc_conjuge, pai, mae, rg, orgao_expedidor, email,
-                   telefone, whatsapp,
-                   biometria, data_registro, registro, foto_url, status
+                   telefone, whatsapp, escolaridade,
+                   biometria, data_registro, registro, foto_url, status,
+                   data_batismo, data_ordenacao, igreja_ordenacao, cidade_ordenacao,
+                   funcao_ministerial, nome_igreja, tempo_ministerio, data_consagracao
             FROM ministros WHERE id = $1
         `, [req.userId]);
 
@@ -61,7 +63,9 @@ router.put('/me', auth, async (req, res) => {
             nome_social, doc_estrangeiro, sexo, data_nascimento,
             pais_nascimento, estado_nascimento, cidade_nascimento,
             nacionalidade, estado_civil, nome_conjuge, data_nasc_conjuge,
-            pai, mae, rg, orgao_expedidor, email
+            pai, mae, rg, orgao_expedidor, email, escolaridade,
+            data_batismo, data_ordenacao, igreja_ordenacao, cidade_ordenacao,
+            funcao_ministerial, nome_igreja, tempo_ministerio, data_consagracao
         } = req.body;
 
         await pool.query(`
@@ -82,13 +86,26 @@ router.put('/me', auth, async (req, res) => {
                 rg = COALESCE($14, rg),
                 orgao_expedidor = COALESCE($15, orgao_expedidor),
                 email = COALESCE($16, email),
+                escolaridade = COALESCE($17, escolaridade),
+                data_batismo = $18,
+                data_ordenacao = $19,
+                igreja_ordenacao = COALESCE($20, igreja_ordenacao),
+                cidade_ordenacao = COALESCE($21, cidade_ordenacao),
+                funcao_ministerial = COALESCE($22, funcao_ministerial),
+                nome_igreja = COALESCE($23, nome_igreja),
+                tempo_ministerio = COALESCE($24, tempo_ministerio),
+                data_consagracao = $25,
                 updated_at = NOW()
-            WHERE id = $17
+            WHERE id = $26
         `, [
             nome_social, doc_estrangeiro, sexo, data_nascimento || null,
             pais_nascimento, estado_nascimento, cidade_nascimento,
             nacionalidade, estado_civil, nome_conjuge, data_nasc_conjuge || null,
-            pai, mae, rg, orgao_expedidor, email, req.userId
+            pai, mae, rg, orgao_expedidor, email, escolaridade,
+            data_batismo || null, data_ordenacao || null,
+            igreja_ordenacao, cidade_ordenacao,
+            funcao_ministerial, nome_igreja, tempo_ministerio,
+            data_consagracao || null, req.userId
         ]);
 
         // Log

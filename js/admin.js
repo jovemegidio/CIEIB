@@ -1118,6 +1118,10 @@ function switchMdpTab(tab) {
                 <div class="mdp-info-item"><label>Igreja</label><span>${m.nome_igreja || '—'}</span></div>
                 <div class="mdp-info-item"><label>Tempo de Ministério</label><span>${m.tempo_ministerio || '—'}</span></div>
                 <div class="mdp-info-item"><label>Data Consagração</label><span>${fmtDate(m.data_consagracao)}</span></div>
+                <div class="mdp-info-item"><label>Data de Batismo</label><span>${fmtDate(m.data_batismo)}</span></div>
+                <div class="mdp-info-item"><label>Data da Ordenação</label><span>${fmtDate(m.data_ordenacao)}</span></div>
+                <div class="mdp-info-item"><label>Igreja onde foi Ordenado</label><span>${m.igreja_ordenacao || '—'}</span></div>
+                <div class="mdp-info-item"><label>Cidade da Ordenação</label><span>${m.cidade_ordenacao || '—'}</span></div>
                 <div class="mdp-info-item"><label>Registro</label><span>${m.registro || '—'}</span></div>
                 <div class="mdp-info-item"><label>Data Registro</label><span>${fmtDate(m.data_registro)}</span></div>
                 <div class="mdp-info-item"><label>Cadastrado em</label><span>${fmtDate(m.created_at)}</span></div>

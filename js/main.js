@@ -350,30 +350,30 @@ async function loadSiteNotifications() {
             document.body.prepend(bar);
         }
 
-        // Auto-rotate if multiple notifications
+        // Auto-rotate if multiple notifications with smooth slide transition
         if (pending.length > 1) {
-            let rotateTimer = setInterval(() => {
+            function rotateNotif() {
                 currentIdx = (currentIdx + 1) % pending.length;
+                bar.style.transition = 'transform 0.45s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease';
+                bar.style.transform = 'translateY(-8px)';
                 bar.style.opacity = '0';
-                bar.style.transition = 'opacity 0.3s ease';
                 setTimeout(() => {
                     renderNotif(currentIdx);
-                    bar.style.opacity = '1';
-                }, 300);
-            }, 7000);
+                    bar.style.transform = 'translateY(8px)';
+                    requestAnimationFrame(() => {
+                        bar.style.transition = 'transform 0.45s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease';
+                        bar.style.transform = 'translateY(0)';
+                        bar.style.opacity = '1';
+                    });
+                }, 400);
+            }
+
+            let rotateTimer = setInterval(rotateNotif, 6000);
 
             // Pause rotation on hover
             bar.addEventListener('mouseenter', () => clearInterval(rotateTimer));
             bar.addEventListener('mouseleave', () => {
-                rotateTimer = setInterval(() => {
-                    currentIdx = (currentIdx + 1) % pending.length;
-                    bar.style.opacity = '0';
-                    bar.style.transition = 'opacity 0.3s ease';
-                    setTimeout(() => {
-                        renderNotif(currentIdx);
-                        bar.style.opacity = '1';
-                    }, 300);
-                }, 7000);
+                rotateTimer = setInterval(rotateNotif, 6000);
             });
         }
 

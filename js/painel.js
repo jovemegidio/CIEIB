@@ -119,7 +119,9 @@ function fillDadosPessoais(m) {
         'campo-orgao': m.orgao_expedidor,
         'campo-email': m.email,
         'campo-biometria': m.biometria,
-        'campo-registro': m.data_registro ? new Date(m.data_registro).toLocaleDateString('pt-BR') : ''
+        'campo-registro': m.data_registro ? new Date(m.data_registro).toLocaleDateString('pt-BR') : '',
+        'campo-igrejaordenacao': m.igreja_ordenacao,
+        'campo-cidadeordenacao': m.cidade_ordenacao
     };
 
     for (const [id, valor] of Object.entries(campos)) {
@@ -137,12 +139,21 @@ function fillDadosPessoais(m) {
     const ecEl = document.getElementById('campo-estadocivil');
     if (ecEl && m.estado_civil) ecEl.value = m.estado_civil;
 
+    const escolaridadeEl = document.getElementById('campo-escolaridade');
+    if (escolaridadeEl && m.escolaridade) escolaridadeEl.value = m.escolaridade;
+
     // Datas
     const nascEl = document.getElementById('campo-nascimento');
     if (nascEl && m.data_nascimento) nascEl.value = m.data_nascimento.split('T')[0];
 
     const nascConjEl = document.getElementById('campo-nascconjuge');
     if (nascConjEl && m.data_nasc_conjuge) nascConjEl.value = m.data_nasc_conjuge.split('T')[0];
+
+    const batismoEl = document.getElementById('campo-databatismo');
+    if (batismoEl && m.data_batismo) batismoEl.value = m.data_batismo.split('T')[0];
+
+    const ordenacaoEl = document.getElementById('campo-dataordenacao');
+    if (ordenacaoEl && m.data_ordenacao) ordenacaoEl.value = m.data_ordenacao.split('T')[0];
 }
 
 function formatCPF(cpf) {
@@ -867,7 +878,12 @@ async function salvarDados() {
             mae: getVal('campo-mae'),
             rg: getVal('campo-rg'),
             orgao_expedidor: getVal('campo-orgao'),
-            email: getVal('campo-email')
+            email: getVal('campo-email'),
+            escolaridade: getVal('campo-escolaridade'),
+            data_batismo: getVal('campo-databatismo'),
+            data_ordenacao: getVal('campo-dataordenacao'),
+            igreja_ordenacao: getVal('campo-igrejaordenacao'),
+            cidade_ordenacao: getVal('campo-cidadeordenacao')
         };
 
         await API.updateMinistro(dados);
@@ -1240,34 +1256,46 @@ function renderAulasCurso(cursoId, data) {
                 <i class="fas fa-arrow-left"></i> Voltar ao catálogo
             </button>
         </div>
+        <div class="curso-modulos-grid">
     `;
 
-    modulos.forEach(mod => {
+    modulos.forEach((mod, idx) => {
+        const totalAulas = (mod.aulas || []).length;
+        const concluidas = (mod.aulas || []).filter(a => a.concluida).length;
+        const modIcons = ['fa-book-open', 'fa-lightbulb', 'fa-clipboard-check', 'fa-award', 'fa-flask', 'fa-star'];
+        const modIcon = modIcons[idx % modIcons.length];
+
         html += `<div class="modulo-section">
-            <h4 class="modulo-titulo"><i class="fas fa-folder-open"></i> ${mod.titulo}</h4>
-            ${mod.descricao ? `<p class="modulo-desc">${mod.descricao}</p>` : ''}
-            <div class="aulas-lista">`;
+            <div class="modulo-header">
+                <div class="modulo-icon"><i class="fas ${modIcon}"></i></div>
+                <div class="modulo-header-text">
+                    <h4>${mod.titulo}</h4>
+                    ${mod.descricao ? `<div class="modulo-desc">${mod.descricao}</div>` : ''}
+                </div>
+            </div>
+            <div class="modulo-aulas">`;
 
         (mod.aulas || []).forEach(aula => {
             const tipoIcon = aula.tipo === 'video' ? 'fa-play-circle' : aula.tipo === 'pdf' ? 'fa-file-pdf' : 'fa-file-alt';
+            const tipoLabel = aula.tipo === 'video' ? 'Vídeo' : aula.tipo === 'pdf' ? 'PDF' : 'Texto';
             html += `
                 <div class="aula-item ${aula.concluida ? 'aula-concluida' : ''}">
                     <div class="aula-check">
                         ${aula.concluida
-                            ? '<i class="fas fa-check-circle" style="color:#059669;"></i>'
+                            ? '<i class="fas fa-check"></i>'
                             : '<i class="far fa-circle" style="color:#ccc;"></i>'
                         }
                     </div>
                     <div class="aula-info">
-                        <span class="aula-tipo"><i class="fas ${tipoIcon}"></i></span>
+                        <span class="aula-tipo"><i class="fas ${tipoIcon}"></i> ${tipoLabel}</span>
                         <span class="aula-titulo">${aula.titulo}</span>
-                        ${aula.duracao_minutos ? `<span class="aula-duracao">${aula.duracao_minutos} min</span>` : ''}
+                        ${aula.duracao_minutos ? `<span class="aula-duracao"><i class="far fa-clock"></i> ${aula.duracao_minutos} min</span>` : ''}
                     </div>
                     ${!aula.concluida
                         ? `<button class="btn-aula-concluir" onclick="concluirAula(${aula.id}, ${cursoId})">
                                <i class="fas fa-check"></i> Concluir
                            </button>`
-                        : '<span class="aula-status-ok"><i class="fas fa-check"></i></span>'
+                        : '<span class="aula-status-ok"><i class="fas fa-check-circle"></i> Concluído</span>'
                     }
                 </div>`;
         });
@@ -1275,9 +1303,13 @@ function renderAulasCurso(cursoId, data) {
         html += `</div></div>`;
     });
 
+    html += '</div>';
+
     // Esconder filtros e benefícios temporariamente
-    document.querySelector('.cursos-filtros').style.display = 'none';
-    document.querySelector('.cursos-beneficios').style.display = 'none';
+    const filtros = document.querySelector('.cursos-filtros');
+    const beneficios = document.querySelector('.cursos-beneficios');
+    if (filtros) filtros.style.display = 'none';
+    if (beneficios) beneficios.style.display = 'none';
 
     grid.innerHTML = html;
 }

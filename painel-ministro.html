@@ -39,7 +39,7 @@
                             <a href="#" id="btnDadosAcesso"><i class="fas fa-user-cog"></i> Dados de Acesso</a>
                         </div>
                     </div>
-                    <a href="#" class="pnav-link"><i class="fas fa-headset"></i> Suporte</a>
+                    <a href="#" class="pnav-link" id="btnSuporte"><i class="fas fa-headset"></i> Suporte</a>
                     <a href="#" class="pnav-link pnav-sair" onclick="API.logout();"><i class="fas fa-sign-out-alt"></i> Sair</a>
                 </div>
                 <div class="painel-right-group">
@@ -875,6 +875,95 @@
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL SUPORTE ===== -->
+    <div class="sup-overlay" id="supOverlay">
+        <div class="sup-modal">
+            <button class="sup-close" id="supClose" aria-label="Fechar">&times;</button>
+
+            <!-- Header -->
+            <div class="sup-header">
+                <div class="sup-header-icon"><i class="fas fa-headset"></i></div>
+                <h2>Central de Suporte</h2>
+                <p>Envie sua dúvida ou solicitação e responderemos o mais breve possível.</p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="sup-tabs">
+                <button class="sup-tab active" data-sup-tab="novo"><i class="fas fa-plus-circle"></i> Novo Chamado</button>
+                <button class="sup-tab" data-sup-tab="historico"><i class="fas fa-history"></i> Meus Chamados</button>
+            </div>
+
+            <!-- Tab: Novo Chamado -->
+            <div class="sup-tab-content active" id="supTabNovo">
+                <form id="formSuporte" class="sup-form">
+                    <div class="sup-field">
+                        <label for="supCategoria"><i class="fas fa-tag"></i> Categoria</label>
+                        <select id="supCategoria" required>
+                            <option value="">Selecione uma categoria...</option>
+                            <option value="duvida">💬 Dúvida Geral</option>
+                            <option value="financeiro">💰 Financeiro / Pagamentos</option>
+                            <option value="curso">📚 Cursos / Matrículas</option>
+                            <option value="credencial">🪪 Credencial Digital</option>
+                            <option value="cadastro">📝 Cadastro / Dados Pessoais</option>
+                            <option value="tecnico">🔧 Problema Técnico</option>
+                            <option value="sugestao">💡 Sugestão / Melhoria</option>
+                            <option value="outro">📌 Outro Assunto</option>
+                        </select>
+                    </div>
+                    <div class="sup-field">
+                        <label for="supAssunto"><i class="fas fa-heading"></i> Assunto</label>
+                        <input type="text" id="supAssunto" placeholder="Descreva brevemente o assunto" required maxlength="200">
+                    </div>
+                    <div class="sup-field">
+                        <label for="supMensagem"><i class="fas fa-comment-dots"></i> Mensagem</label>
+                        <textarea id="supMensagem" rows="5" placeholder="Descreva detalhadamente sua dúvida ou solicitação..." required maxlength="2000"></textarea>
+                        <span class="sup-char-count"><span id="supCharCount">0</span>/2000</span>
+                    </div>
+                    <div class="sup-field">
+                        <label for="supPrioridade"><i class="fas fa-exclamation-circle"></i> Prioridade</label>
+                        <div class="sup-priority-group">
+                            <label class="sup-priority-opt">
+                                <input type="radio" name="prioridade" value="baixa"> 
+                                <span class="sup-priority-badge baixa"><i class="fas fa-arrow-down"></i> Baixa</span>
+                            </label>
+                            <label class="sup-priority-opt">
+                                <input type="radio" name="prioridade" value="normal" checked>
+                                <span class="sup-priority-badge normal"><i class="fas fa-minus"></i> Normal</span>
+                            </label>
+                            <label class="sup-priority-opt">
+                                <input type="radio" name="prioridade" value="alta">
+                                <span class="sup-priority-badge alta"><i class="fas fa-arrow-up"></i> Alta</span>
+                            </label>
+                            <label class="sup-priority-opt">
+                                <input type="radio" name="prioridade" value="urgente">
+                                <span class="sup-priority-badge urgente"><i class="fas fa-bolt"></i> Urgente</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="sup-actions">
+                        <button type="button" class="sup-btn sup-btn-cancel" id="supCancelBtn">Cancelar</button>
+                        <button type="submit" class="sup-btn sup-btn-primary" id="btnEnviarSuporte">
+                            <i class="fas fa-paper-plane"></i> Enviar Chamado
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Tab: Histórico -->
+            <div class="sup-tab-content" id="supTabHistorico">
+                <div class="sup-tickets-loading" id="supTicketsLoading">
+                    <i class="fas fa-spinner fa-spin"></i> Carregando chamados...
+                </div>
+                <div class="sup-tickets-empty" id="supTicketsEmpty" style="display:none;">
+                    <i class="fas fa-inbox"></i>
+                    <p>Nenhum chamado encontrado.</p>
+                    <small>Seus chamados aparecerão aqui após o envio.</small>
+                </div>
+                <div class="sup-tickets-list" id="supTicketsList"></div>
             </div>
         </div>
     </div>

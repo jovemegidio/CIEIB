@@ -1402,3 +1402,247 @@ async function loadDadosAcesso() {
         showToast('Erro ao carregar dados de acesso', 'error');
     }
 }
+
+// ================================================================
+//  SUPORTE — Central de Chamados
+// ================================================================
+
+const supCatLabels = {
+    duvida: '💬 Dúvida Geral',
+    financeiro: '💰 Financeiro',
+    curso: '📚 Cursos',
+    credencial: '🪪 Credencial',
+    cadastro: '📝 Cadastro',
+    tecnico: '🔧 Técnico',
+    sugestao: '💡 Sugestão',
+    outro: '📌 Outro'
+};
+
+const supStatusLabels = {
+    aberto: 'Aberto',
+    em_andamento: 'Em Andamento',
+    respondido: 'Respondido',
+    fechado: 'Fechado'
+};
+
+function openSupModal() {
+    document.getElementById('supOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeSupModal() {
+    document.getElementById('supOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+function showSupTab(tabName) {
+    document.querySelectorAll('.sup-tab').forEach(t => t.classList.toggle('active', t.getAttribute('data-sup-tab') === tabName));
+    document.getElementById('supTabNovo').classList.toggle('active', tabName === 'novo');
+    document.getElementById('supTabHistorico').classList.toggle('active', tabName === 'historico');
+
+    if (tabName === 'historico') loadMeusChamados();
+}
+
+function formatSupDate(dateStr) {
+    if (!dateStr) return '---';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function renderTickets(tickets) {
+    const list = document.getElementById('supTicketsList');
+    const empty = document.getElementById('supTicketsEmpty');
+    const loading = document.getElementById('supTicketsLoading');
+
+    loading.style.display = 'none';
+
+    if (!tickets || tickets.length === 0) {
+        empty.style.display = 'block';
+        list.innerHTML = '';
+        return;
+    }
+
+    empty.style.display = 'none';
+    list.innerHTML = tickets.map(t => `
+        <div class="sup-ticket">
+            <div class="sup-ticket-header">
+                <h4 class="sup-ticket-title">${t.assunto}</h4>
+                <span class="sup-ticket-status ${t.status}">${supStatusLabels[t.status] || t.status}</span>
+            </div>
+            <div class="sup-ticket-meta">
+                <span><i class="fas fa-hashtag"></i> ${t.protocolo}</span>
+                <span><i class="fas fa-tag"></i> ${supCatLabels[t.categoria] || t.categoria}</span>
+                <span class="sup-ticket-priority ${t.prioridade}">${(t.prioridade || 'normal').charAt(0).toUpperCase() + (t.prioridade || 'normal').slice(1)}</span>
+                <span><i class="fas fa-clock"></i> ${formatSupDate(t.created_at)}</span>
+            </div>
+            <p class="sup-ticket-msg">${t.mensagem}</p>
+            ${t.resposta ? `
+                <div class="sup-ticket-reply">
+                    <div class="sup-ticket-reply-label"><i class="fas fa-reply"></i> Resposta${t.respondido_por ? ' — ' + t.respondido_por : ''}</div>
+                    <p class="sup-ticket-reply-text">${t.resposta}</p>
+                </div>
+            ` : ''}
+        </div>
+    `).join('');
+}
+
+async function loadMeusChamados() {
+    const loading = document.getElementById('supTicketsLoading');
+    const empty = document.getElementById('supTicketsEmpty');
+    const list = document.getElementById('supTicketsList');
+
+    loading.style.display = 'block';
+    empty.style.display = 'none';
+    list.innerHTML = '';
+
+    try {
+        const tickets = await API.getMeusChamados();
+        renderTickets(tickets);
+    } catch (err) {
+        loading.style.display = 'none';
+        empty.style.display = 'block';
+    }
+}
+
+function showSupSuccess(protocolo) {
+    const formTab = document.getElementById('supTabNovo');
+    formTab.innerHTML = `
+        <div class="sup-success">
+            <div class="sup-success-icon"><i class="fas fa-check"></i></div>
+            <h3>Chamado Enviado com Sucesso!</h3>
+            <p>Seu chamado foi registrado. Guarde o número do protocolo:</p>
+            <div class="sup-protocolo-display">${protocolo}</div>
+            <p>Acompanhe o status na aba <strong>"Meus Chamados"</strong>.</p>
+            <button type="button" class="sup-btn sup-btn-primary" onclick="resetSupForm()">
+                <i class="fas fa-plus-circle"></i> Novo Chamado
+            </button>
+        </div>
+    `;
+}
+
+function resetSupForm() {
+    const formTab = document.getElementById('supTabNovo');
+    formTab.innerHTML = `
+        <form id="formSuporte" class="sup-form">
+            <div class="sup-field">
+                <label for="supCategoria"><i class="fas fa-tag"></i> Categoria</label>
+                <select id="supCategoria" required>
+                    <option value="">Selecione uma categoria...</option>
+                    <option value="duvida">💬 Dúvida Geral</option>
+                    <option value="financeiro">💰 Financeiro / Pagamentos</option>
+                    <option value="curso">📚 Cursos / Matrículas</option>
+                    <option value="credencial">🪪 Credencial Digital</option>
+                    <option value="cadastro">📝 Cadastro / Dados Pessoais</option>
+                    <option value="tecnico">🔧 Problema Técnico</option>
+                    <option value="sugestao">💡 Sugestão / Melhoria</option>
+                    <option value="outro">📌 Outro Assunto</option>
+                </select>
+            </div>
+            <div class="sup-field">
+                <label for="supAssunto"><i class="fas fa-heading"></i> Assunto</label>
+                <input type="text" id="supAssunto" placeholder="Descreva brevemente o assunto" required maxlength="200">
+            </div>
+            <div class="sup-field">
+                <label for="supMensagem"><i class="fas fa-comment-dots"></i> Mensagem</label>
+                <textarea id="supMensagem" rows="5" placeholder="Descreva detalhadamente sua dúvida ou solicitação..." required maxlength="2000"></textarea>
+                <span class="sup-char-count"><span id="supCharCount">0</span>/2000</span>
+            </div>
+            <div class="sup-field">
+                <label for="supPrioridade"><i class="fas fa-exclamation-circle"></i> Prioridade</label>
+                <div class="sup-priority-group">
+                    <label class="sup-priority-opt">
+                        <input type="radio" name="prioridade" value="baixa">
+                        <span class="sup-priority-badge baixa"><i class="fas fa-arrow-down"></i> Baixa</span>
+                    </label>
+                    <label class="sup-priority-opt">
+                        <input type="radio" name="prioridade" value="normal" checked>
+                        <span class="sup-priority-badge normal"><i class="fas fa-minus"></i> Normal</span>
+                    </label>
+                    <label class="sup-priority-opt">
+                        <input type="radio" name="prioridade" value="alta">
+                        <span class="sup-priority-badge alta"><i class="fas fa-arrow-up"></i> Alta</span>
+                    </label>
+                    <label class="sup-priority-opt">
+                        <input type="radio" name="prioridade" value="urgente">
+                        <span class="sup-priority-badge urgente"><i class="fas fa-bolt"></i> Urgente</span>
+                    </label>
+                </div>
+            </div>
+            <div class="sup-actions">
+                <button type="button" class="sup-btn sup-btn-cancel" id="supCancelBtn">Cancelar</button>
+                <button type="submit" class="sup-btn sup-btn-primary" id="btnEnviarSuporte">
+                    <i class="fas fa-paper-plane"></i> Enviar Chamado
+                </button>
+            </div>
+        </form>
+    `;
+    bindSupFormEvents();
+}
+
+function bindSupFormEvents() {
+    // Char count
+    document.getElementById('supMensagem')?.addEventListener('input', (e) => {
+        const count = document.getElementById('supCharCount');
+        if (count) count.textContent = e.target.value.length;
+    });
+
+    // Cancel button
+    document.getElementById('supCancelBtn')?.addEventListener('click', closeSupModal);
+
+    // Submit
+    document.getElementById('formSuporte')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const categoria = document.getElementById('supCategoria').value;
+        const assunto = document.getElementById('supAssunto').value.trim();
+        const mensagem = document.getElementById('supMensagem').value.trim();
+        const prioridade = document.querySelector('input[name="prioridade"]:checked')?.value || 'normal';
+
+        if (!categoria || !assunto || !mensagem) {
+            showToast('Preencha todos os campos obrigatórios', 'error');
+            return;
+        }
+
+        const btn = document.getElementById('btnEnviarSuporte');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+
+        try {
+            const result = await API.enviarSuporte({ categoria, assunto, mensagem, prioridade });
+            showToast('Chamado enviado com sucesso!', 'success');
+            showSupSuccess(result.protocolo);
+        } catch (err) {
+            showToast(err.message || 'Erro ao enviar chamado', 'error');
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    });
+}
+
+// Init support events on DOMContentLoaded
+document.addEventListener('DOMContentLoaded', () => {
+    // Open
+    document.getElementById('btnSuporte')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        resetSupForm();
+        showSupTab('novo');
+        openSupModal();
+    });
+
+    // Close
+    document.getElementById('supClose')?.addEventListener('click', closeSupModal);
+
+    // Overlay click
+    document.getElementById('supOverlay')?.addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) closeSupModal();
+    });
+
+    // Tabs
+    document.querySelectorAll('.sup-tab').forEach(tab => {
+        tab.addEventListener('click', () => showSupTab(tab.getAttribute('data-sup-tab')));
+    });
+
+    // Init form events
+    bindSupFormEvents();
+});

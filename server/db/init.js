@@ -405,6 +405,23 @@ CREATE TABLE IF NOT EXISTS ministro_uploads (
 );
 
 -- ===== INFORMAÇÕES MINISTERIAIS (primeiro acesso) =====
+-- ===== CHAMADOS DE SUPORTE =====
+CREATE TABLE IF NOT EXISTS suporte_tickets (
+    id SERIAL PRIMARY KEY,
+    ministro_id INTEGER REFERENCES ministros(id) ON DELETE CASCADE,
+    protocolo VARCHAR(20) UNIQUE NOT NULL,
+    categoria VARCHAR(50) NOT NULL,
+    assunto VARCHAR(200) NOT NULL,
+    mensagem TEXT NOT NULL,
+    prioridade VARCHAR(20) DEFAULT 'normal',
+    status VARCHAR(20) DEFAULT 'aberto',
+    resposta TEXT,
+    respondido_por VARCHAR(200),
+    respondido_em TIMESTAMP,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
 ALTER TABLE ministros ADD COLUMN IF NOT EXISTS telefone VARCHAR(20);
 ALTER TABLE ministros ADD COLUMN IF NOT EXISTS whatsapp VARCHAR(20);
 ALTER TABLE ministros ADD COLUMN IF NOT EXISTS escolaridade VARCHAR(50);

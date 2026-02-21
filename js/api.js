@@ -227,6 +227,10 @@ const API = {
         return this.put('/ministros/me/acesso', dados);
     },
 
+    // =============== SUPORTE ===============
+    enviarSuporte(dados) { return this.post('/suporte', dados); },
+    getMeusChamados() { return this.get('/suporte'); },
+
     // =============== CURSOS / FACULDADES ===============
     getCursos(area = '') {
         const qs = area ? `?area=${area}` : '';

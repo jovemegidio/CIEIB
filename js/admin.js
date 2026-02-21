@@ -309,14 +309,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = document.getElementById('adminEmail').value;
         const senha = document.getElementById('adminSenha').value;
 
-        // ---- Mock login (visualização) ----
-        if (email === 'admin@cieib.org.br' && senha === 'admin123') {
-            localStorage.setItem('admin_token', 'mock_token_dev');
-            localStorage.setItem('admin_data', JSON.stringify({ nome: 'Administrador', email }));
-            showPanel();
-            return;
-        }
-
         try {
             const data = await fetch('/api/admin/login', {
                 method: 'POST',

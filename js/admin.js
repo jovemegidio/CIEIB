@@ -951,7 +951,7 @@ function renderMinistrosTable(data) {
                 </div>
             </td>
             <td><strong style="font-size:0.83rem;">${m.nome}</strong></td>
-            <td style="font-size:0.8rem;font-family:monospace;">${m.cpf || '-'}</td>
+            <td style="font-size:0.8rem;font-family:monospace;">${formatCPF(m.cpf)}</td>
             <td style="font-size:0.8rem;">${formatCargo(m.cargo)}</td>
             <td style="font-size:0.78rem;color:#999;">${m.registro || '—'}</td>
             <td>${statusBadge(m.status)}</td>
@@ -982,6 +982,32 @@ function formatCargo(cargo) {
         'OBREIRO': 'Obreiro(a)'
     };
     return map[cargo] || cargo.charAt(0) + cargo.slice(1).toLowerCase();
+}
+
+function formatCPF(cpf) {
+    if (!cpf) return '—';
+    const digits = cpf.replace(/\D/g, '');
+    if (digits.length === 11) return digits.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    return cpf;
+}
+
+function formatRG(rg) {
+    if (!rg) return '—';
+    const digits = rg.replace(/\D/g, '');
+    if (digits.length === 9) return digits.replace(/(\d{2})(\d{3})(\d{3})(\d{1})/, '$1.$2.$3-$4');
+    if (digits.length === 8) return digits.replace(/(\d{2})(\d{3})(\d{3})/, '$1.$2.$3');
+    if (digits.length >= 7 && digits.length <= 10) {
+        return rg.includes('.') || rg.includes('-') ? rg : digits.replace(/(\d{2})(\d{3})(\d{3})(\d*)/, '$1.$2.$3' + (digits.length > 8 ? '-$4' : ''));
+    }
+    return rg;
+}
+
+function formatTelefone(tel) {
+    if (!tel) return '—';
+    const digits = tel.replace(/\D/g, '');
+    if (digits.length === 11) return digits.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    if (digits.length === 10) return digits.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+    return tel;
 }
 
 async function toggleMinistroStatus(id, currentStatus) {
@@ -1069,7 +1095,7 @@ async function openMembroDetail(id) {
                 <div class="mdp-profile-info">
                     <h4>${m.nome}</h4>
                     <p>${formatCargo(m.cargo)} — ${m.nome_igreja || 'Sem igreja vinculada'}</p>
-                    <p>CPF: ${m.cpf} ${m.registro ? `| Registro: ${m.registro}` : ''}</p>
+                    <p>CPF: ${formatCPF(m.cpf)} ${m.registro ? `| Registro: ${m.registro}` : ''}</p>
                     <div class="mdp-profile-badges">
                         <span class="badge ${m.status === 'ATIVO' ? 'badge-ativo' : m.status === 'PENDENTE' ? 'badge-pendente' : 'badge-inativo'}">${m.status}</span>
                         <span class="badge ${m.anuidade_status === 'paga' ? 'badge-paga' : m.anuidade_status === 'vencida' ? 'badge-vencida' : 'badge-pendente'}">Anuid. ${(m.anuidade_status || 'pendente')}</span>
@@ -1116,8 +1142,8 @@ function switchMdpTab(tab) {
             <div class="mdp-info-grid">
                 <div class="mdp-info-item"><label>Nome Completo</label><span>${m.nome || '—'}</span></div>
                 <div class="mdp-info-item"><label>Nome Social</label><span>${m.nome_social || '—'}</span></div>
-                <div class="mdp-info-item"><label>CPF</label><span>${m.cpf || '—'}</span></div>
-                <div class="mdp-info-item"><label>RG</label><span>${m.rg || '—'} ${m.orgao_expedidor ? `(${m.orgao_expedidor})` : ''}</span></div>
+                <div class="mdp-info-item"><label>CPF</label><span>${formatCPF(m.cpf)}</span></div>
+                <div class="mdp-info-item"><label>RG</label><span>${formatRG(m.rg)} ${m.orgao_expedidor ? `(${m.orgao_expedidor})` : ''}</span></div>
                 <div class="mdp-info-item"><label>Sexo</label><span>${m.sexo === 'M' ? 'Masculino' : m.sexo === 'F' ? 'Feminino' : '—'}</span></div>
                 <div class="mdp-info-item"><label>Data Nascimento</label><span>${fmtDate(m.data_nascimento)}</span></div>
                 <div class="mdp-info-item"><label>Estado Civil</label><span>${m.estado_civil || '—'}</span></div>
@@ -1128,8 +1154,8 @@ function switchMdpTab(tab) {
             <div class="mdp-section-title"><i class="fas fa-phone"></i> Contato</div>
             <div class="mdp-info-grid">
                 <div class="mdp-info-item"><label>Email</label><span>${m.email || '—'}</span></div>
-                <div class="mdp-info-item"><label>Telefone</label><span>${m.telefone || '—'}</span></div>
-                <div class="mdp-info-item"><label>WhatsApp</label><span>${m.whatsapp || '—'}</span></div>
+                <div class="mdp-info-item"><label>Telefone</label><span>${formatTelefone(m.telefone)}</span></div>
+                <div class="mdp-info-item"><label>WhatsApp</label><span>${formatTelefone(m.whatsapp)}</span></div>
             </div>
 
             <div class="mdp-section-title"><i class="fas fa-map-marker-alt"></i> Endereço</div>

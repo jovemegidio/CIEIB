@@ -286,11 +286,11 @@
                             break;
                         case 'missao':
                             const missaoEl = document.getElementById('qsMissao');
-                            if (missaoEl) missaoEl.querySelector('p').textContent = c.conteudo;
+                            if (missaoEl) missaoEl.querySelector('p').innerHTML = c.conteudo;
                             break;
                         case 'visao':
                             const visaoEl = document.getElementById('qsVisao');
-                            if (visaoEl) visaoEl.querySelector('p').textContent = c.conteudo;
+                            if (visaoEl) visaoEl.querySelector('p').innerHTML = c.conteudo;
                             break;
                         case 'valores':
                             try {

@@ -938,8 +938,8 @@ router.post('/midias/upload', adminAuth, upload.single('arquivo'), async (req, r
         const url = `/uploads/${req.file.filename}`;
         const tipo = req.file.mimetype.startsWith('image') ? 'imagem' : 'documento';
         const r = await pool.query(
-            'INSERT INTO midias (titulo, tipo, url, tamanho, admin_id) VALUES ($1,$2,$3,$4,$5) RETURNING *',
-            [req.body.titulo || req.file.originalname, tipo, url, req.file.size, req.adminId]
+            'INSERT INTO midias (titulo, descricao, tipo, url, tamanho, admin_id) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *',
+            [req.body.titulo || req.file.originalname, req.body.descricao || null, tipo, url, req.file.size, req.adminId]
         );
         res.status(201).json(r.rows[0]);
     } catch (err) { res.status(500).json({ error: err.message }); }

@@ -2208,14 +2208,23 @@ async function loadMidias() {
 function renderMidiasGrid() {
     const el = document.getElementById('midiasGrid');
     if (allMidias.length === 0) { el.innerHTML = '<p style="text-align:center;color:#aaa;padding:40px;grid-column:1/-1;">Nenhuma mídia enviada</p>'; return; }
+    const fmtDt = d => d ? new Date(d).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric'}) : '';
+    const fmtSize = s => s >= 1048576 ? (s/1048576).toFixed(1)+' MB' : (s/1024).toFixed(1)+' KB';
+    const tipoIcon = t => t === 'imagem' ? 'fa-image' : 'fa-file-pdf';
+    const tipoColor = t => t === 'imagem' ? '#0e7490' : '#d93025';
     el.innerHTML = allMidias.map(m => `
         <div class="midia-item">
             <div class="midia-thumb">${m.tipo === 'imagem'
                 ? `<img src="${m.url}" alt="${m.titulo}" loading="lazy">`
-                : `<i class="fas fa-file-alt"></i>`}</div>
+                : `<i class="fas ${tipoIcon(m.tipo)}" style="font-size:2rem;color:${tipoColor(m.tipo)}"></i>`}</div>
             <div class="midia-info">
                 <h5>${m.titulo}</h5>
-                <p>${(m.tamanho / 1024).toFixed(1)} KB</p>
+                <p style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                    <span class="badge" style="background:${m.tipo==='imagem'?'#e0f7fa':'#fce8e8'};color:${tipoColor(m.tipo)};font-size:0.65rem;"><i class="fas ${tipoIcon(m.tipo)}"></i> ${m.tipo}</span>
+                    <span style="color:#888;font-size:0.75rem;">${fmtSize(m.tamanho || 0)}</span>
+                    <span style="color:#aaa;font-size:0.7rem;">${fmtDt(m.created_at)}</span>
+                </p>
+                ${m.descricao ? `<p style="font-size:0.75rem;color:#666;margin-top:2px;">${m.descricao}</p>` : ''}
             </div>
             <div class="midia-actions">
                 <button class="btn-table-action btn-table-view" onclick="copyToClipboard('${m.url}')" title="Copiar URL"><i class="fas fa-copy"></i></button>
@@ -2228,8 +2237,25 @@ function renderMidiasGrid() {
 function openUploadModal() {
     document.getElementById('modalTitle').textContent = 'Upload de Mídia';
     document.getElementById('modalBody').innerHTML = `
-        <div class="admin-form-group"><label>Título</label><input type="text" id="mMidiaTitulo" placeholder="Nome do arquivo"></div>
-        <div class="admin-form-group"><label>Arquivo</label><input type="file" id="mMidiaArquivo" accept="image/*,.pdf,.doc,.docx"></div>
+        <div class="admin-form-group"><label>Título *</label><input type="text" id="mMidiaTitulo" placeholder="Ex: Logo Convenção 2026"></div>
+        <div class="admin-form-group"><label>Descrição (opcional)</label><textarea id="mMidiaDesc" rows="2" placeholder="Breve descrição da mídia..."></textarea></div>
+        <div class="admin-form-group">
+            <label>Arquivo *</label>
+            <div id="mMidiaDropZone" style="border:2px dashed #ccc;border-radius:10px;padding:30px;text-align:center;cursor:pointer;transition:all .2s;background:#fafbfc;"
+                 onclick="document.getElementById('mMidiaArquivo').click()"
+                 ondragover="event.preventDefault();this.style.borderColor='var(--admin-primary)';this.style.background='#f0f4f8';"
+                 ondragleave="this.style.borderColor='#ccc';this.style.background='#fafbfc';"
+                 ondrop="event.preventDefault();this.style.borderColor='#ccc';this.style.background='#fafbfc';document.getElementById('mMidiaArquivo').files=event.dataTransfer.files;midiaFilePreview();">
+                <div id="mMidiaPreview" style="display:none;margin-bottom:12px;"></div>
+                <div id="mMidiaPlaceholder">
+                    <i class="fas fa-cloud-upload-alt" style="font-size:2.5rem;color:#aaa;"></i>
+                    <p style="margin:8px 0 4px;color:#555;font-weight:600;">Clique ou arraste um arquivo</p>
+                    <small style="color:#999;">Imagens (JPG, PNG, WebP, GIF) ou Documentos (PDF, DOC, DOCX)</small><br>
+                    <small style="color:#bbb;">Tamanho máximo: 5 MB</small>
+                </div>
+            </div>
+            <input type="file" id="mMidiaArquivo" accept="image/jpeg,image/png,image/webp,image/gif,.pdf,.doc,.docx" style="display:none;" onchange="midiaFilePreview()">
+        </div>
     `;
     document.getElementById('modalFooter').innerHTML = `
         <button class="btn-admin-secondary" onclick="closeModal()">Cancelar</button>
@@ -2238,12 +2264,40 @@ function openUploadModal() {
     openModal();
 }
 
+function midiaFilePreview() {
+    const file = document.getElementById('mMidiaArquivo').files[0];
+    const preview = document.getElementById('mMidiaPreview');
+    const placeholder = document.getElementById('mMidiaPlaceholder');
+    if (!file) { preview.style.display = 'none'; placeholder.style.display = ''; return; }
+    const fmtSize = s => s >= 1048576 ? (s/1048576).toFixed(1)+' MB' : (s/1024).toFixed(1)+' KB';
+    if (file.size > 5 * 1024 * 1024) { showToast('Arquivo muito grande. Máximo 5 MB.', 'error'); document.getElementById('mMidiaArquivo').value = ''; return; }
+    placeholder.style.display = 'none';
+    if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            preview.innerHTML = `<img src="${e.target.result}" style="max-height:120px;border-radius:8px;margin-bottom:8px;"><br><span style="font-size:0.85rem;color:#555;"><i class="fas fa-image" style="color:#0e7490;"></i> ${file.name} <small style="color:#999;">(${fmtSize(file.size)})</small></span>`;
+            preview.style.display = '';
+        };
+        reader.readAsDataURL(file);
+    } else {
+        const icon = file.name.endsWith('.pdf') ? 'fa-file-pdf' : 'fa-file-word';
+        const color = file.name.endsWith('.pdf') ? '#d93025' : '#1a73e8';
+        preview.innerHTML = `<i class="fas ${icon}" style="font-size:2.5rem;color:${color};"></i><br><span style="font-size:0.85rem;color:#555;">${file.name} <small style="color:#999;">(${fmtSize(file.size)})</small></span>`;
+        preview.style.display = '';
+    }
+    // Auto-fill title if empty
+    const titleInput = document.getElementById('mMidiaTitulo');
+    if (!titleInput.value) titleInput.value = file.name.replace(/\.[^.]+$/, '');
+}
+
 async function uploadMidia() {
     const file = document.getElementById('mMidiaArquivo').files[0];
     if (!file) { showToast('Selecione um arquivo', 'error'); return; }
+    if (file.size > 5 * 1024 * 1024) { showToast('Arquivo muito grande. Máximo 5 MB.', 'error'); return; }
     const formData = new FormData();
     formData.append('arquivo', file);
     formData.append('titulo', document.getElementById('mMidiaTitulo').value || file.name);
+    formData.append('descricao', document.getElementById('mMidiaDesc').value || '');
     try {
         const res = await fetch('/api/admin/midias/upload', {
             method: 'POST',

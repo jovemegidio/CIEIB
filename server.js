@@ -35,11 +35,31 @@ app.use('/api/', apiLimiter);
 
 // ---- Favicon redirect ----
 app.get('/favicon.ico', (req, res) => {
-    res.redirect(301, '/fav.jpg');
+    res.redirect(302, '/fav.jpg');
+});
+
+// ---- Cache control para HTML (nunca cachear) ----
+app.use((req, res, next) => {
+    if (req.path.endsWith('.html') || req.path === '/' || !req.path.includes('.')) {
+        res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
+    }
+    next();
 });
 
 // ---- Servir arquivos estáticos (HTML, CSS, JS) ----
-app.use(express.static(__dirname));
+app.use(express.static(__dirname, {
+    etag: true,
+    lastModified: true,
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.html')) {
+            res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        } else if (filePath.endsWith('.css') || filePath.endsWith('.js')) {
+            res.set('Cache-Control', 'public, max-age=3600, must-revalidate');
+        }
+    }
+}));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ---- Rotas da API ----

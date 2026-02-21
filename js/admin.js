@@ -721,7 +721,8 @@ async function saveModulo(cursoId) {
 }
 
 async function deleteModulo(moduloId, cursoId) {
-    if (!confirm('Excluir este módulo e todas as suas aulas?')) return;
+    const ok = await adminConfirm({ title: 'Excluir Módulo', message: 'Excluir este módulo e todas as suas aulas?', type: 'danger', confirmText: 'Excluir' });
+    if (!ok) return;
     try {
         await AdminAPI.del(`/modulos/${moduloId}`);
         showToast('Módulo excluído', 'success');
@@ -781,7 +782,8 @@ async function saveAula(moduloId, moduloTitulo) {
 }
 
 async function deleteAula(aulaId, moduloId, moduloTitulo) {
-    if (!confirm('Excluir esta aula?')) return;
+    const ok = await adminConfirm({ title: 'Excluir Aula', message: 'Excluir esta aula permanentemente?', type: 'danger', confirmText: 'Excluir' });
+    if (!ok) return;
     try {
         await AdminAPI.del(`/aulas/${aulaId}`);
         showToast('Aula excluída', 'success');
@@ -1012,7 +1014,8 @@ function formatTelefone(tel) {
 
 async function toggleMinistroStatus(id, currentStatus) {
     const newStatus = currentStatus === 'ATIVO' ? 'INATIVO' : 'ATIVO';
-    if (!confirm(`${newStatus === 'INATIVO' ? 'Desativar' : 'Ativar'} este membro?`)) return;
+    const ok = await adminConfirm({ title: newStatus === 'INATIVO' ? 'Desativar Membro' : 'Ativar Membro', message: `${newStatus === 'INATIVO' ? 'Desativar' : 'Ativar'} este membro?`, type: 'warning', confirmText: newStatus === 'INATIVO' ? 'Desativar' : 'Ativar' });
+    if (!ok) return;
     try {
         await AdminAPI.put(`/ministros/${id}/status`, { status: newStatus });
         showToast('Status alterado!', 'success');
@@ -1021,7 +1024,8 @@ async function toggleMinistroStatus(id, currentStatus) {
 }
 
 async function deleteMinistro(id) {
-    if (!confirm('ATENÇÃO: Excluir este membro permanentemente? Todos os dados relacionados serão removidos.')) return;
+    const ok = await adminConfirm({ title: 'Excluir Membro', message: 'ATENÇÃO: Excluir este membro permanentemente? Todos os dados relacionados serão removidos.', type: 'danger', confirmText: 'Excluir Permanentemente' });
+    if (!ok) return;
     try {
         await AdminAPI.del(`/ministros/${id}`);
         showToast('Membro excluído', 'success');
@@ -1618,7 +1622,8 @@ async function updateBoleto(boletoId, ministroId) {
 }
 
 async function deleteBoleto(boletoId) {
-    if (!confirm('Excluir este boleto?')) return;
+    const ok = await adminConfirm({ title: 'Excluir Boleto', message: 'Excluir este boleto permanentemente?', type: 'danger', confirmText: 'Excluir' });
+    if (!ok) return;
     try {
         await AdminAPI.del(`/boletos/${boletoId}`);
         showToast('Boleto excluído', 'success');
@@ -1728,7 +1733,8 @@ async function updateCredencial(credencialId, ministroId) {
 }
 
 async function deleteCredencial(credencialId) {
-    if (!confirm('Excluir esta credencial?')) return;
+    const ok = await adminConfirm({ title: 'Excluir Credencial', message: 'Excluir esta credencial permanentemente?', type: 'danger', confirmText: 'Excluir' });
+    if (!ok) return;
     try {
         await AdminAPI.del(`/credenciais/${credencialId}`);
         showToast('Credencial excluída', 'success');
@@ -2108,7 +2114,8 @@ async function uploadMidia() {
 }
 
 async function deleteMidia(id) {
-    if (!confirm('Excluir esta mídia?')) return;
+    const ok = await adminConfirm({ title: 'Excluir Mídia', message: 'Excluir esta mídia permanentemente?', type: 'danger', confirmText: 'Excluir' });
+    if (!ok) return;
     try {
         await AdminAPI.del(`/midias/${id}`);
         showToast('Mídia excluída', 'success'); loadMidias();
@@ -2203,7 +2210,8 @@ async function saveNotifSite(id) {
 // GENERIC HELPERS
 // ================================================================
 async function deleteItem(resource, id) {
-    if (!confirm('Tem certeza que deseja excluir?')) return;
+    const ok = await adminConfirm({ title: 'Excluir Item', message: 'Tem certeza que deseja excluir este item?', type: 'danger', confirmText: 'Excluir' });
+    if (!ok) return;
     try {
         await AdminAPI.del(`/${resource}/${id}`);
         showToast('Item excluído!', 'success');
@@ -2222,6 +2230,45 @@ function showToast(msg, type = 'info') {
     toast.style.display = 'flex';
     clearTimeout(toast._timer);
     toast._timer = setTimeout(() => { toast.style.display = 'none'; }, 3000);
+}
+
+function adminConfirm({ title = 'Confirmar', message = 'Tem certeza?', type = 'warning', confirmText = 'Confirmar', cancelText = 'Cancelar' } = {}) {
+    return new Promise((resolve) => {
+        const overlay = document.getElementById('adminConfirmOverlay');
+        const iconEl = document.getElementById('confirmIcon');
+        const titleEl = document.getElementById('confirmTitle');
+        const msgEl = document.getElementById('confirmMessage');
+        const btnOk = document.getElementById('confirmBtnOk');
+        const btnCancel = document.getElementById('confirmBtnCancel');
+
+        const icons = { warning: 'exclamation-triangle', danger: 'trash-alt', info: 'info-circle', success: 'check-circle' };
+        iconEl.className = `admin-confirm-icon icon-${type}`;
+        iconEl.innerHTML = `<i class="fas fa-${icons[type] || icons.warning}"></i>`;
+        titleEl.textContent = title;
+        msgEl.textContent = message;
+        btnOk.textContent = confirmText;
+        btnOk.className = `admin-confirm-btn admin-confirm-ok btn-${type}`;
+        btnCancel.textContent = cancelText;
+        overlay.classList.add('active');
+
+        function cleanup(result) {
+            overlay.classList.remove('active');
+            btnOk.removeEventListener('click', onOk);
+            btnCancel.removeEventListener('click', onCancel);
+            overlay.removeEventListener('click', onOverlay);
+            document.removeEventListener('keydown', onKey);
+            resolve(result);
+        }
+        function onOk() { cleanup(true); }
+        function onCancel() { cleanup(false); }
+        function onOverlay(e) { if (e.target === overlay) cleanup(false); }
+        function onKey(e) { if (e.key === 'Escape') cleanup(false); }
+
+        btnOk.addEventListener('click', onOk);
+        btnCancel.addEventListener('click', onCancel);
+        overlay.addEventListener('click', onOverlay);
+        document.addEventListener('keydown', onKey);
+    });
 }
 
 function formatDate(dateStr) {

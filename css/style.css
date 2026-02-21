@@ -392,29 +392,82 @@ select:focus-visible {
 /* Responsive */
 @media (max-width: 768px) {
     .site-notification-bar .snb-inner {
-        padding: 11px 44px 11px 14px;
-        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 12px 40px 12px 12px;
+        gap: 8px;
+        min-height: auto;
     }
     .site-notification-bar .snb-text {
-        font-size: 0.82rem;
+        font-size: 0.78rem;
+        text-align: center;
+        gap: 4px;
     }
     .site-notification-bar .snb-text strong {
-        font-size: 0.84rem;
+        font-size: 0.8rem;
+        display: block;
+        width: 100%;
+    }
+    .site-notification-bar .snb-text span {
+        display: block;
+        width: 100%;
+        font-size: 0.72rem;
+        opacity: 0.9;
     }
     .site-notification-bar .snb-badge {
-        font-size: 0.58rem;
-        padding: 3px 9px;
+        font-size: 0.55rem;
+        padding: 3px 8px;
     }
     .site-notification-bar .snb-icon-wrap {
-        width: 28px;
-        height: 28px;
+        width: 26px;
+        height: 26px;
     }
     .site-notification-bar .snb-icon-wrap i {
-        font-size: 0.8rem;
+        font-size: 0.7rem;
     }
     .site-notification-bar .snb-cta {
-        font-size: 0.72rem;
-        padding: 5px 14px;
+        font-size: 0.68rem;
+        padding: 5px 12px;
+    }
+    .site-notification-bar .snb-close {
+        right: 8px;
+        width: 26px;
+        height: 26px;
+        font-size: 0.7rem;
+    }
+    .site-notification-bar .snb-dots {
+        margin-left: 0;
+    }
+    .site-notification-bar .snb-dot {
+        width: 6px;
+        height: 6px;
+    }
+    .site-notification-bar .snb-dot.active {
+        width: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .site-notification-bar .snb-inner {
+        flex-direction: column;
+        align-items: center;
+        padding: 10px 36px 10px 10px;
+        gap: 6px;
+    }
+    .site-notification-bar .snb-icon-wrap {
+        display: none;
+    }
+    .site-notification-bar .snb-cta {
+        font-size: 0.65rem;
+        padding: 4px 10px;
+        margin-top: 2px;
+    }
+    .site-notification-bar .snb-text {
+        font-size: 0.73rem;
+        line-height: 1.4;
+    }
+    .site-notification-bar .snb-text strong {
+        font-size: 0.76rem;
     }
 }
 
@@ -2161,7 +2214,28 @@ img {
     }
 
     .hero-content h1 {
-        font-size: 1.8rem;
+        font-size: 1.6rem;
+        letter-spacing: 1px;
+        word-break: break-word;
+        hyphens: auto;
+    }
+
+    .hero-content p {
+        font-size: 0.95rem;
+        padding: 0 8px;
+    }
+
+    .hero-buttons {
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        padding: 0 20px;
+    }
+
+    .hero-buttons .btn {
+        width: 100%;
+        justify-content: center;
+        padding: 14px 24px;
     }
 
     .slogan-tags span {
@@ -2303,21 +2377,38 @@ img {
 
 @media (max-width: 480px) {
     .hero {
-        min-height: 80vh;
+        min-height: 85vh;
+        padding-bottom: 70px;
+    }
+
+    .hero-content {
+        padding: 30px 12px;
     }
 
     .hero-content h1 {
-        font-size: 1.5rem;
-        letter-spacing: 1px;
+        font-size: 1.3rem;
+        letter-spacing: 0.5px;
+        line-height: 1.3;
+        word-break: break-word;
+        hyphens: auto;
+    }
+
+    .hero-content h1 span {
+        font-size: 1.2rem;
     }
 
     .hero-content p {
-        font-size: 0.95rem;
+        font-size: 0.88rem;
+        line-height: 1.6;
+        margin-bottom: 28px;
+        padding: 0 4px;
     }
 
     .hero-buttons {
         flex-direction: column;
         align-items: center;
+        gap: 10px;
+        padding: 0 10px;
     }
 
     .btn {
@@ -2387,9 +2478,18 @@ img {
     }
 
     .hero-badge {
-        font-size: 0.75rem;
-        padding: 6px 16px;
+        font-size: 0.7rem;
+        padding: 6px 14px;
         letter-spacing: 1px;
+        margin-bottom: 16px;
+    }
+
+    .hero-scroll {
+        bottom: 45px;
+    }
+
+    .hero-scroll a {
+        font-size: 1.2rem;
     }
 
     .logo-name {

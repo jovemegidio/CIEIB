@@ -384,10 +384,6 @@ function renderMsgStats() {
     el('msgNaoLidas', naoLidas);
     el('msgRecebidas', recebidas);
     el('msgEnviadas', enviadas);
-
-    // Update notification badge
-    const badge = document.querySelector('.notif-badge');
-    if (badge) badge.textContent = naoLidas;
 }
 
 function getFilteredMensagens() {
@@ -1773,95 +1769,181 @@ async function solicitarCarteirinhaFisica() {
 }
 
 // ================================================================
-//  NOTIFICAÇÕES
+//  NOTIFICAÇÕES — Sistema Completo
 // ================================================================
+let _notifCache = [];
+let _notifInterval = null;
+
 async function loadNotificacoes() {
     try {
         const notifs = await API.getNotificacoes().catch(() => []);
+        _notifCache = notifs;
         const naoLidas = notifs.filter(n => !n.lida).length;
 
+        // Atualizar badge
         const badge = document.querySelector('.notif-badge');
-        if (badge) badge.textContent = naoLidas;
+        if (badge) {
+            badge.textContent = naoLidas > 99 ? '99+' : naoLidas;
+            badge.style.display = naoLidas === 0 ? 'none' : 'flex';
+        }
 
-        // Setup click handler no ícone de notificação
-        const notifIcon = document.querySelector('.painel-notif');
-        if (notifIcon) {
-            notifIcon.style.cursor = 'pointer';
-            notifIcon.onclick = function() {
-                toggleNotifPanel(notifs);
-            };
+        // Setup click handler (apenas 1x)
+        const notifBtn = document.querySelector('.painel-notif');
+        if (notifBtn && !notifBtn._notifBound) {
+            notifBtn._notifBound = true;
+            notifBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleNotifPanel();
+            });
+        }
+
+        // Atualizar painel se estiver aberto
+        const panel = document.getElementById('notifPanel');
+        if (panel && panel.classList.contains('active')) {
+            renderNotifPanelContent(panel);
+        }
+
+        // Auto-polling a cada 60s
+        if (!_notifInterval) {
+            _notifInterval = setInterval(loadNotificacoes, 60000);
         }
     } catch (err) {
         console.error('Erro ao carregar notificações:', err);
     }
 }
 
-function toggleNotifPanel(notifs) {
-    let panel = document.getElementById('notifPanel');
+function notifTimeAgo(dateStr) {
+    if (!dateStr) return '';
+    const now = new Date();
+    const d = new Date(dateStr);
+    const diff = Math.floor((now - d) / 1000);
+    if (diff < 60) return 'agora';
+    if (diff < 3600) return `${Math.floor(diff / 60)}min`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
+    if (diff < 604800) return `${Math.floor(diff / 86400)}d`;
+    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+}
 
-    if (panel) {
-        panel.remove();
-        return;
-    }
+function getNotifIcon(tipo) {
+    const map = {
+        success: 'fa-check-circle', info: 'fa-info-circle', warning: 'fa-exclamation-triangle',
+        alerta: 'fa-exclamation-circle', error: 'fa-times-circle', curso: 'fa-graduation-cap',
+        credencial: 'fa-id-badge', evento: 'fa-calendar-check', boleto: 'fa-barcode',
+        financeiro: 'fa-money-bill-wave', suporte: 'fa-headset', mensagem: 'fa-envelope'
+    };
+    return map[tipo] || 'fa-bell';
+}
 
-    panel = document.createElement('div');
-    panel.id = 'notifPanel';
-    panel.className = 'notif-panel';
+function renderNotifPanelContent(panel) {
+    const notifs = _notifCache;
+    const naoLidas = notifs.filter(n => !n.lida).length;
 
     let html = `<div class="notif-panel-header">
-        <h4><i class="fas fa-bell"></i> Notificações</h4>
-        <button onclick="marcarTodasLidas()" class="notif-ler-todas">Marcar todas como lidas</button>
+        <h4><i class="fas fa-bell"></i> Notificações${naoLidas > 0 ? ` <span style="background:#ef4444;color:#fff;font-size:0.65rem;padding:2px 7px;border-radius:10px;margin-left:6px;">${naoLidas}</span>` : ''}</h4>
+        ${naoLidas > 0 ? '<button onclick="marcarTodasLidas()">Marcar todas como lidas</button>' : ''}
     </div><div class="notif-panel-body">`;
 
     if (notifs.length === 0) {
-        html += '<p class="notif-vazio"><i class="fas fa-check-circle"></i> Nenhuma notificação</p>';
+        html += `<div class="notif-empty"><i class="fas fa-bell-slash"></i><p>Nenhuma notificação</p></div>`;
     } else {
-        notifs.slice(0, 15).forEach(n => {
-            const tipoIcons = { success: 'fa-check-circle', error: 'fa-times-circle', info: 'fa-info-circle', warning: 'fa-exclamation-triangle' };
-            const icon = tipoIcons[n.tipo] || 'fa-bell';
+        notifs.slice(0, 20).forEach(n => {
+            const icon = getNotifIcon(n.tipo);
+            const tipoClass = n.tipo || 'info';
             html += `
-                <div class="notif-item ${n.lida ? '' : 'notif-nao-lida'}" onclick="marcarNotifLida(${n.id})">
-                    <i class="fas ${icon} notif-tipo-${n.tipo || 'info'}"></i>
-                    <div>
-                        <strong>${n.titulo}</strong>
-                        <p>${n.mensagem || ''}</p>
-                        <span class="notif-data">${formatDate(n.created_at)}</span>
-                    </div>
-                </div>`;
+            <div class="notif-item${n.lida ? '' : ' nao-lida'}" onclick="marcarNotifLida(${n.id})">
+                <div class="notif-icon tipo-${tipoClass}"><i class="fas ${icon}"></i></div>
+                <div class="notif-content">
+                    <h5>${n.titulo || 'Notificação'}</h5>
+                    <p>${n.mensagem || ''}</p>
+                </div>
+                <span class="notif-time">${notifTimeAgo(n.created_at)}</span>
+            </div>`;
         });
     }
 
     html += '</div>';
     panel.innerHTML = html;
+}
 
-    document.querySelector('.painel-topnav').appendChild(panel);
+function toggleNotifPanel() {
+    let panel = document.getElementById('notifPanel');
+
+    // Se já existe e está aberto, fechar
+    if (panel && panel.classList.contains('active')) {
+        panel.classList.remove('active');
+        setTimeout(() => panel.remove(), 200);
+        return;
+    }
+
+    // Se existe mas não está ativo, remover
+    if (panel) panel.remove();
+
+    // Criar painel
+    panel = document.createElement('div');
+    panel.id = 'notifPanel';
+    panel.className = 'notif-panel';
+    renderNotifPanelContent(panel);
+
+    // Posicionar relativo ao botão
+    const notifBtn = document.querySelector('.painel-notif');
+    if (notifBtn) {
+        notifBtn.parentElement.style.position = 'relative';
+        notifBtn.parentElement.appendChild(panel);
+    } else {
+        document.querySelector('.painel-topnav').appendChild(panel);
+    }
+
+    // Ativar com pequeno delay para animação
+    requestAnimationFrame(() => {
+        panel.classList.add('active');
+    });
 
     // Fechar ao clicar fora
     setTimeout(() => {
-        document.addEventListener('click', function closePanel(e) {
+        const handler = (e) => {
             if (!panel.contains(e.target) && !e.target.closest('.painel-notif')) {
-                panel.remove();
-                document.removeEventListener('click', closePanel);
+                panel.classList.remove('active');
+                setTimeout(() => { if (panel.parentElement) panel.remove(); }, 200);
+                document.removeEventListener('click', handler);
             }
-        });
-    }, 100);
+        };
+        document.addEventListener('click', handler);
+    }, 50);
 }
 
 async function marcarNotifLida(id) {
     try {
         await API.marcarNotificacaoLida(id);
-        loadNotificacoes();
-    } catch (err) {}
+        // Atualizar cache local
+        const n = _notifCache.find(x => x.id === id);
+        if (n) n.lida = true;
+        // Atualizar badge
+        const naoLidas = _notifCache.filter(x => !x.lida).length;
+        const badge = document.querySelector('.notif-badge');
+        if (badge) {
+            badge.textContent = naoLidas > 99 ? '99+' : naoLidas;
+            badge.style.display = naoLidas === 0 ? 'none' : 'flex';
+        }
+        // Atualizar painel
+        const panel = document.getElementById('notifPanel');
+        if (panel) renderNotifPanelContent(panel);
+    } catch (err) {
+        console.error('Erro ao marcar notificação:', err);
+    }
 }
 
 async function marcarTodasLidas() {
     try {
         await API.marcarTodasNotificacoesLidas();
-        loadNotificacoes();
+        _notifCache.forEach(n => n.lida = true);
+        const badge = document.querySelector('.notif-badge');
+        if (badge) { badge.textContent = '0'; badge.style.display = 'none'; }
         const panel = document.getElementById('notifPanel');
-        if (panel) panel.remove();
+        if (panel) renderNotifPanelContent(panel);
         showToast('Todas as notificações marcadas como lidas', 'success');
-    } catch (err) {}
+    } catch (err) {
+        console.error('Erro ao marcar todas:', err);
+    }
 }
 
 // ================================================================

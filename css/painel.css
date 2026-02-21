@@ -4950,22 +4950,25 @@
 
 .notif-panel {
     position: absolute;
-    top: 100%;
+    top: calc(100% + 8px);
     right: 0;
-    width: 360px;
-    max-height: 400px;
+    width: 380px;
+    max-height: 460px;
     background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    border-radius: 14px;
+    box-shadow: 0 12px 48px rgba(0,0,0,0.22), 0 0 0 1px rgba(0,0,0,0.05);
     z-index: 1001;
     display: none;
     overflow: hidden;
-    border: 1px solid #eee;
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+    transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .notif-panel.active {
     display: block;
-    animation: fadeInPanel 0.2s ease;
+    opacity: 1;
+    transform: translateY(0) scale(1);
 }
 
 .notif-panel-header {
@@ -5064,6 +5067,36 @@
     color: #e65100;
 }
 
+.notif-icon.tipo-alerta {
+    background: rgba(220,38,38,0.1);
+    color: #dc2626;
+}
+
+.notif-icon.tipo-boleto {
+    background: rgba(59,130,246,0.08);
+    color: #2563eb;
+}
+
+.notif-icon.tipo-financeiro {
+    background: rgba(245,158,11,0.08);
+    color: #d97706;
+}
+
+.notif-icon.tipo-suporte {
+    background: rgba(16,185,129,0.08);
+    color: #059669;
+}
+
+.notif-icon.tipo-mensagem {
+    background: rgba(99,102,241,0.08);
+    color: #6366f1;
+}
+
+.notif-icon.tipo-error {
+    background: rgba(239,68,68,0.08);
+    color: #ef4444;
+}
+
 .notif-item .notif-content {
     flex: 1;
     min-width: 0;
@@ -5154,8 +5187,13 @@
         left: 0;
         right: 0;
         width: 100%;
-        max-height: 70vh;
-        border-radius: 16px 16px 0 0;
+        max-height: 75vh;
+        border-radius: 18px 18px 0 0;
+        transform: translateY(0) scale(1);
+    }
+
+    .notif-panel.active {
+        opacity: 1;
     }
 
     .meu-curso-item {

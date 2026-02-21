@@ -331,11 +331,46 @@ async function loadSiteNotifications() {
                 dismissSiteNotif(parseInt(this.dataset.id));
             });
 
-            // Bind dot navigation
+            // Bind dot navigation with smooth transition
             bar.querySelectorAll('.snb-dot').forEach(dot => {
                 dot.addEventListener('click', function() {
-                    currentIdx = parseInt(this.dataset.idx);
-                    renderNotif(currentIdx);
+                    const newIdx = parseInt(this.dataset.idx);
+                    if (newIdx === currentIdx) return;
+
+                    const inner = bar.querySelector('.snb-inner');
+                    const goRight = newIdx > currentIdx;
+
+                    if (inner) {
+                        inner.style.transition = 'opacity 0.35s ease, transform 0.35s cubic-bezier(0.4,0,0.2,1)';
+                        inner.style.opacity = '0';
+                        inner.style.transform = goRight ? 'translateX(-25px)' : 'translateX(25px)';
+
+                        setTimeout(() => {
+                            currentIdx = newIdx;
+                            const n = pending[currentIdx];
+                            const cfg = tipoConfig[n.tipo] || tipoConfig['info'];
+                            bar.style.transition = 'background 0.5s ease';
+                            bar.className = 'site-notification-bar ' + cfg.bg;
+                            renderNotif(currentIdx);
+
+                            const newInner = bar.querySelector('.snb-inner');
+                            if (newInner) {
+                                newInner.style.transition = 'none';
+                                newInner.style.opacity = '0';
+                                newInner.style.transform = goRight ? 'translateX(25px)' : 'translateX(-25px)';
+                                requestAnimationFrame(() => {
+                                    requestAnimationFrame(() => {
+                                        newInner.style.transition = 'opacity 0.35s ease, transform 0.35s cubic-bezier(0.4,0,0.2,1)';
+                                        newInner.style.opacity = '1';
+                                        newInner.style.transform = 'translateX(0)';
+                                    });
+                                });
+                            }
+                        }, 360);
+                    } else {
+                        currentIdx = newIdx;
+                        renderNotif(currentIdx);
+                    }
                 });
             });
         }
@@ -350,22 +385,46 @@ async function loadSiteNotifications() {
             document.body.prepend(bar);
         }
 
-        // Auto-rotate if multiple notifications with smooth slide transition
+        // Auto-rotate if multiple notifications with smooth crossfade
         if (pending.length > 1) {
             function rotateNotif() {
-                currentIdx = (currentIdx + 1) % pending.length;
-                bar.style.transition = 'transform 0.45s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease';
-                bar.style.transform = 'translateY(-8px)';
-                bar.style.opacity = '0';
+                const inner = bar.querySelector('.snb-inner');
+                if (!inner) return;
+
+                // Fade out + slide left
+                inner.style.transition = 'opacity 0.4s ease, transform 0.4s cubic-bezier(0.4,0,0.2,1)';
+                inner.style.opacity = '0';
+                inner.style.transform = 'translateX(-30px)';
+
                 setTimeout(() => {
+                    // Update index and re-render
+                    currentIdx = (currentIdx + 1) % pending.length;
+                    const n = pending[currentIdx];
+                    const cfg = tipoConfig[n.tipo] || tipoConfig['info'];
+
+                    // Smooth background transition (bar stays in place)
+                    bar.style.transition = 'background 0.6s ease';
+                    bar.className = 'site-notification-bar ' + cfg.bg;
+
                     renderNotif(currentIdx);
-                    bar.style.transform = 'translateY(8px)';
-                    requestAnimationFrame(() => {
-                        bar.style.transition = 'transform 0.45s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease';
-                        bar.style.transform = 'translateY(0)';
-                        bar.style.opacity = '1';
-                    });
-                }, 400);
+
+                    // Position new content offscreen-right
+                    const newInner = bar.querySelector('.snb-inner');
+                    if (newInner) {
+                        newInner.style.transition = 'none';
+                        newInner.style.opacity = '0';
+                        newInner.style.transform = 'translateX(30px)';
+
+                        // Slide in from right
+                        requestAnimationFrame(() => {
+                            requestAnimationFrame(() => {
+                                newInner.style.transition = 'opacity 0.4s ease, transform 0.4s cubic-bezier(0.4,0,0.2,1)';
+                                newInner.style.opacity = '1';
+                                newInner.style.transform = 'translateX(0)';
+                            });
+                        });
+                    }
+                }, 420);
             }
 
             let rotateTimer = setInterval(rotateNotif, 6000);

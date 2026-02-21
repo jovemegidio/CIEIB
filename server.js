@@ -9,12 +9,28 @@ const helmet = require('helmet');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
 
+const crypto = require('crypto');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 const isProd = process.env.NODE_ENV === 'production';
 
-// ---- Versão para cache-busting (muda a cada restart/deploy) ----
-const APP_VERSION = Date.now().toString(36);
+// ---- Versão para cache-busting (baseada no conteúdo dos arquivos) ----
+const WATCHED_FILES = [
+    'css/style.css', 'css/painel.css', 'css/admin.css',
+    'js/main.js', 'js/api.js', 'js/painel.js', 'js/admin.js'
+];
+
+function computeVersion() {
+    let combined = '';
+    for (const f of WATCHED_FILES) {
+        try { combined += fs.statSync(path.join(__dirname, f)).mtimeMs; }
+        catch { combined += '0'; }
+    }
+    return crypto.createHash('md5').update(combined).digest('hex').slice(0, 8);
+}
+
+let APP_VERSION = '0'; // será calculado após fs ser importado
 
 // ---- Trust proxy (Nginx) ----
 if (isProd) app.set('trust proxy', 1);
@@ -43,6 +59,22 @@ app.get('/favicon.ico', (req, res) => {
 
 // ---- Helper: servir HTML com cache-busting automático ----
 const fs = require('fs');
+
+// Calcular versão inicial e observar mudanças nos arquivos
+APP_VERSION = computeVersion();
+console.log(`📦 Cache version: ${APP_VERSION}`);
+
+['css', 'js'].forEach(dir => {
+    try {
+        fs.watch(path.join(__dirname, dir), { recursive: true }, () => {
+            const newVersion = computeVersion();
+            if (newVersion !== APP_VERSION) {
+                APP_VERSION = newVersion;
+                console.log(`🔄 Cache version atualizada: ${APP_VERSION}`);
+            }
+        });
+    } catch (e) { /* watch não disponível */ }
+});
 function sendHtmlWithCacheBust(res, filePath) {
     fs.readFile(filePath, 'utf8', (err, html) => {
         if (err) return res.status(404).send('Página não encontrada');

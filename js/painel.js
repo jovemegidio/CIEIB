@@ -176,7 +176,6 @@ function fillConvencoes(convencoes) {
             <td>${c.registro || '-'}</td>
             <td><span class="status-badge status-${c.status === 'ATIVO' ? 'ativo' : 'inativo'}">${c.status}</span></td>
             <td><span class="status-badge status-${c.condicao === 'ATIVO' ? 'ativo' : 'inativo'}">${c.condicao}</span></td>
-            <td><button class="btn-icon" title="Detalhar"><i class="fas fa-info-circle"></i></button></td>
         </tr>
     `).join('');
 }
@@ -204,7 +203,6 @@ function fillContasResumo(data) {
             <td>R$${v.total.toFixed(2)}</td>
             <td>R$${v.desc.toFixed(2)}</td>
             <td>R$${v.pago.toFixed(2)}</td>
-            <td class="valor-aberto">R$${v.aberto.toFixed(2)}</td>
         </tr>
     `).join('');
 }
@@ -1777,6 +1775,14 @@ let _notifInterval = null;
 async function loadNotificacoes() {
     try {
         const notifs = await API.getNotificacoes().catch(() => []);
+        // Restaurar estado de alertas dinâmicos lidos do sessionStorage
+        const dismissedKey = 'cieib_notif_dismissed';
+        const dismissed = JSON.parse(sessionStorage.getItem(dismissedKey) || '[]');
+        notifs.forEach(n => {
+            if (n.id < 0 && dismissed.includes(n.id)) {
+                n.lida = true;
+            }
+        });
         _notifCache = notifs;
         const naoLidas = notifs.filter(n => !n.lida).length;
 
@@ -1834,6 +1840,11 @@ function getNotifIcon(tipo) {
     return map[tipo] || 'fa-bell';
 }
 
+function cleanNotifTitle(titulo) {
+    // Remove emojis do título (ícones já são via FontAwesome)
+    return (titulo || 'Notificação').replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{FE00}-\u{FEFF}\u{1F900}-\u{1F9FF}]|[⚠️🔴📅💰💳🪪💬📋]/gu, '').trim();
+}
+
 function renderNotifPanelContent(panel) {
     const notifs = _notifCache;
     const naoLidas = notifs.filter(n => !n.lida).length;
@@ -1849,11 +1860,12 @@ function renderNotifPanelContent(panel) {
         notifs.slice(0, 20).forEach(n => {
             const icon = getNotifIcon(n.tipo);
             const tipoClass = n.tipo || 'info';
+            const titulo = cleanNotifTitle(n.titulo);
             html += `
             <div class="notif-item${n.lida ? '' : ' nao-lida'}" onclick="marcarNotifLida(${n.id})">
                 <div class="notif-icon tipo-${tipoClass}"><i class="fas ${icon}"></i></div>
                 <div class="notif-content">
-                    <h5>${n.titulo || 'Notificação'}</h5>
+                    <h5>${titulo}</h5>
                     <p>${n.mensagem || ''}</p>
                 </div>
                 <span class="notif-time">${notifTimeAgo(n.created_at)}</span>
@@ -1913,10 +1925,46 @@ function toggleNotifPanel() {
 
 async function marcarNotifLida(id) {
     try {
-        await API.marcarNotificacaoLida(id);
-        // Atualizar cache local
-        const n = _notifCache.find(x => x.id === id);
-        if (n) n.lida = true;
+        // IDs negativos são alertas dinâmicos — marcar apenas no cache local
+        if (id < 0) {
+            const n = _notifCache.find(x => x.id === id);
+            if (n) {
+                n.lida = true;
+                // Persistir IDs de alertas dinâmicos lidos no sessionStorage
+                const dismissedKey = 'cieib_notif_dismissed';
+                const dismissed = JSON.parse(sessionStorage.getItem(dismissedKey) || '[]');
+                if (!dismissed.includes(id)) {
+                    dismissed.push(id);
+                    sessionStorage.setItem(dismissedKey, JSON.stringify(dismissed));
+                }
+            }
+            // Navegar ao link se existir
+            if (n && n.link) {
+                if (n.link.startsWith('#')) {
+                    const tabName = n.link.replace('#', '');
+                    const tabBtn = document.querySelector(`.ptab[data-tab="${tabName}"]`);
+                    if (tabBtn) tabBtn.click();
+                } else {
+                    window.location.href = n.link;
+                }
+            }
+        } else {
+            await API.marcarNotificacaoLida(id);
+            const n = _notifCache.find(x => x.id === id);
+            if (n) {
+                n.lida = true;
+                // Navegar ao link se existir
+                if (n.link) {
+                    if (n.link.startsWith('#')) {
+                        const tabName = n.link.replace('#', '');
+                        const tabBtn = document.querySelector(`.ptab[data-tab="${tabName}"]`);
+                        if (tabBtn) tabBtn.click();
+                    } else {
+                        window.location.href = n.link;
+                    }
+                }
+            }
+        }
         // Atualizar badge
         const naoLidas = _notifCache.filter(x => !x.lida).length;
         const badge = document.querySelector('.notif-badge');
@@ -1935,7 +1983,16 @@ async function marcarNotifLida(id) {
 async function marcarTodasLidas() {
     try {
         await API.marcarTodasNotificacoesLidas();
-        _notifCache.forEach(n => n.lida = true);
+        // Marcar todas no cache local
+        const dismissedKey = 'cieib_notif_dismissed';
+        const dismissed = JSON.parse(sessionStorage.getItem(dismissedKey) || '[]');
+        _notifCache.forEach(n => {
+            n.lida = true;
+            if (n.id < 0 && !dismissed.includes(n.id)) {
+                dismissed.push(n.id);
+            }
+        });
+        sessionStorage.setItem(dismissedKey, JSON.stringify(dismissed));
         const badge = document.querySelector('.notif-badge');
         if (badge) { badge.textContent = '0'; badge.style.display = 'none'; }
         const panel = document.getElementById('notifPanel');

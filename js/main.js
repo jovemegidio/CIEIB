@@ -548,17 +548,45 @@ async function loadSiteConfig() {
             }
         }
 
-        // Atualizar logo do cabeçalho
+        // Atualizar logo do cabeçalho (substitui ícone + texto por imagem)
         if (config.site_logo_url) {
-            document.querySelectorAll('.logo img').forEach(img => {
-                img.src = config.site_logo_url;
+            document.querySelectorAll('.logo, .painel-logo').forEach(el => {
+                const existingImg = el.querySelector('img.logo-img');
+                if (existingImg) {
+                    existingImg.src = config.site_logo_url;
+                } else {
+                    // Esconder ícone e texto, inserir <img>
+                    const logoIcon = el.querySelector('.logo-icon');
+                    const logoText = el.querySelector('.logo-text');
+                    if (logoIcon) logoIcon.style.display = 'none';
+                    if (logoText) logoText.style.display = 'none';
+                    const img = document.createElement('img');
+                    img.src = config.site_logo_url;
+                    img.alt = config.nome_site || 'CIEIB';
+                    img.className = 'logo-img';
+                    el.insertBefore(img, el.firstChild);
+                }
             });
         }
         // Atualizar logo do rodapé (usa logo próprio ou cai no do cabeçalho)
         const footerLogoUrl = config.site_logo_footer_url || config.site_logo_url;
         if (footerLogoUrl) {
-            document.querySelectorAll('.footer-logo img').forEach(img => {
-                img.src = footerLogoUrl;
+            document.querySelectorAll('.footer-logo').forEach(el => {
+                const existingImg = el.querySelector('img.logo-img');
+                if (existingImg) {
+                    existingImg.src = footerLogoUrl;
+                } else {
+                    // Esconder ícone e texto, inserir <img>
+                    const logoIcon = el.querySelector('.logo-icon');
+                    const logoSpan = el.querySelector('span');
+                    if (logoIcon) logoIcon.style.display = 'none';
+                    if (logoSpan) logoSpan.style.display = 'none';
+                    const img = document.createElement('img');
+                    img.src = footerLogoUrl;
+                    img.alt = config.nome_site || 'CIEIB';
+                    img.className = 'logo-img logo-img-footer';
+                    el.insertBefore(img, el.firstChild);
+                }
             });
         }
 

@@ -2830,6 +2830,23 @@ async function loadConfiguracoes() {
         }
 
         el.innerHTML = html;
+
+        // Aplicar logo no sidebar do admin se configurado
+        const logoUrl = configMap['site_logo_url']?.valor;
+        const sidebarLogo = document.querySelector('.sidebar-logo');
+        if (sidebarLogo && logoUrl) {
+            const iconEl = sidebarLogo.querySelector('.sidebar-logo-icon');
+            const textDiv = sidebarLogo.querySelector('.sidebar-logo-icon + div');
+            if (iconEl) iconEl.style.display = 'none';
+            if (textDiv) textDiv.style.display = 'none';
+            if (!sidebarLogo.querySelector('.sidebar-logo-img')) {
+                const img = document.createElement('img');
+                img.src = logoUrl;
+                img.alt = configMap['nome_site']?.valor || 'Logo';
+                img.className = 'sidebar-logo-img';
+                sidebarLogo.prepend(img);
+            }
+        }
     } catch (err) { showToast('Erro ao carregar configurações', 'error'); }
 }
 

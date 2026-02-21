@@ -44,11 +44,23 @@ sudo chown $USER:$USER /var/log/cieib
 echo "🗄️  Executando migrações do banco..."
 node server/db/init.js
 
-# ---- 6. Reiniciar PM2 ----
+# ---- 6. Atualizar Nginx (se config mudou) ----
+echo "🌐 Atualizando configuração do Nginx..."
+if [ -f "$APP_DIR/nginx/cieib-vps.conf" ]; then
+    sudo cp "$APP_DIR/nginx/cieib-vps.conf" /etc/nginx/sites-available/cieib
+    if sudo nginx -t 2>/dev/null; then
+        sudo nginx -s reload
+        echo "✅ Nginx atualizado e recarregado"
+    else
+        echo "⚠️  Erro na config do Nginx — mantendo config anterior"
+    fi
+fi
+
+# ---- 7. Reiniciar PM2 ----
 echo "🔄 Reiniciando aplicação..."
 pm2 reload ecosystem.config.js --env production
 
-# ---- 7. Salvar estado do PM2 ----
+# ---- 8. Salvar estado do PM2 ----
 pm2 save
 
 echo ""
@@ -56,7 +68,7 @@ echo "✅ Deploy concluído com sucesso!"
 echo "🌐 Verifique: https://$(grep server_name /etc/nginx/sites-available/cieib 2>/dev/null | head -1 | awk '{print $2}' | tr -d ';' || echo 'seudominio.com.br')"
 echo ""
 
-# ---- 8. Health Check ----
+# ---- 9. Health Check ----
 sleep 3
 HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/health 2>/dev/null || echo "000")
 if [ "$HTTP_STATUS" = "200" ]; then

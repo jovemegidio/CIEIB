@@ -1030,7 +1030,7 @@ router.put('/suporte/:id/responder', adminAuth, async (req, res) => {
         const { resposta, status } = req.body;
         if (!resposta) return res.status(400).json({ error: 'Resposta é obrigatória' });
 
-        const admin = await pool.query('SELECT nome FROM administradores WHERE id = $1', [req.adminId]);
+        const admin = await pool.query('SELECT nome FROM admins WHERE id = $1', [req.adminId]);
         const adminNome = admin.rows[0]?.nome || 'Administrador';
         const novoStatus = status || 'respondido';
 

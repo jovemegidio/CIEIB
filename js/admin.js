@@ -3186,7 +3186,11 @@ async function deleteItem(resource, id) {
     } catch (err) { showToast(err.message, 'error'); }
 }
 
-function openModal() { document.getElementById('adminModal').style.display = 'flex'; }
+function openModal(title, body) {
+    if (title) document.getElementById('modalTitle').textContent = title;
+    if (body) document.getElementById('modalBody').innerHTML = body;
+    document.getElementById('adminModal').style.display = 'flex';
+}
 function closeModal() { document.getElementById('adminModal').style.display = 'none'; }
 
 function showToast(msg, type = 'info') {
@@ -3378,6 +3382,7 @@ async function openSupTicketDetail(id) {
         const st = supStatusMap[t.status] || supStatusMap.aberto;
         const pr = supPrioMap[t.prioridade] || supPrioMap.normal;
 
+        document.getElementById('modalFooter').innerHTML = `<button class="btn-admin-secondary" onclick="closeModal()">Fechar</button>`;
         openModal('Detalhes do Chamado #' + t.protocolo, `
             <div style="display:grid;gap:14px;">
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
@@ -3416,6 +3421,7 @@ async function openSupTicketDetail(id) {
 }
 
 function openSupResponder(id) {
+    document.getElementById('modalFooter').innerHTML = '';
     openModal('Responder Chamado', `
         <div style="display:grid;gap:14px;">
             <div>

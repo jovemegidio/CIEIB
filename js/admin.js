@@ -965,6 +965,77 @@ function closeMembroDetail() {
     currentMembro = null;
 }
 
+function printMembroDetail() {
+    const modal = document.getElementById('membroDetailPanel');
+    if (!modal) return;
+
+    const printWin = window.open('', '_blank', 'width=900,height=700');
+    const m = currentMembro || {};
+    const fmtDate = d => d ? new Date(d).toLocaleDateString('pt-BR') : '—';
+
+    printWin.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+        <title>Ficha — ${m.nome || 'Membro'}</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Segoe UI', Tahoma, sans-serif; padding: 24px; color: #333; font-size: 13px; }
+            h1 { font-size: 18px; color: #1a3a5c; border-bottom: 2px solid #c8a951; padding-bottom: 6px; margin-bottom: 12px; }
+            h2 { font-size: 14px; color: #1a3a5c; margin: 16px 0 8px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+            .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px 16px; }
+            .item label { font-size: 10px; color: #888; text-transform: uppercase; display: block; }
+            .item span { font-weight: 600; }
+            .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+            .badge-ativo { background: #e8f5e9; color: #2e7d32; }
+            .badge-pendente { background: #fff3e0; color: #e65100; }
+            .footer { margin-top: 24px; text-align: center; font-size: 10px; color: #999; border-top: 1px solid #ddd; padding-top: 8px; }
+            @media print { body { padding: 12px; } }
+        </style></head><body>
+        <h1><i>📋</i> Ficha do Membro — ${m.nome || ''}</h1>
+        <p style="margin-bottom: 12px;">
+            <span class="badge badge-${(m.status||'').toLowerCase() === 'ativo' ? 'ativo' : 'pendente'}">${m.status || '—'}</span>
+            ${m.cargo || ''} — Registro: ${m.registro || '—'}
+        </p>
+        <h2>Dados Pessoais</h2>
+        <div class="grid">
+            <div class="item"><label>Nome</label><span>${m.nome || '—'}</span></div>
+            <div class="item"><label>CPF</label><span>${m.cpf || '—'}</span></div>
+            <div class="item"><label>RG</label><span>${m.rg || '—'} ${m.orgao_expedidor || ''}</span></div>
+            <div class="item"><label>Sexo</label><span>${m.sexo === 'M' ? 'Masculino' : m.sexo === 'F' ? 'Feminino' : '—'}</span></div>
+            <div class="item"><label>Nascimento</label><span>${fmtDate(m.data_nascimento)}</span></div>
+            <div class="item"><label>Estado Civil</label><span>${m.estado_civil || '—'}</span></div>
+            <div class="item"><label>Cônjuge</label><span>${m.nome_conjuge || '—'}</span></div>
+            <div class="item"><label>Escolaridade</label><span>${m.escolaridade || '—'}</span></div>
+            <div class="item"><label>Email</label><span>${m.email || '—'}</span></div>
+            <div class="item"><label>Telefone</label><span>${m.telefone || '—'}</span></div>
+            <div class="item"><label>WhatsApp</label><span>${m.whatsapp || '—'}</span></div>
+            <div class="item"><label>Igreja</label><span>${m.nome_igreja || '—'}</span></div>
+        </div>
+        <h2>Dados Ministeriais</h2>
+        <div class="grid">
+            <div class="item"><label>Cargo</label><span>${m.cargo || '—'}</span></div>
+            <div class="item"><label>Função</label><span>${m.funcao_ministerial || '—'}</span></div>
+            <div class="item"><label>Tempo Ministério</label><span>${m.tempo_ministerio || '—'}</span></div>
+            <div class="item"><label>Consagração</label><span>${fmtDate(m.data_consagracao)}</span></div>
+            <div class="item"><label>Registro</label><span>${m.registro || '—'}</span></div>
+            <div class="item"><label>Data Registro</label><span>${fmtDate(m.data_registro)}</span></div>
+        </div>
+        ${(m.endereco && m.endereco.endereco) ? `
+            <h2>Endereço</h2>
+            <div class="grid">
+                <div class="item"><label>Logradouro</label><span>${m.endereco.endereco}, ${m.endereco.numero || 's/n'}</span></div>
+                <div class="item"><label>Complemento</label><span>${m.endereco.complemento || '—'}</span></div>
+                <div class="item"><label>Bairro</label><span>${m.endereco.bairro || '—'}</span></div>
+                <div class="item"><label>Cidade/UF</label><span>${m.endereco.cidade || '—'} / ${m.endereco.uf || '—'}</span></div>
+                <div class="item"><label>CEP</label><span>${m.endereco.cep || '—'}</span></div>
+            </div>
+        ` : ''}
+        <div class="footer">CIEIB — Convenção das Igrejas Evangélicas Interdenominacional do Brasil | Impresso em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}</div>
+    </body></html>`);
+
+    printWin.document.close();
+    printWin.focus();
+    setTimeout(() => { printWin.print(); }, 400);
+}
+
 function switchMdpTab(tab) {
     document.querySelectorAll('.mdp-tab').forEach(t => t.classList.remove('active'));
     document.querySelector(`.mdp-tab[data-tab="${tab}"]`)?.classList.add('active');
@@ -1056,7 +1127,7 @@ function switchMdpTab(tab) {
             <p style="font-size:0.78rem;color:var(--admin-gray);margin-bottom:16px;">Documentos enviados pelo ministro durante o cadastro. Você pode visualizar e fazer upload de novos documentos.</p>
             <div class="mdp-docs-grid">
                 ${docTypes.map(dt => {
-                    const url = docs[dt.key] || null;
+                    const url = docs[dt.key + '_url'] || docs[dt.key] || null;
                     const hasFile = !!url;
                     return `
                         <div class="mdp-doc-card ${hasFile ? 'has-file' : 'no-file'}">

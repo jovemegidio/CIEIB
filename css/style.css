@@ -152,6 +152,237 @@ select:focus-visible {
     padding: 0 20px;
 }
 
+/* ===== Site Notification Bar (Anúncios Públicos) ===== */
+.site-notification-bar {
+    position: relative;
+    z-index: 101;
+    padding: 0;
+    overflow: hidden;
+    animation: snbSlideDown 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes snbSlideDown {
+    from { transform: translateY(-100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes snbShimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+}
+
+@keyframes snbPulseIcon {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+
+@keyframes snbBgPan {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.site-notification-bar .snb-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 12px 50px 12px 20px;
+    min-height: 46px;
+    position: relative;
+}
+
+.site-notification-bar .snb-icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.18);
+    flex-shrink: 0;
+    animation: snbPulseIcon 2.5s ease-in-out infinite;
+    backdrop-filter: blur(4px);
+}
+
+.site-notification-bar .snb-icon-wrap i {
+    font-size: 0.9rem;
+    color: #fff;
+}
+
+.site-notification-bar .snb-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(4px);
+    font-family: var(--font-primary);
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #fff;
+    white-space: nowrap;
+}
+
+.site-notification-bar .snb-text {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    color: #fff;
+    font-family: var(--font-secondary);
+    font-size: 0.88rem;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.site-notification-bar .snb-text strong {
+    font-weight: 700;
+    font-family: var(--font-primary);
+}
+
+.site-notification-bar .snb-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 16px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.22);
+    backdrop-filter: blur(4px);
+    color: #fff;
+    font-family: var(--font-primary);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.site-notification-bar .snb-cta:hover {
+    background: rgba(255, 255, 255, 0.35);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.site-notification-bar .snb-cta i {
+    font-size: 0.7rem;
+    transition: transform 0.25s ease;
+}
+
+.site-notification-bar .snb-cta:hover i {
+    transform: translateX(3px);
+}
+
+.site-notification-bar .snb-close {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.25s ease;
+    padding: 0;
+    line-height: 1;
+}
+
+.site-notification-bar .snb-close:hover {
+    background: rgba(255, 255, 255, 0.25);
+    color: #fff;
+    transform: translateY(-50%) scale(1.1);
+}
+
+/* Navigation dots for multiple notifications */
+.site-notification-bar .snb-dots {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-left: 4px;
+}
+
+.site-notification-bar .snb-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.35);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.site-notification-bar .snb-dot.active {
+    background: #fff;
+    width: 18px;
+    border-radius: 3px;
+}
+
+/* Gradient backgrounds per type */
+.snb-bg-info      { background: linear-gradient(135deg, #1a3a5c 0%, #2c5282 50%, #1a3a5c 100%); background-size: 200% 200%; animation: snbBgPan 8s ease infinite; }
+.snb-bg-success   { background: linear-gradient(135deg, #065f46 0%, #059669 50%, #065f46 100%); background-size: 200% 200%; animation: snbBgPan 8s ease infinite; }
+.snb-bg-warning   { background: linear-gradient(135deg, #92400e 0%, #d97706 50%, #92400e 100%); background-size: 200% 200%; animation: snbBgPan 8s ease infinite; }
+.snb-bg-error     { background: linear-gradient(135deg, #991b1b 0%, #dc2626 50%, #991b1b 100%); background-size: 200% 200%; animation: snbBgPan 8s ease infinite; }
+.snb-bg-evento    { background: linear-gradient(135deg, #4c1d95 0%, #7c3aed 40%, #a855f7 70%, #7c3aed 100%); background-size: 200% 200%; animation: snbBgPan 8s ease infinite; }
+.snb-bg-curso     { background: linear-gradient(135deg, #0e7490 0%, #06b6d4 50%, #0e7490 100%); background-size: 200% 200%; animation: snbBgPan 8s ease infinite; }
+.snb-bg-destaque  { background: linear-gradient(135deg, #1a3a5c 0%, #c8a951 50%, #1a3a5c 100%); background-size: 200% 200%; animation: snbBgPan 6s ease infinite; }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .site-notification-bar .snb-inner {
+        padding: 10px 42px 10px 12px;
+        gap: 10px;
+    }
+    .site-notification-bar .snb-text {
+        font-size: 0.8rem;
+    }
+    .site-notification-bar .snb-badge {
+        font-size: 0.6rem;
+        padding: 2px 8px;
+    }
+    .site-notification-bar .snb-icon-wrap {
+        width: 26px;
+        height: 26px;
+    }
+    .site-notification-bar .snb-icon-wrap i {
+        font-size: 0.75rem;
+    }
+    .site-notification-bar .snb-cta {
+        font-size: 0.72rem;
+        padding: 4px 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .site-notification-bar .snb-inner {
+        flex-wrap: wrap;
+        padding: 8px 36px 8px 10px;
+        gap: 6px;
+    }
+    .site-notification-bar .snb-icon-wrap {
+        display: none;
+    }
+    .site-notification-bar .snb-text {
+        font-size: 0.76rem;
+    }
+    .site-notification-bar .snb-dots {
+        width: 100%;
+        justify-content: center;
+        margin-top: 2px;
+    }
+}
+
 /* ===== Top Bar ===== */
 .top-bar {
     background: var(--primary-dark);

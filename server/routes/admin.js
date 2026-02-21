@@ -509,10 +509,10 @@ router.get('/notificacoes-site', adminAuth, async (req, res) => {
 
 router.post('/notificacoes-site', adminAuth, async (req, res) => {
     try {
-        const { titulo, mensagem, tipo, link, ativa } = req.body;
+        const { titulo, mensagem, tipo, link, ativa, data_inicio, data_fim } = req.body;
         const r = await pool.query(
-            'INSERT INTO notificacoes_site (titulo, mensagem, tipo, link, ativa) VALUES ($1,$2,$3,$4,$5) RETURNING *',
-            [titulo, mensagem, tipo || 'info', link, ativa !== false]
+            'INSERT INTO notificacoes_site (titulo, mensagem, tipo, link, ativa, data_inicio, data_fim) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *',
+            [titulo, mensagem, tipo || 'info', link, ativa !== false, data_inicio || new Date(), data_fim || null]
         );
         res.status(201).json(r.rows[0]);
     } catch (err) { res.status(500).json({ error: err.message }); }
@@ -520,10 +520,10 @@ router.post('/notificacoes-site', adminAuth, async (req, res) => {
 
 router.put('/notificacoes-site/:id', adminAuth, async (req, res) => {
     try {
-        const { titulo, mensagem, tipo, link, ativa } = req.body;
+        const { titulo, mensagem, tipo, link, ativa, data_inicio, data_fim } = req.body;
         const r = await pool.query(
-            'UPDATE notificacoes_site SET titulo=$1, mensagem=$2, tipo=$3, link=$4, ativa=$5 WHERE id=$6 RETURNING *',
-            [titulo, mensagem, tipo, link, ativa, req.params.id]
+            'UPDATE notificacoes_site SET titulo=$1, mensagem=$2, tipo=$3, link=$4, ativa=$5, data_inicio=$6, data_fim=$7 WHERE id=$8 RETURNING *',
+            [titulo, mensagem, tipo, link, ativa, data_inicio || null, data_fim || null, req.params.id]
         );
         res.json(r.rows[0]);
     } catch (err) { res.status(500).json({ error: err.message }); }

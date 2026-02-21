@@ -38,8 +38,8 @@ const API = {
             { id:9, nome:'Pr. Lucas Egidio', cargo:'Membro', tipo:'conselho_fiscal', descricao:'', foto_url:null, ordem:3, ativo:true }
         ],
         '/notificacoes/site': [
-            { id: 1, titulo: '15ª Convenção Nacional', mensagem: 'Inscrições abertas até 30 de agosto!', tipo: 'evento', link: '#eventos', ativa: true },
-            { id: 2, titulo: 'Novo Curso de Teologia', mensagem: 'Matrículas abertas para o segundo semestre.', tipo: 'curso', link: '#cursos', ativa: true }
+            { id: 1, titulo: '15ª Convenção Nacional', mensagem: 'Inscrições abertas até 30 de agosto!', tipo: 'evento', link: '#eventos', ativa: true, data_inicio: '2026-01-01T00:00' },
+            { id: 2, titulo: 'Novo Curso de Teologia', mensagem: 'Matrículas abertas para o segundo semestre.', tipo: 'curso', link: '#cursos', ativa: true, data_inicio: '2026-02-01T00:00' }
         ],
     },
     _getMockResponse(endpoint) {

@@ -258,11 +258,10 @@ document.addEventListener('DOMContentLoaded', () => {
     loadSiteNotifications();
 });
 
-// ---- Push Notification Bar para o site público ----
+// ---- Push Notification Bar para o site público (design profissional) ----
 async function loadSiteNotifications() {
     try {
         let notifs;
-        // Usar API client com fallback mock (quando disponível)
         if (typeof API !== 'undefined' && API.getNotificacoesSite) {
             notifs = await API.getNotificacoesSite();
         } else {
@@ -274,42 +273,73 @@ async function loadSiteNotifications() {
         }
         if (!notifs || notifs.length === 0) return;
 
-        // Verificar se já foram descartadas nesta sessão
         const dismissed = JSON.parse(sessionStorage.getItem('cieib_notifs_dismissed') || '[]');
         const pending = notifs.filter(n => !dismissed.includes(n.id));
         if (pending.length === 0) return;
 
-        // Criar barra de notificação
+        const tipoConfig = {
+            'info':    { bg: 'snb-bg-info',    icon: 'fa-info-circle',           badge: 'Informação' },
+            'success': { bg: 'snb-bg-success',  icon: 'fa-check-circle',          badge: 'Novidade' },
+            'warning': { bg: 'snb-bg-warning',  icon: 'fa-exclamation-triangle',  badge: 'Atenção' },
+            'error':   { bg: 'snb-bg-error',    icon: 'fa-exclamation-circle',    badge: 'Urgente' },
+            'evento':  { bg: 'snb-bg-evento',   icon: 'fa-calendar-alt',          badge: 'Evento' },
+            'curso':   { bg: 'snb-bg-curso',    icon: 'fa-graduation-cap',        badge: 'Curso' },
+            'destaque':{ bg: 'snb-bg-destaque', icon: 'fa-star',                  badge: 'Destaque' }
+        };
+
         const bar = document.createElement('div');
         bar.className = 'site-notification-bar';
         bar.id = 'siteNotifBar';
 
-        const tipoColors = {
-            'info': { bg: 'linear-gradient(135deg, #1a3a5c, #2c5282)', icon: 'fa-info-circle' },
-            'success': { bg: 'linear-gradient(135deg, #065f46, #059669)', icon: 'fa-check-circle' },
-            'warning': { bg: 'linear-gradient(135deg, #92400e, #d97706)', icon: 'fa-exclamation-triangle' },
-            'error': { bg: 'linear-gradient(135deg, #991b1b, #dc2626)', icon: 'fa-exclamation-circle' },
-            'evento': { bg: 'linear-gradient(135deg, #5b21b6, #7c3aed)', icon: 'fa-calendar-star' },
-            'curso': { bg: 'linear-gradient(135deg, #0e7490, #06b6d4)', icon: 'fa-graduation-cap' }
-        };
+        let currentIdx = 0;
 
-        // Mostrar a primeira notificação pendente
-        const notif = pending[0];
-        const style = tipoColors[notif.tipo] || tipoColors['info'];
+        function renderNotif(idx) {
+            const n = pending[idx];
+            const cfg = tipoConfig[n.tipo] || tipoConfig['info'];
+            bar.className = 'site-notification-bar ' + cfg.bg;
 
-        bar.style.background = style.bg;
-        bar.innerHTML = `
-            <div class="container" style="display:flex;align-items:center;justify-content:center;gap:12px;position:relative;">
-                <i class="fas ${style.icon}" style="font-size:1rem;"></i>
-                <span><strong>${notif.titulo}</strong> ${notif.mensagem || ''}</span>
-                ${notif.link ? `<a href="${notif.link}" style="color:rgba(255,255,255,0.9);text-decoration:underline;font-weight:600;margin-left:8px;">Saiba mais</a>` : ''}
-                <button onclick="dismissSiteNotif(${notif.id})" style="position:absolute;right:0;background:none;border:none;color:rgba(255,255,255,0.8);cursor:pointer;font-size:1.1rem;padding:4px 8px;" aria-label="Fechar">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-        `;
+            let dotsHtml = '';
+            if (pending.length > 1) {
+                dotsHtml = '<div class="snb-dots">' +
+                    pending.map((_, i) => `<span class="snb-dot ${i === idx ? 'active' : ''}" data-idx="${i}"></span>`).join('') +
+                    '</div>';
+            }
 
-        // Inserir logo após o top-bar
+            bar.innerHTML = `
+                <div class="container">
+                    <div class="snb-inner">
+                        <div class="snb-icon-wrap"><i class="fas ${cfg.icon}"></i></div>
+                        <span class="snb-badge">${cfg.badge}</span>
+                        <div class="snb-text">
+                            <strong>${n.titulo}</strong>
+                            <span>${n.mensagem || ''}</span>
+                        </div>
+                        ${n.link ? `<a href="${n.link}" class="snb-cta">Saiba mais <i class="fas fa-arrow-right"></i></a>` : ''}
+                        ${dotsHtml}
+                        <button class="snb-close" aria-label="Fechar notificação" data-id="${n.id}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            // Bind close button
+            bar.querySelector('.snb-close').addEventListener('click', function() {
+                dismissSiteNotif(parseInt(this.dataset.id));
+            });
+
+            // Bind dot navigation
+            bar.querySelectorAll('.snb-dot').forEach(dot => {
+                dot.addEventListener('click', function() {
+                    currentIdx = parseInt(this.dataset.idx);
+                    renderNotif(currentIdx);
+                });
+            });
+        }
+
+        renderNotif(0);
+
+        // Insert after top-bar
         const topBar = document.querySelector('.top-bar');
         if (topBar && topBar.nextSibling) {
             topBar.parentNode.insertBefore(bar, topBar.nextSibling);
@@ -317,27 +347,35 @@ async function loadSiteNotifications() {
             document.body.prepend(bar);
         }
 
-        // Se houver múltiplas, criar rotação
+        // Auto-rotate if multiple notifications
         if (pending.length > 1) {
-            let currentIdx = 0;
-            setInterval(() => {
+            let rotateTimer = setInterval(() => {
                 currentIdx = (currentIdx + 1) % pending.length;
-                const n = pending[currentIdx];
-                const s = tipoColors[n.tipo] || tipoColors['info'];
-                bar.style.background = s.bg;
-                bar.querySelector('.container').innerHTML = `
-                    <i class="fas ${s.icon}" style="font-size:1rem;"></i>
-                    <span><strong>${n.titulo}</strong> ${n.mensagem || ''}</span>
-                    ${n.link ? `<a href="${n.link}" style="color:rgba(255,255,255,0.9);text-decoration:underline;font-weight:600;margin-left:8px;">Saiba mais</a>` : ''}
-                    <button onclick="dismissSiteNotif(${n.id})" style="position:absolute;right:0;background:none;border:none;color:rgba(255,255,255,0.8);cursor:pointer;font-size:1.1rem;padding:4px 8px;" aria-label="Fechar">
-                        <i class="fas fa-times"></i>
-                    </button>
-                `;
-            }, 6000);
+                bar.style.opacity = '0';
+                bar.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => {
+                    renderNotif(currentIdx);
+                    bar.style.opacity = '1';
+                }, 300);
+            }, 7000);
+
+            // Pause rotation on hover
+            bar.addEventListener('mouseenter', () => clearInterval(rotateTimer));
+            bar.addEventListener('mouseleave', () => {
+                rotateTimer = setInterval(() => {
+                    currentIdx = (currentIdx + 1) % pending.length;
+                    bar.style.opacity = '0';
+                    bar.style.transition = 'opacity 0.3s ease';
+                    setTimeout(() => {
+                        renderNotif(currentIdx);
+                        bar.style.opacity = '1';
+                    }, 300);
+                }, 7000);
+            });
         }
 
     } catch (err) {
-        // Silenciosamente falha se API não disponível
+        // Silently fail if API unavailable
     }
 }
 
@@ -349,7 +387,8 @@ function dismissSiteNotif(id) {
     const bar = document.getElementById('siteNotifBar');
     if (bar) {
         bar.style.transform = 'translateY(-100%)';
-        bar.style.transition = 'transform 0.3s ease';
-        setTimeout(() => bar.remove(), 300);
+        bar.style.opacity = '0';
+        bar.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease';
+        setTimeout(() => bar.remove(), 400);
     }
 }

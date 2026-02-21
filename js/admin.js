@@ -98,9 +98,9 @@ const AdminAPI = {
             { id: 3, titulo: 'Regimento Interno PDF', tipo: 'documento', url: '/uploads/regimento-interno.pdf', tamanho: 1024000 }
         ],
         '/notificacoes-site': [
-            { id: 1, titulo: '15ª Convenção Nacional', mensagem: 'Inscrições abertas até 30 de agosto de 2025!', tipo: 'evento', link: '#eventos', ativa: true },
-            { id: 2, titulo: 'Novo Curso de Teologia Básica', mensagem: 'Matrículas abertas para o segundo semestre.', tipo: 'curso', link: '#cursos', ativa: true },
-            { id: 3, titulo: 'Horário de Atendimento', mensagem: 'Secretaria funciona de segunda a sexta, das 9h às 18h.', tipo: 'info', link: '', ativa: false }
+            { id: 1, titulo: '15ª Convenção Nacional', mensagem: 'Inscrições abertas até 30 de agosto!', tipo: 'evento', link: '#eventos', ativa: true, data_inicio: '2026-01-01T00:00', data_fim: '2026-08-30T23:59' },
+            { id: 2, titulo: 'Novo Curso de Teologia Básica', mensagem: 'Matrículas abertas para o segundo semestre.', tipo: 'curso', link: '#cursos', ativa: true, data_inicio: '2026-02-01T00:00', data_fim: null },
+            { id: 3, titulo: 'Horário de Atendimento', mensagem: 'Secretaria funciona de segunda a sexta, das 9h às 18h.', tipo: 'info', link: '', ativa: false, data_inicio: '2026-01-01T00:00', data_fim: null }
         ],
     },
 
@@ -1049,11 +1049,16 @@ async function loadNotifSite() {
 
 function renderNotifSiteTable() {
     const el = document.getElementById('notifSiteTable');
-    if (allNotifSite.length === 0) { el.innerHTML = '<p style="text-align:center;color:#aaa;padding:40px;">Nenhuma notificação</p>'; return; }
-    el.innerHTML = `<table class="admin-table"><thead><tr><th>Título</th><th>Tipo</th><th>Ativa</th><th>Ações</th></tr></thead><tbody>
+    if (allNotifSite.length === 0) { el.innerHTML = '<p style="text-align:center;color:#aaa;padding:40px;">Nenhuma notificação cadastrada</p>'; return; }
+    const tipoLabels = { info:'ℹ️ Info', success:'✅ Sucesso', warning:'⚠️ Aviso', error:'🔴 Urgente', evento:'📅 Evento', curso:'🎓 Curso', destaque:'⭐ Destaque' };
+    const fmtDt = d => d ? new Date(d).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+    el.innerHTML = `<table class="admin-table"><thead><tr><th>Título</th><th>Mensagem</th><th>Tipo</th><th>Início</th><th>Fim</th><th>Ativa</th><th>Ações</th></tr></thead><tbody>
         ${allNotifSite.map(n => `<tr>
-            <td>${n.titulo}</td>
-            <td><span class="badge badge-ativo">${n.tipo}</span></td>
+            <td><strong>${n.titulo}</strong></td>
+            <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${n.mensagem || ''}</td>
+            <td><span class="badge badge-ativo">${tipoLabels[n.tipo] || n.tipo}</span></td>
+            <td style="font-size:0.8rem;">${fmtDt(n.data_inicio)}</td>
+            <td style="font-size:0.8rem;">${fmtDt(n.data_fim)}</td>
             <td>${n.ativa ? '<span class="badge badge-ativo">Sim</span>' : '<span class="badge badge-inativo">Não</span>'}</td>
             <td class="actions-cell">
                 <button class="btn-table-action btn-table-edit" onclick="openNotifSiteModal(${n.id})"><i class="fas fa-edit"></i></button>
@@ -1065,23 +1070,30 @@ function renderNotifSiteTable() {
 
 function openNotifSiteModal(id) {
     const item = id ? allNotifSite.find(n => n.id === id) : null;
-    document.getElementById('modalTitle').textContent = item ? 'Editar Notificação' : 'Nova Notificação';
+    const fmtDate = (d) => d ? new Date(d).toISOString().slice(0, 16) : '';
+    document.getElementById('modalTitle').textContent = item ? 'Editar Notificação do Site' : 'Nova Notificação do Site';
     document.getElementById('modalBody').innerHTML = `
-        <div class="admin-form-group"><label>Título</label><input type="text" id="mNotifTitle" value="${item?.titulo || ''}"></div>
-        <div class="admin-form-group"><label>Mensagem</label><textarea id="mNotifMsg">${item?.mensagem || ''}</textarea></div>
+        <div class="admin-form-group"><label>Título *</label><input type="text" id="mNotifTitle" value="${item?.titulo || ''}" placeholder="Ex: 15ª Convenção Nacional"></div>
+        <div class="admin-form-group"><label>Mensagem</label><textarea id="mNotifMsg" placeholder="Ex: Inscrições abertas até 30 de agosto!">${item?.mensagem || ''}</textarea></div>
         <div class="form-grid">
-            <div class="admin-form-group"><label>Tipo</label>
+            <div class="admin-form-group"><label>Tipo / Cor</label>
                 <select id="mNotifTipo">
-                    <option value="info" ${item?.tipo === 'info' ? 'selected' : ''}>Info</option>
-                    <option value="success" ${item?.tipo === 'success' ? 'selected' : ''}>Sucesso</option>
-                    <option value="warning" ${item?.tipo === 'warning' ? 'selected' : ''}>Aviso</option>
-                    <option value="evento" ${item?.tipo === 'evento' ? 'selected' : ''}>Evento</option>
-                    <option value="curso" ${item?.tipo === 'curso' ? 'selected' : ''}>Curso</option>
+                    <option value="info" ${item?.tipo === 'info' ? 'selected' : ''}>ℹ️ Informação (Azul)</option>
+                    <option value="success" ${item?.tipo === 'success' ? 'selected' : ''}>✅ Sucesso (Verde)</option>
+                    <option value="warning" ${item?.tipo === 'warning' ? 'selected' : ''}>⚠️ Aviso (Amarelo)</option>
+                    <option value="error" ${item?.tipo === 'error' ? 'selected' : ''}>🔴 Urgente (Vermelho)</option>
+                    <option value="evento" ${item?.tipo === 'evento' ? 'selected' : ''}>📅 Evento (Roxo)</option>
+                    <option value="curso" ${item?.tipo === 'curso' ? 'selected' : ''}>🎓 Curso (Ciano)</option>
+                    <option value="destaque" ${item?.tipo === 'destaque' ? 'selected' : ''}>⭐ Destaque (Dourado)</option>
                 </select>
             </div>
-            <div class="admin-form-group"><label>Link</label><input type="text" id="mNotifLink" value="${item?.link || ''}"></div>
+            <div class="admin-form-group"><label>Link (URL ou âncora)</label><input type="text" id="mNotifLink" value="${item?.link || ''}" placeholder="Ex: #eventos ou /noticias.html"></div>
         </div>
-        <div class="admin-form-group"><label><input type="checkbox" id="mNotifAtiva" ${item?.ativa !== false ? 'checked' : ''}> Ativa</label></div>
+        <div class="form-grid">
+            <div class="admin-form-group"><label>Data Início</label><input type="datetime-local" id="mNotifInicio" value="${fmtDate(item?.data_inicio)}"><small style="color:#999;">Quando a notificação começa a aparecer</small></div>
+            <div class="admin-form-group"><label>Data Fim (opcional)</label><input type="datetime-local" id="mNotifFim" value="${fmtDate(item?.data_fim)}"><small style="color:#999;">Quando deixa de aparecer (vazio = sempre)</small></div>
+        </div>
+        <div class="admin-form-group" style="margin-top:8px;"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" id="mNotifAtiva" ${item?.ativa !== false ? 'checked' : ''} style="width:18px;height:18px;"> Ativa (visível no site)</label></div>
     `;
     document.getElementById('modalFooter').innerHTML = `
         <button class="btn-admin-secondary" onclick="closeModal()">Cancelar</button>
@@ -1091,12 +1103,16 @@ function openNotifSiteModal(id) {
 }
 
 async function saveNotifSite(id) {
+    const titulo = document.getElementById('mNotifTitle').value.trim();
+    if (!titulo) { showToast('Título é obrigatório', 'error'); return; }
     const body = {
-        titulo: document.getElementById('mNotifTitle').value,
+        titulo,
         mensagem: document.getElementById('mNotifMsg').value,
         tipo: document.getElementById('mNotifTipo').value,
         link: document.getElementById('mNotifLink').value,
         ativa: document.getElementById('mNotifAtiva').checked,
+        data_inicio: document.getElementById('mNotifInicio').value || null,
+        data_fim: document.getElementById('mNotifFim').value || null,
     };
     try {
         if (id) await AdminAPI.put(`/notificacoes-site/${id}`, body);

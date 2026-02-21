@@ -80,13 +80,6 @@ app.use(express.static(__dirname, {
     extensions: []
 }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-            .replace(/(href=["'](?:\/)?css\/[^"']+)(["'])/g, `$1?v=${APP_VERSION}$2`)
-            .replace(/(src=["'](?:\/)?js\/[^"']+)(["'])/g, `$1?v=${APP_VERSION}$2`);
-        res.set('Content-Type', 'text/html');
-        res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
-        res.send(busted);
-    });
-}
 
 // ---- Rotas da API ----
 const authRoutes = require('./server/routes/auth');

@@ -539,6 +539,25 @@ router.delete('/notificacoes-site/:id', adminAuth, async (req, res) => {
 // ================================================================
 // UPLOAD DE MÍDIAS
 // ================================================================
+
+// POST /api/admin/upload-image — Upload genérico de imagem (retorna URL)
+router.post('/upload-image', adminAuth, upload.single('imagem'), async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ error: 'Nenhuma imagem enviada' });
+        const allowed = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
+        const ext = path.extname(req.file.originalname).toLowerCase();
+        if (!allowed.includes(ext)) {
+            fs.unlinkSync(req.file.path);
+            return res.status(400).json({ error: 'Formato não permitido. Use JPG, PNG, WebP ou GIF.' });
+        }
+        const url = `/uploads/${req.file.filename}`;
+        res.json({ url, filename: req.file.filename, size: req.file.size });
+    } catch (err) {
+        console.error('Erro upload:', err);
+        res.status(500).json({ error: 'Erro ao fazer upload' });
+    }
+});
+
 router.get('/midias', adminAuth, async (req, res) => {
     try {
         const r = await pool.query('SELECT * FROM midias ORDER BY created_at DESC');

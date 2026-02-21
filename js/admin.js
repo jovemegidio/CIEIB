@@ -130,6 +130,102 @@ const AdminAPI = {
     del: (ep) => AdminAPI.request('DELETE', ep),
 };
 
+// ================================================================
+// UPLOAD DE IMAGEM — Componente reutilizável
+// ================================================================
+function adminUploadField(inputId, label, currentUrl) {
+    const hasImage = currentUrl && currentUrl.trim();
+    return `
+        <div class="admin-form-group admin-upload-group">
+            <label><i class="fas fa-image"></i> ${label}</label>
+            <input type="hidden" id="${inputId}" value="${currentUrl || ''}">
+            <div class="admin-upload-box" id="${inputId}_box">
+                <div class="admin-upload-preview" id="${inputId}_preview" style="${hasImage ? '' : 'display:none;'}">
+                    <img id="${inputId}_img" src="${hasImage ? currentUrl : ''}" alt="Preview">
+                    <button type="button" class="admin-upload-remove" onclick="adminRemoveImage('${inputId}')" title="Remover"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="admin-upload-area" id="${inputId}_area" style="${hasImage ? 'display:none;' : ''}">
+                    <input type="file" id="${inputId}_file" accept="image/jpeg,image/png,image/webp,image/gif" onchange="adminUploadFile('${inputId}')" style="display:none;">
+                    <div class="admin-upload-placeholder" onclick="document.getElementById('${inputId}_file').click()">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <span>Clique ou arraste uma imagem</span>
+                        <small>JPG, PNG, WebP ou GIF (máx. 5MB)</small>
+                    </div>
+                </div>
+                <div class="admin-upload-loading" id="${inputId}_loading" style="display:none;">
+                    <i class="fas fa-spinner fa-spin"></i> Enviando...
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+async function adminUploadFile(inputId) {
+    const fileInput = document.getElementById(`${inputId}_file`);
+    const file = fileInput?.files[0];
+    if (!file) return;
+
+    // Validação local
+    if (file.size > 5 * 1024 * 1024) {
+        showToast('Arquivo muito grande. Máximo 5MB.', 'error');
+        fileInput.value = '';
+        return;
+    }
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowed.includes(file.type)) {
+        showToast('Formato não suportado. Use JPG, PNG, WebP ou GIF.', 'error');
+        fileInput.value = '';
+        return;
+    }
+
+    // Show loading
+    document.getElementById(`${inputId}_area`).style.display = 'none';
+    document.getElementById(`${inputId}_loading`).style.display = 'flex';
+
+    try {
+        const formData = new FormData();
+        formData.append('imagem', file);
+
+        const res = await fetch('/api/admin/upload-image', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${AdminAPI.token()}` },
+            body: formData
+        });
+
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.error || 'Erro no upload');
+        }
+
+        const data = await res.json();
+
+        // Set hidden input value
+        document.getElementById(inputId).value = data.url;
+
+        // Show preview
+        const img = document.getElementById(`${inputId}_img`);
+        img.src = data.url;
+        document.getElementById(`${inputId}_preview`).style.display = 'flex';
+        document.getElementById(`${inputId}_loading`).style.display = 'none';
+
+        showToast('Imagem enviada com sucesso!', 'success');
+    } catch (err) {
+        console.error('Upload error:', err);
+        showToast(err.message || 'Erro ao enviar imagem', 'error');
+        document.getElementById(`${inputId}_area`).style.display = 'flex';
+        document.getElementById(`${inputId}_loading`).style.display = 'none';
+    }
+
+    fileInput.value = '';
+}
+
+function adminRemoveImage(inputId) {
+    document.getElementById(inputId).value = '';
+    document.getElementById(`${inputId}_img`).src = '';
+    document.getElementById(`${inputId}_preview`).style.display = 'none';
+    document.getElementById(`${inputId}_area`).style.display = 'flex';
+}
+
 // ---- State ----
 let currentSection = 'dashboard';
 let allNoticias = [], allEventos = [], allCursos = [], allContatos = [];
@@ -339,7 +435,7 @@ function openNoticiaModal(id) {
         <div class="admin-form-group"><label>Conteúdo</label><textarea id="mNoticiaConteudo" style="min-height:120px;">${item?.conteudo || ''}</textarea></div>
         <div class="form-grid">
             <div class="admin-form-group"><label>Categoria</label><input type="text" id="mNoticiaCat" value="${item?.categoria || ''}"></div>
-            <div class="admin-form-group"><label>Imagem URL</label><input type="text" id="mNoticiaImg" value="${item?.imagem_url || ''}"></div>
+            ${adminUploadField('mNoticiaImg', 'Imagem', item?.imagem_url)}
         </div>
         <div class="admin-form-group"><label><input type="checkbox" id="mNoticiaDest" ${item?.destaque ? 'checked' : ''}> Destaque</label></div>
     `;
@@ -491,7 +587,7 @@ function openCursoModal(id) {
                 </select>
             </div>
             <div class="admin-form-group"><label>Carga Horária (h)</label><input type="number" id="mCursoCH" value="${item?.carga_horaria || 0}"></div>
-            <div class="admin-form-group"><label>Imagem URL</label><input type="text" id="mCursoImg" value="${item?.imagem_url || ''}"></div>
+            ${adminUploadField('mCursoImg', 'Imagem', item?.imagem_url)}
         </div>
         <div class="admin-form-group"><label><input type="checkbox" id="mCursoCert" ${item?.certificado !== false ? 'checked' : ''}> Emite Certificado</label></div>
     `;
@@ -683,7 +779,7 @@ function openConteudoModal(id) {
         </div>
         <div class="admin-form-group"><label>Título</label><input type="text" id="mCmsTitulo" value="${item?.titulo || ''}"></div>
         <div class="admin-form-group"><label>Conteúdo</label><textarea id="mCmsConteudo" style="min-height:160px;">${item?.conteudo || ''}</textarea></div>
-        <div class="admin-form-group"><label>Imagem URL</label><input type="text" id="mCmsImg" value="${item?.imagem_url || ''}"></div>
+        ${adminUploadField('mCmsImg', 'Imagem', item?.imagem_url)}
     `;
     document.getElementById('modalFooter').innerHTML = `
         <button class="btn-admin-secondary" onclick="closeModal()">Cancelar</button>
@@ -808,7 +904,7 @@ function openDiretoriaModal(id) {
             <div class="admin-form-group"><label>Ordem</label><input type="number" id="mDirOrdem" value="${item?.ordem || 0}"></div>
         </div>
         <div class="admin-form-group"><label>Descrição</label><textarea id="mDirDesc">${item?.descricao || ''}</textarea></div>
-        <div class="admin-form-group"><label>Foto URL</label><input type="text" id="mDirFoto" value="${item?.foto_url || ''}"></div>
+        ${adminUploadField('mDirFoto', 'Foto', item?.foto_url)}
     `;
     document.getElementById('modalFooter').innerHTML = `
         <button class="btn-admin-secondary" onclick="closeModal()">Cancelar</button>

@@ -801,7 +801,8 @@
                 e.preventDefault();
                 const btn = loginForm.querySelector('button[type="submit"]');
                 const original = btn.innerHTML;
-                const cpf = document.getElementById('loginCpf').value.replace(/\D/g, '');
+                const cpfRaw = document.getElementById('loginCpf').value.trim();
+                const cpf = cpfRaw; // Enviar valor bruto — backend aceita CPF ou nº credencial
                 const senha = document.getElementById('loginPassword').value;
                 const msgAnterior = loginForm.querySelector('.login-error');
                 if (msgAnterior) msgAnterior.remove();
@@ -1207,8 +1208,11 @@
             btn.disabled = true;
 
             try {
+                const headers = {};
+                if (regToken) headers['Authorization'] = `Bearer ${regToken}`;
                 const res = await fetch('/api/registro/documentos', {
                     method: 'POST',
+                    headers,
                     body: formData
                 });
                 const data = await res.json();

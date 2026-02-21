@@ -185,10 +185,27 @@ router.post('/', async (req, res) => {
 // ========== POST /api/registro/documentos — Etapa 2: Upload de documentos ==========
 router.post('/documentos', upload.array('documentos', 10), async (req, res) => {
     try {
-        const { ministro_id, tipos } = req.body;
+        let { ministro_id, tipos } = req.body;
 
-        if (!ministro_id || !req.files || req.files.length === 0) {
-            return res.status(400).json({ error: 'ID do ministro e ao menos um documento são obrigatórios.' });
+        // Verificar autenticação via token (header ou body)
+        const authHeader = req.headers.authorization;
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            try {
+                const decoded = jwt.verify(authHeader.split(' ')[1], process.env.JWT_SECRET);
+                // Garantir que o ministro_id do body corresponde ao token
+                if (ministro_id && parseInt(ministro_id) !== decoded.id) {
+                    return res.status(403).json({ error: 'ID do ministro não corresponde ao token.' });
+                }
+                ministro_id = decoded.id;
+            } catch (e) {
+                return res.status(401).json({ error: 'Token inválido.' });
+            }
+        } else if (!ministro_id) {
+            return res.status(401).json({ error: 'Autenticação necessária.' });
+        }
+
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({ error: 'Ao menos um documento é obrigatório.' });
         }
 
         // tipos vem como JSON string: ["certidao_casamento","comprovante_endereco", ...]

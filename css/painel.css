@@ -202,29 +202,53 @@
     color: rgba(255,255,255,0.8);
     font-size: 1.15rem;
     cursor: pointer;
-    padding: 6px;
-    transition: color 0.2s;
+    padding: 8px;
+    transition: all 0.25s ease;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
 }
 
 .painel-notif:hover {
     color: var(--secondary);
+    background: rgba(255,255,255,0.15);
+    border-color: rgba(200,169,81,0.3);
+    transform: translateY(-1px);
 }
 
 .notif-badge {
     position: absolute;
-    top: 0;
-    right: -2px;
-    background: var(--secondary);
-    color: var(--dark);
+    top: -4px;
+    right: -4px;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: #fff;
     font-size: 0.6rem;
-    font-weight: 700;
-    width: 17px;
-    height: 17px;
-    border-radius: 50%;
+    font-weight: 800;
+    min-width: 19px;
+    height: 19px;
+    border-radius: 10px;
+    padding: 0 5px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 8px rgba(239,68,68,0.4);
+    border: 2px solid var(--primary-dark);
+    animation: notifPulse 2s ease-in-out infinite;
+}
+
+.notif-badge:empty,
+.notif-badge[data-count="0"] {
+    display: none;
+}
+
+@keyframes notifPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
 }
 
 .painel-mobile-toggle {
@@ -1369,20 +1393,66 @@
 
 .curso-card-header {
     background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
-    padding: 18px 18px 14px;
+    padding: 16px 18px 14px;
     position: relative;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 54px;
+}
+
+.curso-card-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 60%);
+    pointer-events: none;
 }
 
 .curso-card-header::after {
     content: '';
     position: absolute;
-    top: -20px;
-    right: -20px;
-    width: 80px;
-    height: 80px;
-    background: rgba(200,169,81,0.1);
+    top: -30px;
+    right: -30px;
+    width: 100px;
+    height: 100px;
+    background: rgba(255,255,255,0.06);
     border-radius: 50%;
+    pointer-events: none;
+}
+
+.curso-card-header > i {
+    font-size: 1.2rem;
+    color: rgba(255,255,255,0.35);
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+}
+
+.curso-area-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    white-space: nowrap;
+    position: relative;
+    z-index: 1;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.curso-area-tag i {
+    font-size: 0.65rem;
 }
 
 .curso-card-header h4 {
@@ -1410,6 +1480,15 @@
     flex: 1;
     display: flex;
     flex-direction: column;
+}
+
+.curso-card-body h4 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 8px;
+    line-height: 1.35;
 }
 
 .curso-card-body p {

@@ -622,9 +622,17 @@ async function loadCursos() {
 }
 
 function filterCursos(area) {
+    const teologicas = ['Teologia'];
+    const ministeriais = ['Ministério', 'Capelania', 'Jurídico', 'Aconselhamento', 'Liderança'];
+
     const cards = document.querySelectorAll('.curso-catalogo-card');
     cards.forEach(card => {
-        if (area === 'todos' || card.getAttribute('data-area') === area) {
+        const cat = card.getAttribute('data-area');
+        if (area === 'todos') {
+            card.style.display = '';
+        } else if (area === 'teologica' && teologicas.includes(cat)) {
+            card.style.display = '';
+        } else if (area === 'ministerial' && ministeriais.includes(cat)) {
             card.style.display = '';
         } else {
             card.style.display = 'none';
@@ -646,26 +654,27 @@ function renderCursosCatalogo(cursos, matriculas) {
 
     const matriculaIds = matriculas.map(m => m.curso_id);
 
-    const areaIcons = {
-        'teologica': 'fa-book-open',
-        'ministerial': 'fa-briefcase-medical'
+    /* Mapa de categorias → gradiente, ícone e cor do tag */
+    const catConfig = {
+        'Teologia':        { bg: 'linear-gradient(135deg, #1a3a5c 0%, #2c5282 50%, #3b6cb5 100%)', icon: 'fa-book-bible',       tag: '#a3c4f3' },
+        'Ministério':      { bg: 'linear-gradient(135deg, #065f46 0%, #059669 50%, #10b981 100%)', icon: 'fa-church',           tag: '#86efac' },
+        'Capelania':       { bg: 'linear-gradient(135deg, #5b21b6 0%, #7c3aed 50%, #a78bfa 100%)', icon: 'fa-hand-holding-heart', tag: '#ddd6fe' },
+        'Jurídico':        { bg: 'linear-gradient(135deg, #92400e 0%, #b45309 50%, #d97706 100%)', icon: 'fa-gavel',            tag: '#fde68a' },
+        'Aconselhamento':  { bg: 'linear-gradient(135deg, #9d174d 0%, #be185d 50%, #ec4899 100%)', icon: 'fa-comments',         tag: '#fbcfe8' },
+        'Liderança':       { bg: 'linear-gradient(135deg, #0e7490 0%, #0891b2 50%, #22d3ee 100%)', icon: 'fa-users-cog',        tag: '#a5f3fc' }
     };
-
-    const areaLabels = {
-        'teologica': 'Área Teológica',
-        'ministerial': 'Área Ministerial e Profissional'
-    };
+    const defaultCat = { bg: 'linear-gradient(135deg, #374151, #6b7280)', icon: 'fa-graduation-cap', tag: '#d1d5db' };
 
     grid.innerHTML = cursos.map(c => {
         const isMatriculado = matriculaIds.includes(c.id);
         const matricula = matriculas.find(m => m.curso_id === c.id);
-        const icon = areaIcons[c.area] || 'fa-graduation-cap';
+        const cfg = catConfig[c.area] || defaultCat;
 
         return `
         <div class="curso-catalogo-card" data-area="${c.area}">
-            <div class="curso-card-header" style="background: ${c.area === 'teologica' ? 'linear-gradient(135deg, #1a3a5c, #2c5282)' : 'linear-gradient(135deg, #065f46, #059669)'};">
-                <i class="fas ${icon}"></i>
-                <span class="curso-area-tag">${areaLabels[c.area] || c.area}</span>
+            <div class="curso-card-header" style="background: ${cfg.bg};">
+                <i class="fas ${cfg.icon}"></i>
+                <span class="curso-area-tag" style="background:${cfg.tag};color:#1a1a2e;"><i class="fas ${cfg.icon}"></i> ${c.area}</span>
             </div>
             <div class="curso-card-body">
                 <h4>${c.titulo}</h4>
@@ -709,7 +718,7 @@ function renderMeusCoarsos(matriculas) {
         <div class="meu-curso-item">
             <div class="meu-curso-info">
                 <h5>${m.titulo}</h5>
-                <span class="meu-curso-nivel">${m.area === 'teologica' ? '📖' : '🏥'} ${m.nivel || ''} · ${m.carga_horaria || 0}h</span>
+                <span class="meu-curso-nivel">${['Teologia'].includes(m.area) ? '📖' : '🏥'} ${m.nivel || ''} · ${m.carga_horaria || 0}h</span>
             </div>
             <div class="meu-curso-progress">
                 <div class="curso-progresso-bar">

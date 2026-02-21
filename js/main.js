@@ -480,10 +480,17 @@ async function loadSiteConfig() {
             }
         }
 
-        // Atualizar logo do site (se definido)
+        // Atualizar logo do cabeçalho
         if (config.site_logo_url) {
-            document.querySelectorAll('.logo img, .footer-logo img').forEach(img => {
-                if (config.site_logo_url) img.src = config.site_logo_url;
+            document.querySelectorAll('.logo img').forEach(img => {
+                img.src = config.site_logo_url;
+            });
+        }
+        // Atualizar logo do rodapé (usa logo próprio ou cai no do cabeçalho)
+        const footerLogoUrl = config.site_logo_footer_url || config.site_logo_url;
+        if (footerLogoUrl) {
+            document.querySelectorAll('.footer-logo img').forEach(img => {
+                img.src = footerLogoUrl;
             });
         }
 

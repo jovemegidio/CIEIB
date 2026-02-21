@@ -104,8 +104,9 @@ async function seed() {
         const configs = [
             // Identidade
             { chave: 'nome_site', valor: 'CIEIB — Convenção de Igrejas Evangélicas Independentes do Brasil', desc: 'Nome do Site' },
-            { chave: 'site_logo_url', valor: '', desc: 'URL do Logo do Site' },
-            { chave: 'site_favicon_url', valor: '/fav.jpg', desc: 'URL do Favicon' },
+            { chave: 'site_logo_url', valor: '', desc: 'Logo do Cabeçalho' },
+            { chave: 'site_logo_footer_url', valor: '', desc: 'Logo do Rodapé' },
+            { chave: 'site_favicon_url', valor: '/fav.jpg', desc: 'Favicon do Site' },
             // SEO
             { chave: 'meta_description', valor: 'CIEIB é uma convenção que reúne igrejas evangélicas independentes em todo o Brasil, promovendo unidade, comunhão e crescimento do Reino de Deus.', desc: 'Meta Description (SEO)' },
             { chave: 'meta_keywords', valor: 'CIEIB, convenção, igrejas evangélicas, interdenominacional, Brasil, ministros', desc: 'Meta Keywords (SEO)' },

@@ -1854,7 +1854,8 @@ async function loadConfiguracoes() {
                 iconClass: 'icon-site',
                 fields: [
                     { chave: 'nome_site', label: 'Nome do Site', type: 'text', full: true },
-                    { chave: 'site_logo_url', label: 'Logo do Site', type: 'upload', hint: 'Recomendado: 312×72px (Cabeçalho) / 154×64px (Rodapé)' },
+                    { chave: 'site_logo_url', label: 'Logo do Cabeçalho', type: 'upload', hint: 'Recomendado: 312×72px' },
+                    { chave: 'site_logo_footer_url', label: 'Logo do Rodapé', type: 'upload', hint: 'Recomendado: 154×64px' },
                     { chave: 'site_favicon_url', label: 'Favicon do Site', type: 'upload', hint: 'Recomendado: 64×64px (formato quadrado)' },
                 ]
             },

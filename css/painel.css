@@ -3076,34 +3076,38 @@
 /* Header */
 .sup-header {
     background: linear-gradient(135deg, #1a3a5c 0%, #2d5a87 50%, #c8a951 100%);
-    padding: 28px 28px 22px;
+    padding: 16px 24px 14px;
     border-radius: 18px 18px 0 0;
     text-align: center;
     color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
 }
 
 .sup-header-icon {
-    width: 56px;
-    height: 56px;
+    width: 40px;
+    height: 40px;
     background: rgba(255, 255, 255, 0.15);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
-    margin: 0 auto 12px;
+    font-size: 1.1rem;
+    margin: 0 auto 4px;
     border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 .sup-header h2 {
-    margin: 0 0 6px;
-    font-size: 1.3rem;
+    margin: 0;
+    font-size: 1.15rem;
     font-weight: 700;
 }
 
 .sup-header p {
     margin: 0;
-    font-size: 0.85rem;
+    font-size: 0.78rem;
     opacity: 0.85;
 }
 
@@ -3116,7 +3120,7 @@
 
 .sup-tab {
     flex: 1;
-    padding: 14px;
+    padding: 10px;
     border: none;
     background: transparent;
     font-size: 0.85rem;
@@ -3161,7 +3165,7 @@
 /* Tab Content */
 .sup-tab-content {
     display: none;
-    padding: 24px;
+    padding: 16px 20px;
 }
 
 .sup-tab-content.active {
@@ -3170,7 +3174,7 @@
 
 /* Form */
 .sup-field {
-    margin-bottom: 18px;
+    margin-bottom: 10px;
 }
 
 .sup-field label {
@@ -3192,10 +3196,10 @@
 .sup-field select,
 .sup-field textarea {
     width: 100%;
-    padding: 12px 14px;
+    padding: 10px 12px;
     border: 2px solid #e5e7eb;
     border-radius: 10px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-family: inherit;
     color: #1f2937;
     background: #f9fafb;
@@ -3214,7 +3218,7 @@
 
 .sup-field textarea {
     resize: vertical;
-    min-height: 100px;
+    min-height: 80px;
 }
 
 .sup-char-count {
@@ -3243,10 +3247,10 @@
 .sup-priority-badge {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    padding: 8px 14px;
+    gap: 4px;
+    padding: 6px 12px;
     border-radius: 20px;
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     font-weight: 600;
     border: 2px solid #e5e7eb;
     background: #f9fafb;
@@ -3283,14 +3287,14 @@
     display: flex;
     gap: 10px;
     justify-content: flex-end;
-    padding-top: 8px;
+    padding-top: 4px;
 }
 
 .sup-btn {
-    padding: 12px 24px;
+    padding: 10px 20px;
     border: none;
     border-radius: 10px;
-    font-size: 0.88rem;
+    font-size: 0.84rem;
     font-weight: 600;
     cursor: pointer;
     display: flex;

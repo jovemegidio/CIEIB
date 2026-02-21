@@ -13,6 +13,9 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const isProd = process.env.NODE_ENV === 'production';
 
+// ---- Versão para cache-busting (muda a cada restart/deploy) ----
+const APP_VERSION = Date.now().toString(36);
+
 // ---- Trust proxy (Nginx) ----
 if (isProd) app.set('trust proxy', 1);
 
@@ -48,7 +51,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// ---- Servir arquivos estáticos (HTML, CSS, JS) ----
+// ---- Servir arquivos estáticos (CSS, JS, imagens) ----
 app.use(express.static(__dirname, {
     etag: true,
     lastModified: true,
@@ -56,11 +59,27 @@ app.use(express.static(__dirname, {
         if (filePath.endsWith('.html')) {
             res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
         } else if (filePath.endsWith('.css') || filePath.endsWith('.js')) {
-            res.set('Cache-Control', 'public, max-age=3600, must-revalidate');
+            // CSS/JS: sem cache forte — sempre revalidar via ETag
+            res.set('Cache-Control', 'no-cache, must-revalidate');
         }
     }
 }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// ---- Helper: servir HTML com cache-busting automático ----
+const fs = require('fs');
+function sendHtmlWithCacheBust(res, filePath) {
+    fs.readFile(filePath, 'utf8', (err, html) => {
+        if (err) return res.status(404).send('Página não encontrada');
+        // Injeta ?v=VERSAO em todos os CSS/JS locais
+        const busted = html
+            .replace(/(href=["'](?:\/)?css\/[^"']+)(["'])/g, `$1?v=${APP_VERSION}$2`)
+            .replace(/(src=["'](?:\/)?js\/[^"']+)(["'])/g, `$1?v=${APP_VERSION}$2`);
+        res.set('Content-Type', 'text/html');
+        res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.send(busted);
+    });
+}
 
 // ---- Rotas da API ----
 const authRoutes = require('./server/routes/auth');
@@ -95,7 +114,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/registro', registroRoutes);
 app.use('/api/suporte', suporteRoutes);
 
-// ---- SPA Fallback: Rotas HTML ----
+// ---- SPA Fallback: Rotas HTML com cache-busting ----
 const htmlPages = [
     'index', 'quem-somos', 'diretoria', 'noticias',
     'contato', 'area-do-ministro', 'painel-ministro', 'verificar-credencial', 'painel-admin'
@@ -103,12 +122,12 @@ const htmlPages = [
 
 htmlPages.forEach(page => {
     app.get(`/${page}`, (req, res) => {
-        res.sendFile(path.join(__dirname, `${page}.html`));
+        sendHtmlWithCacheBust(res, path.join(__dirname, `${page}.html`));
     });
 });
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    sendHtmlWithCacheBust(res, path.join(__dirname, 'index.html'));
 });
 
 // ---- Health Check ----

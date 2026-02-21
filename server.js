@@ -148,7 +148,7 @@ app.use('/api/suporte', suporteRoutes);
 
 // ---- SPA Fallback: Rotas HTML com cache-busting ----
 const htmlPages = [
-    'index', 'quem-somos', 'diretoria', 'noticias',
+    'index', 'quem-somos', 'diretoria', 'noticias', 'midias',
     'contato', 'area-do-ministro', 'painel-ministro', 'verificar-credencial', 'painel-admin', 'lgpd'
 ];
 

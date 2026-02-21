@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Mídias da CIEIB - Convenção das Igrejas Evangélicas Interdenominacional do Brasil">
+    <title>CIEIB: Mídias</title>
+    <link rel="icon" type="image/jpeg" href="/fav.jpg">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .midias-filters {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+        .midias-filters .filter-btn {
+            padding: 10px 24px;
+            border-radius: 50px;
+            border: 2px solid var(--primary);
+            background: transparent;
+            color: var(--primary);
+            font-family: var(--font-primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .midias-filters .filter-btn:hover,
+        .midias-filters .filter-btn.active {
+            background: var(--primary);
+            color: var(--white);
+        }
+        .midias-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        .midia-card {
+            background: var(--white);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: var(--transition);
+        }
+        .midia-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        }
+        .midia-thumb {
+            position: relative;
+            width: 100%;
+            height: 220px;
+            background: var(--light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .midia-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .midia-thumb .midia-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            opacity: 0.5;
+        }
+        .midia-thumb .midia-type-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--primary);
+            color: var(--white);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-family: var(--font-primary);
+        }
+        .midia-thumb .play-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.3);
+            opacity: 0;
+            transition: var(--transition);
+        }
+        .midia-card:hover .play-overlay {
+            opacity: 1;
+        }
+        .play-overlay i {
+            font-size: 3rem;
+            color: var(--white);
+        }
+        .midia-info {
+            padding: 20px;
+        }
+        .midia-info h3 {
+            font-family: var(--font-primary);
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        .midia-info p {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+        .midia-info .midia-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+        .midia-info .midia-meta i {
+            margin-right: 4px;
+            color: var(--primary);
+        }
+
+        /* Lightbox */
+        .lightbox-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .lightbox-overlay.active {
+            display: flex;
+        }
+        .lightbox-overlay img,
+        .lightbox-overlay video,
+        .lightbox-overlay iframe {
+            max-width: 90vw;
+            max-height: 85vh;
+            border-radius: 8px;
+        }
+        .lightbox-overlay iframe {
+            width: 80vw;
+            height: 70vh;
+        }
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: #fff;
+            font-size: 2rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            z-index: 10000;
+        }
+
+        @media (max-width: 768px) {
+            .midias-grid {
+                grid-template-columns: 1fr;
+            }
+            .lightbox-overlay iframe {
+                width: 95vw;
+                height: 50vh;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Skip to content -->
+    <a href="#main-content" class="sr-only sr-only-focusable">Pular para o conteúdo principal</a>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="container">
+            <div class="top-bar-content">
+                <div class="top-bar-left">
+                    <span><i class="fas fa-clock"></i> <span data-config="site_horario">Seg a Sex: 09h às 17h</span></span>
+                    <span><i class="fas fa-phone"></i> <span data-config="site_telefone">(00) 0000-0000</span></span>
+                    <span><i class="fas fa-envelope"></i> <span data-config="site_email">contato@cieib.org.br</span></span>
+                </div>
+                <div class="top-bar-right" id="topBarSocial">
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header" id="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-dove"></i>
+                    </div>
+                    <div class="logo-text">
+                        <span class="logo-name">CIEIB</span>
+                        <span class="logo-desc">Convenção das Igrejas Evangélicas<br>Interdenominacional do Brasil</span>
+                    </div>
+                </a>
+                <nav class="nav" id="nav" aria-label="Navegação principal">
+                    <ul class="nav-list">
+                        <li><a href="index.html">Home</a></li>
+                        <li class="dropdown">
+                            <a href="#">Institucional <i class="fas fa-chevron-down"></i></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="quem-somos.html">Quem Somos</a></li>
+                                <li><a href="diretoria.html">Diretoria</a></li>
+                                <li><a href="diretoria.html#presidente">Presidente</a></li>
+                                <li><a href="quem-somos.html#estrutura">Conselhos</a></li>
+                                <li><a href="quem-somos.html#estrutura">Comissões</a></li>
+                                <li><a href="quem-somos.html#estrutura">Órgãos</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown">
+                            <a href="#">Convenções <i class="fas fa-chevron-down"></i></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="index.html#convencoes-section">Convenções Afiliadas</a></li>
+                                <li><a href="index.html#eventos">Assembleias Convencionais</a></li>
+                                <li><a href="index.html#resolucoes">Resoluções</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="noticias.html">Notícias</a></li>
+                        <li><a href="midias.html" class="active">Mídias</a></li>
+                        <li><a href="contato.html">Contato</a></li>
+                        <li class="nav-cta"><a href="area-do-ministro.html"><i class="fas fa-user-shield"></i> Área do Ministro</a></li>
+                    </ul>
+                </nav>
+                <button class="mobile-toggle" id="mobileToggle" aria-label="Menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main id="main-content">
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <h1>Mídias</h1>
+            <nav aria-label="Breadcrumb">
+                <div class="breadcrumb">
+                    <a href="index.html">Home</a>
+                    <span>/</span>
+                    <span aria-current="page">Mídias</span>
+                </div>
+            </nav>
+        </div>
+    </section>
+
+    <!-- Page Content -->
+    <section class="page-content">
+        <div class="container">
+
+            <!-- Filtros -->
+            <div class="midias-filters" id="midiasFilters">
+                <button class="filter-btn active" data-filter="todos">Todos</button>
+                <button class="filter-btn" data-filter="imagem">Imagens</button>
+                <button class="filter-btn" data-filter="video">Vídeos</button>
+                <button class="filter-btn" data-filter="documento">Documentos</button>
+            </div>
+
+            <!-- Grid de Mídias -->
+            <div class="midias-grid" id="midiasGrid">
+                <div style="text-align:center;padding:60px 0;color:#999;grid-column:1/-1;">
+                    <i class="fas fa-spinner fa-spin" style="font-size:2rem;"></i>
+                    <p style="margin-top:12px;">Carregando mídias...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    </main>
+
+    <!-- Lightbox -->
+    <div class="lightbox-overlay" id="lightbox">
+        <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+        <div id="lightboxContent"></div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col footer-about">
+                    <div class="footer-logo">
+                        <div class="logo-icon"><i class="fas fa-dove"></i></div>
+                        <span>CIEIB</span>
+                    </div>
+                    <p data-config="footer_sobre">Convenção das Igrejas Evangélicas Interdenominacional do Brasil — promovendo a unidade e o crescimento do evangelho em todo o território nacional.</p>
+                    <div class="footer-social" id="footerSocial">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                        <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h3>Institucional</h3>
+                    <ul>
+                        <li><a href="quem-somos.html">Quem Somos</a></li>
+                        <li><a href="diretoria.html">Diretoria</a></li>
+                        <li><a href="diretoria.html#presidente">Presidente</a></li>
+                        <li><a href="quem-somos.html#estrutura">Conselhos</a></li>
+                        <li><a href="quem-somos.html#estrutura">Comissões</a></li>
+                        <li><a href="quem-somos.html#estrutura">Órgãos</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Convenções</h3>
+                    <ul>
+                        <li><a href="index.html#convencoes-section">Convenções Afiliadas</a></li>
+                        <li><a href="index.html#eventos">Assembleias Convencionais</a></li>
+                        <li><a href="index.html#resolucoes">Resoluções</a></li>
+                        <li><a href="noticias.html">Notícias</a></li>
+                        <li><a href="midias.html">Mídias</a></li>
+                    </ul>
+                    <ul id="footerExtraLinks"></ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Contato</h3>
+                    <ul class="footer-contact">
+                        <li>
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span data-config="site_endereco">Rua Exemplo, 1000<br>Bairro Centro<br>CEP 00000-000<br>Cidade - UF</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-phone"></i>
+                            <span data-config="site_telefone">(00) 0000-0000</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-envelope"></i>
+                            <span data-config="site_email">contato@cieib.org.br</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Atendimento</h3>
+                    <div class="footer-hours">
+                        <p><i class="fas fa-clock"></i> <span data-config="site_horario">Seg a Sex: 09h às 17h</span></p>
+                    </div>
+                    <a href="contato.html" class="btn btn-outline btn-sm">Fale Conosco</a>
+                    <div class="footer-dpo">
+                        <a href="lgpd.html">Fale com o DPO</a>
+                        <a href="lgpd.html">Política de Privacidade</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container">
+                <p data-config="footer_copyright">Copyright &copy; CIEIB 2026. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <button class="back-to-top" id="backToTop" aria-label="Voltar ao topo">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+    <a href="https://wa.me/5500000000000" class="whatsapp-float" id="whatsappFloat" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp (abre em nova janela)">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        let allMidias = [];
+        let currentFilter = 'todos';
+
+        const typeIcons = {
+            'imagem': 'fa-image',
+            'video': 'fa-video',
+            'documento': 'fa-file-pdf',
+            'audio': 'fa-music'
+        };
+
+        const typeLabels = {
+            'imagem': 'Imagem',
+            'video': 'Vídeo',
+            'documento': 'Documento',
+            'audio': 'Áudio'
+        };
+
+        // Filtros
+        document.getElementById('midiasFilters').addEventListener('click', e => {
+            const btn = e.target.closest('.filter-btn');
+            if (!btn) return;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFilter = btn.dataset.filter;
+            renderMidias();
+        });
+
+        function isYouTubeUrl(url) {
+            return /youtube\.com|youtu\.be/i.test(url);
+        }
+
+        function getYouTubeEmbed(url) {
+            let id = '';
+            const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
+            if (match) id = match[1];
+            return id ? `https://www.youtube.com/embed/${id}` : url;
+        }
+
+        function getYouTubeThumb(url) {
+            const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
+            return match ? `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg` : '';
+        }
+
+        function renderMidias() {
+            const grid = document.getElementById('midiasGrid');
+            const filtered = currentFilter === 'todos'
+                ? allMidias
+                : allMidias.filter(m => m.tipo === currentFilter);
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div style="text-align:center;padding:60px 0;color:#999;grid-column:1/-1;">
+                        <i class="fas fa-photo-video" style="font-size:2rem;"></i>
+                        <p style="margin-top:12px;">Nenhuma mídia encontrada${currentFilter !== 'todos' ? ' nesta categoria' : ''}.</p>
+                    </div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(m => {
+                const icon = typeIcons[m.tipo] || 'fa-file';
+                const label = typeLabels[m.tipo] || m.tipo;
+                const date = new Date(m.created_at).toLocaleDateString('pt-BR');
+                const isVideo = m.tipo === 'video';
+                const isImage = m.tipo === 'imagem';
+                const isYT = isVideo && isYouTubeUrl(m.url);
+                const ytThumb = isYT ? getYouTubeThumb(m.url) : '';
+
+                let thumbHtml = '';
+                if (isImage) {
+                    thumbHtml = `<img src="${m.url}" alt="${m.titulo}" loading="lazy">
+                        <div class="play-overlay"><i class="fas fa-search-plus"></i></div>`;
+                } else if (isYT) {
+                    thumbHtml = `<img src="${ytThumb}" alt="${m.titulo}" loading="lazy">
+                        <div class="play-overlay"><i class="fas fa-play-circle"></i></div>`;
+                } else if (isVideo) {
+                    thumbHtml = `<i class="midia-icon fas fa-video"></i>
+                        <div class="play-overlay"><i class="fas fa-play-circle"></i></div>`;
+                } else {
+                    thumbHtml = `<i class="midia-icon fas ${icon}"></i>
+                        <div class="play-overlay"><i class="fas fa-external-link-alt"></i></div>`;
+                }
+
+                return `
+                    <div class="midia-card" onclick="openMidia('${encodeURIComponent(JSON.stringify({tipo: m.tipo, url: m.url, titulo: m.titulo}))}')">
+                        <div class="midia-thumb">
+                            ${thumbHtml}
+                            <span class="midia-type-badge"><i class="fas ${icon}"></i> ${label}</span>
+                        </div>
+                        <div class="midia-info">
+                            <h3>${m.titulo}</h3>
+                            ${m.descricao ? `<p>${m.descricao}</p>` : ''}
+                            <div class="midia-meta">
+                                <span><i class="fas fa-calendar-alt"></i> ${date}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openMidia(encodedData) {
+            const data = JSON.parse(decodeURIComponent(encodedData));
+            const lightbox = document.getElementById('lightbox');
+            const content = document.getElementById('lightboxContent');
+
+            if (data.tipo === 'imagem') {
+                content.innerHTML = `<img src="${data.url}" alt="${data.titulo}" style="border-radius:8px;">`;
+            } else if (data.tipo === 'video') {
+                if (isYouTubeUrl(data.url)) {
+                    content.innerHTML = `<iframe src="${getYouTubeEmbed(data.url)}" frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>`;
+                } else {
+                    content.innerHTML = `<video src="${data.url}" controls autoplay style="border-radius:8px;max-width:90vw;max-height:80vh;"></video>`;
+                }
+            } else {
+                window.open(data.url, '_blank');
+                return;
+            }
+
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            const content = document.getElementById('lightboxContent');
+            lightbox.classList.remove('active');
+            content.innerHTML = '';
+            document.body.style.overflow = '';
+        }
+
+        // Fechar com ESC
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeLightbox();
+        });
+
+        // Fechar clicando fora
+        document.getElementById('lightbox').addEventListener('click', e => {
+            if (e.target === e.currentTarget) closeLightbox();
+        });
+
+        // Carregar mídias
+        async function loadMidias() {
+            const grid = document.getElementById('midiasGrid');
+            try {
+                const res = await fetch(`${API.BASE_URL}/dashboard/midias`);
+                allMidias = await res.json();
+                renderMidias();
+            } catch (err) {
+                console.error('Erro ao carregar mídias:', err);
+                grid.innerHTML = `
+                    <div style="text-align:center;padding:60px 0;color:#999;grid-column:1/-1;">
+                        <i class="fas fa-exclamation-triangle" style="font-size:2rem;color:#e74c3c;"></i>
+                        <p style="margin-top:12px;">Erro ao carregar mídias. Tente novamente.</p>
+                    </div>`;
+            }
+        }
+
+        loadMidias();
+    </script>
+</body>
+</html>

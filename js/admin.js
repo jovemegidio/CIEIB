@@ -2521,7 +2521,7 @@ function renderDiretoriaTable() {
         ${allDiretoria.map(d => `<tr>
             <td>${d.nome}</td>
             <td>${d.cargo}</td>
-            <td><span class="badge ${d.tipo === 'conselho_fiscal' ? 'badge-aberto' : 'badge-ativo'}">${d.tipo === 'conselho_fiscal' ? 'Conselho Fiscal' : 'Diretoria'}</span></td>
+            <td><span class="badge ${d.tipo === 'conselho_fiscal' ? 'badge-aberto' : d.tipo === 'superintendencia' ? 'badge-warning' : 'badge-ativo'}">${d.tipo === 'conselho_fiscal' ? 'Conselho Fiscal' : d.tipo === 'superintendencia' ? 'Superintendência' : 'Diretoria'}</span></td>
             <td>${d.email || '-'}</td>
             <td class="actions-cell">
                 <button class="btn-table-action btn-table-edit" onclick="openDiretoriaModal(${d.id})"><i class="fas fa-edit"></i></button>
@@ -2542,6 +2542,7 @@ function openDiretoriaModal(id) {
                 <select id="mDirTipo">
                     <option value="diretoria" ${(!item || item?.tipo === 'diretoria') ? 'selected' : ''}>Diretoria</option>
                     <option value="conselho_fiscal" ${item?.tipo === 'conselho_fiscal' ? 'selected' : ''}>Conselho Fiscal</option>
+                    <option value="superintendencia" ${item?.tipo === 'superintendencia' ? 'selected' : ''}>Superintendência</option>
                 </select>
             </div>
             <div class="admin-form-group"><label>Email</label><input type="email" id="mDirEmail" value="${item?.email || ''}"></div>

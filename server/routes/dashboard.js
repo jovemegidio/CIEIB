@@ -155,4 +155,16 @@ router.get('/conteudos/:pagina', async (req, res) => {
     }
 });
 
+// GET /api/dashboard/midias — Mídias públicas (galeria)
+router.get('/midias', async (req, res) => {
+    try {
+        const result = await pool.query(
+            'SELECT id, titulo, descricao, tipo, url, created_at FROM midias ORDER BY created_at DESC'
+        );
+        res.json(result.rows);
+    } catch (err) {
+        res.json([]);
+    }
+});
+
 module.exports = router;

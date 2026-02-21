@@ -284,10 +284,10 @@ router.get('/modulos/:id/aulas', adminAuth, async (req, res) => {
 
 router.post('/modulos/:id/aulas', adminAuth, async (req, res) => {
     try {
-        const { titulo, tipo, duracao_minutos, conteudo, ordem } = req.body;
+        const { titulo, descricao, tipo, duracao_minutos, conteudo_url, material_url, ordem } = req.body;
         const r = await pool.query(
-            'INSERT INTO curso_aulas (modulo_id, titulo, tipo, duracao_minutos, conteudo, ordem) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *',
-            [req.params.id, titulo, tipo || 'texto', duracao_minutos || 0, conteudo, ordem || 0]
+            'INSERT INTO curso_aulas (modulo_id, titulo, descricao, tipo, conteudo_url, material_url, duracao_minutos, ordem) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *',
+            [req.params.id, titulo, descricao, tipo || 'texto', conteudo_url, material_url, duracao_minutos || 0, ordem || 0]
         );
         res.status(201).json(r.rows[0]);
     } catch (err) { res.status(500).json({ error: err.message }); }
@@ -295,11 +295,12 @@ router.post('/modulos/:id/aulas', adminAuth, async (req, res) => {
 
 router.put('/aulas/:id', adminAuth, async (req, res) => {
     try {
-        const { titulo, tipo, duracao_minutos, conteudo, ordem } = req.body;
+        const { titulo, descricao, tipo, duracao_minutos, conteudo_url, material_url, ordem } = req.body;
         const r = await pool.query(
-            'UPDATE curso_aulas SET titulo=$1, tipo=$2, duracao_minutos=$3, conteudo=$4, ordem=$5 WHERE id=$6 RETURNING *',
-            [titulo, tipo, duracao_minutos, conteudo, ordem, req.params.id]
+            'UPDATE curso_aulas SET titulo=$1, descricao=$2, tipo=$3, duracao_minutos=$4, conteudo_url=$5, material_url=$6, ordem=$7 WHERE id=$8 RETURNING *',
+            [titulo, descricao, tipo, duracao_minutos, conteudo_url, material_url, ordem, req.params.id]
         );
+        if (r.rows.length === 0) return res.status(404).json({ error: 'Aula não encontrada' });
         res.json(r.rows[0]);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });

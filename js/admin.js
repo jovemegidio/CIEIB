@@ -633,19 +633,50 @@ async function deleteModulo(moduloId, cursoId) {
     } catch (err) { showToast(err.message, 'error'); }
 }
 
+let _currentAulas = [];
 async function openModuloAulas(moduloId, moduloTitulo) {
     try {
-        const aulas = await AdminAPI.get(`/modulos/${moduloId}/aulas`);
+        _currentAulas = await AdminAPI.get(`/modulos/${moduloId}/aulas`);
         document.getElementById('modalTitle').textContent = `Aulas — ${moduloTitulo}`;
+        const tipoIcons = { video: 'fa-play-circle', texto: 'fa-file-alt', pdf: 'fa-file-pdf', audio: 'fa-headphones', quiz: 'fa-question-circle' };
+        const tipoBadge = { video: 'badge-ativo', texto: 'badge-destaque', pdf: 'badge-inativo', audio: 'badge-warning', quiz: 'badge-info-notif' };
         document.getElementById('modalBody').innerHTML = `
+            <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+                <div style="flex:1;min-width:100px;background:#f0f4f8;border-radius:8px;padding:12px;text-align:center;">
+                    <div style="font-size:20px;font-weight:700;color:var(--admin-primary)">${_currentAulas.length}</div>
+                    <div style="font-size:11px;color:#888;">Aulas</div>
+                </div>
+                <div style="flex:1;min-width:100px;background:#f0f4f8;border-radius:8px;padding:12px;text-align:center;">
+                    <div style="font-size:20px;font-weight:700;color:var(--admin-secondary)">${_currentAulas.reduce((s,a) => s + (a.duracao_minutos||0), 0)}min</div>
+                    <div style="font-size:11px;color:#888;">Duração Total</div>
+                </div>
+                <div style="flex:1;min-width:100px;background:#f0f4f8;border-radius:8px;padding:12px;text-align:center;">
+                    <div style="font-size:20px;font-weight:700;color:#27ae60">${_currentAulas.filter(a=>a.tipo==='video').length}</div>
+                    <div style="font-size:11px;color:#888;">Vídeos</div>
+                </div>
+                <div style="flex:1;min-width:100px;background:#f0f4f8;border-radius:8px;padding:12px;text-align:center;">
+                    <div style="font-size:20px;font-weight:700;color:#8e44ad">${_currentAulas.filter(a=>a.tipo==='texto'||a.tipo==='pdf').length}</div>
+                    <div style="font-size:11px;color:#888;">Textos/PDF</div>
+                </div>
+            </div>
             <button class="btn-admin-primary" onclick="openAulaForm(${moduloId}, '${moduloTitulo.replace(/'/g, "\\'")}')" style="margin-bottom:16px;"><i class="fas fa-plus"></i> Nova Aula</button>
-            ${aulas.length === 0 ? '<p style="color:#aaa;text-align:center;">Nenhuma aula</p>' : aulas.map(a => `
-                <div style="display:flex;align-items:center;justify-content:space-between;padding:10px;border:1px solid #eee;border-radius:8px;margin-bottom:8px;">
-                    <div>
-                        <strong style="font-size:0.85rem;">${a.titulo}</strong>
-                        <span style="font-size:0.72rem;color:#999;margin-left:8px;">${a.tipo} — ${a.duracao_minutos || 0}min</span>
+            ${_currentAulas.length === 0 ? '<p style="color:#aaa;text-align:center;padding:30px;">Nenhuma aula cadastrada neste módulo</p>' : _currentAulas.map((a, idx) => `
+                <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid #eee;border-radius:10px;margin-bottom:8px;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--admin-primary)'" onmouseout="this.style.borderColor='#eee'">
+                    <div style="width:32px;height:32px;border-radius:50%;background:#f0f4f8;display:flex;align-items:center;justify-content:center;color:var(--admin-primary);font-weight:700;font-size:0.8rem;flex-shrink:0;">${idx+1}</div>
+                    <i class="fas ${tipoIcons[a.tipo]||'fa-file'} ${''} " style="color:var(--admin-secondary);font-size:1.1rem;flex-shrink:0;"></i>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-size:0.88rem;font-weight:600;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.titulo}</div>
+                        <div style="font-size:0.72rem;color:#999;margin-top:2px;">
+                            <span class="badge ${tipoBadge[a.tipo]||'badge-ativo'}" style="font-size:0.65rem;padding:2px 8px;">${a.tipo}</span>
+                            ${a.duracao_minutos ? `<span style="margin-left:6px;"><i class="fas fa-clock"></i> ${a.duracao_minutos}min</span>` : ''}
+                            ${a.conteudo_url ? '<span style="margin-left:6px;"><i class="fas fa-link"></i> Com conteúdo</span>' : '<span style="margin-left:6px;color:#e74c3c;"><i class="fas fa-exclamation-triangle"></i> Sem conteúdo</span>'}
+                            ${a.material_url ? '<span style="margin-left:6px;"><i class="fas fa-paperclip"></i> Material</span>' : ''}
+                        </div>
                     </div>
-                    <button class="btn-table-action btn-table-delete" onclick="deleteAula(${a.id}, ${moduloId}, '${moduloTitulo.replace(/'/g, "\\'")}')"><i class="fas fa-trash"></i></button>
+                    <div style="display:flex;gap:6px;flex-shrink:0;">
+                        <button class="btn-table-action btn-table-edit" onclick="openAulaForm(${moduloId}, '${moduloTitulo.replace(/'/g, "\\'")}'  , ${a.id})"><i class="fas fa-edit"></i></button>
+                        <button class="btn-table-action btn-table-delete" onclick="deleteAula(${a.id}, ${moduloId}, '${moduloTitulo.replace(/'/g, "\\'")}')"><i class="fas fa-trash"></i></button>
+                    </div>
                 </div>
             `).join('')}
         `;
@@ -653,33 +684,107 @@ async function openModuloAulas(moduloId, moduloTitulo) {
     } catch (err) { showToast(err.message, 'error'); }
 }
 
-function openAulaForm(moduloId, moduloTitulo) {
+function openAulaForm(moduloId, moduloTitulo, aulaId) {
+    const item = aulaId ? _currentAulas.find(a => a.id === aulaId) : null;
+    document.getElementById('modalTitle').textContent = item ? `Editar Aula — ${item.titulo}` : `Nova Aula — ${moduloTitulo}`;
     document.getElementById('modalBody').innerHTML = `
-        <div class="admin-form-group"><label>Título</label><input type="text" id="mAulaTitle"></div>
+        <div class="admin-form-group"><label>Título *</label><input type="text" id="mAulaTitle" value="${item?.titulo || ''}" placeholder="Nome da aula"></div>
+        <div class="admin-form-group"><label>Descrição</label><textarea id="mAulaDesc" style="min-height:60px;" placeholder="Breve descrição do conteúdo da aula">${item?.descricao || ''}</textarea></div>
         <div class="form-grid">
-            <div class="admin-form-group"><label>Tipo</label>
-                <select id="mAulaTipo"><option value="video">Vídeo</option><option value="texto">Texto</option><option value="pdf">PDF</option></select>
+            <div class="admin-form-group"><label>Tipo *</label>
+                <select id="mAulaTipo" onchange="aulaToggleConteudo()">
+                    <option value="video" ${item?.tipo==='video'?'selected':''}>🎬 Vídeo</option>
+                    <option value="texto" ${item?.tipo==='texto'?'selected':''}>📝 Texto</option>
+                    <option value="pdf" ${item?.tipo==='pdf'?'selected':''}>📄 PDF</option>
+                    <option value="audio" ${item?.tipo==='audio'?'selected':''}>🎧 Áudio</option>
+                    <option value="quiz" ${item?.tipo==='quiz'?'selected':''}>❓ Quiz</option>
+                </select>
             </div>
-            <div class="admin-form-group"><label>Duração (min)</label><input type="number" id="mAulaDuracao" value="0"></div>
+            <div class="admin-form-group"><label>Duração (min)</label><input type="number" id="mAulaDuracao" min="0" value="${item?.duracao_minutos || 0}"></div>
+            <div class="admin-form-group"><label>Ordem</label><input type="number" id="mAulaOrdem" min="0" value="${item?.ordem || 0}"></div>
         </div>
-        <div class="admin-form-group"><label>Conteúdo</label><textarea id="mAulaConteudo" style="min-height:100px;"></textarea></div>
-        <div style="display:flex;gap:10px;margin-top:16px;">
-            <button class="btn-admin-secondary" onclick="openModuloAulas(${moduloId}, '${moduloTitulo.replace(/'/g, "\\'")}')">Voltar</button>
-            <button class="btn-admin-primary" onclick="saveAula(${moduloId}, '${moduloTitulo.replace(/'/g, "\\'")}')"><i class="fas fa-save"></i> Salvar</button>
-        </div>
+        <div id="aulaConteudoArea"></div>
+        ${adminUploadField('mAulaMaterial', 'Material de Apoio (PDF, DOC, etc.)', item?.material_url)}
     `;
-    document.getElementById('modalFooter').innerHTML = '';
+    aulaToggleConteudo(item);
+    document.getElementById('modalFooter').innerHTML = `
+        <button class="btn-admin-secondary" onclick="openModuloAulas(${moduloId}, '${moduloTitulo.replace(/'/g, "\\'")}')">Voltar</button>
+        <button class="btn-admin-primary" onclick="saveAula(${moduloId}, '${moduloTitulo.replace(/'/g, "\\'")}'  , ${aulaId || 'null'})"><i class="fas fa-save"></i> Salvar</button>
+    `;
 }
 
-async function saveAula(moduloId, moduloTitulo) {
+function aulaToggleConteudo(item) {
+    const tipo = document.getElementById('mAulaTipo').value;
+    const area = document.getElementById('aulaConteudoArea');
+    const val = item?.conteudo_url || '';
+    if (tipo === 'video') {
+        area.innerHTML = `
+            <div class="admin-form-group">
+                <label><i class="fas fa-video"></i> URL do Vídeo (YouTube, Vimeo, etc.)</label>
+                <input type="url" id="mAulaConteudoUrl" value="${val}" placeholder="https://youtube.com/watch?v=... ou https://vimeo.com/...">
+                <small style="color:#888;margin-top:4px;display:block;">Cole a URL do vídeo. Suporta YouTube, Vimeo, Google Drive e links diretos MP4.</small>
+                ${val && (val.includes('youtube') || val.includes('youtu.be')) ? `<div style="margin-top:8px;border-radius:8px;overflow:hidden;"><iframe width="100%" height="200" src="https://www.youtube.com/embed/${extractYouTubeId(val)}" frameborder="0" allowfullscreen></iframe></div>` : ''}
+            </div>`;
+    } else if (tipo === 'texto') {
+        area.innerHTML = `
+            <div class="admin-form-group">
+                <label><i class="fas fa-file-alt"></i> Conteúdo da Aula</label>
+                <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
+                    <button type="button" class="btn-mini-format" onclick="aulaInsertFmt('**','**')" title="Negrito"><i class="fas fa-bold"></i></button>
+                    <button type="button" class="btn-mini-format" onclick="aulaInsertFmt('_','_')" title="Itálico"><i class="fas fa-italic"></i></button>
+                    <button type="button" class="btn-mini-format" onclick="aulaInsertFmt('\\n• ','')" title="Lista"><i class="fas fa-list-ul"></i></button>
+                    <button type="button" class="btn-mini-format" onclick="aulaInsertFmt('## ','')" title="Subtítulo"><i class="fas fa-heading"></i></button>
+                    <span style="flex:1;"></span>
+                    <small style="color:#999;align-self:center;">**negrito** · _itálico_ · ## subtítulo</small>
+                </div>
+                <textarea id="mAulaConteudoUrl" style="min-height:200px;font-family:monospace;font-size:0.9rem;line-height:1.6;">${htmlToPlainEdit(val)}</textarea>
+            </div>`;
+    } else if (tipo === 'pdf' || tipo === 'audio') {
+        area.innerHTML = `${adminUploadField('mAulaConteudoUrl', tipo === 'pdf' ? 'Arquivo PDF da Aula' : 'Arquivo de Áudio', val)}`;
+    } else {
+        area.innerHTML = `
+            <div class="admin-form-group">
+                <label><i class="fas fa-question-circle"></i> URL ou Conteúdo do Quiz</label>
+                <input type="text" id="mAulaConteudoUrl" value="${val}" placeholder="URL do quiz ou conteúdo">
+            </div>`;
+    }
+}
+
+function extractYouTubeId(url) {
+    const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/);
+    return m ? m[1] : '';
+}
+
+function aulaInsertFmt(before, after) {
+    const ta = document.getElementById('mAulaConteudoUrl');
+    if (!ta || ta.tagName !== 'TEXTAREA') return;
+    const start = ta.selectionStart, end = ta.selectionEnd;
+    const selected = ta.value.substring(start, end);
+    ta.value = ta.value.substring(0, start) + before + selected + after + ta.value.substring(end);
+    ta.focus();
+    ta.selectionStart = start + before.length;
+    ta.selectionEnd = start + before.length + selected.length;
+}
+
+async function saveAula(moduloId, moduloTitulo, aulaId) {
+    const titulo = document.getElementById('mAulaTitle').value.trim();
+    if (!titulo) { showToast('Título é obrigatório', 'error'); return; }
+    const tipo = document.getElementById('mAulaTipo').value;
+    let conteudoUrl = document.getElementById('mAulaConteudoUrl')?.value || '';
+    if (tipo === 'texto' && conteudoUrl) conteudoUrl = plainEditToHtml(conteudoUrl);
+    const body = {
+        titulo,
+        descricao: document.getElementById('mAulaDesc').value,
+        tipo,
+        duracao_minutos: parseInt(document.getElementById('mAulaDuracao').value) || 0,
+        conteudo_url: conteudoUrl,
+        material_url: document.getElementById('mAulaMaterial')?.value || '',
+        ordem: parseInt(document.getElementById('mAulaOrdem').value) || 0,
+    };
     try {
-        await AdminAPI.post(`/modulos/${moduloId}/aulas`, {
-            titulo: document.getElementById('mAulaTitle').value,
-            tipo: document.getElementById('mAulaTipo').value,
-            duracao_minutos: parseInt(document.getElementById('mAulaDuracao').value) || 0,
-            conteudo: document.getElementById('mAulaConteudo').value,
-        });
-        showToast('Aula criada!', 'success');
+        if (aulaId) await AdminAPI.put(`/aulas/${aulaId}`, body);
+        else await AdminAPI.post(`/modulos/${moduloId}/aulas`, body);
+        showToast(aulaId ? 'Aula atualizada!' : 'Aula criada!', 'success');
         openModuloAulas(moduloId, moduloTitulo);
     } catch (err) { showToast(err.message, 'error'); }
 }

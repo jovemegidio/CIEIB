@@ -289,7 +289,11 @@ async function seed() {
             { nome: 'WhatsApp', url: 'https://wa.me/5500000000000', icone: 'fab fa-whatsapp', ordem: 4 },
         ];
         for (const r of redes) {
-            await pool.query('INSERT INTO redes_sociais (nome, url, icone, ordem) VALUES ($1,$2,$3,$4) ON CONFLICT DO NOTHING', [r.nome, r.url, r.icone, r.ordem]);
+            await pool.query(`
+                INSERT INTO redes_sociais (nome, url, icone, ordem)
+                SELECT $1, $2, $3, $4
+                WHERE NOT EXISTS (SELECT 1 FROM redes_sociais WHERE nome = $1)
+            `, [r.nome, r.url, r.icone, r.ordem]);
         }
 
         console.log('✅ Dados iniciais inseridos com sucesso!');

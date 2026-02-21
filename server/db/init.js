@@ -438,6 +438,60 @@ ALTER TABLE ministros ADD COLUMN IF NOT EXISTS tempo_ministerio VARCHAR(50);
 ALTER TABLE ministros ADD COLUMN IF NOT EXISTS data_consagracao DATE;
 ALTER TABLE ministros ADD COLUMN IF NOT EXISTS aprovado BOOLEAN DEFAULT FALSE;
 
+-- ===== BOLETOS / ANUIDADES =====
+CREATE TABLE IF NOT EXISTS ministro_boletos (
+    id SERIAL PRIMARY KEY,
+    ministro_id INTEGER REFERENCES ministros(id) ON DELETE CASCADE,
+    tipo VARCHAR(30) DEFAULT 'anuidade',
+    referencia VARCHAR(50),
+    ano INTEGER,
+    mes INTEGER,
+    valor DECIMAL(10,2) DEFAULT 0,
+    data_vencimento DATE,
+    data_pagamento DATE,
+    valor_pago DECIMAL(10,2) DEFAULT 0,
+    arquivo_boleto_url VARCHAR(500),
+    arquivo_comprovante_url VARCHAR(500),
+    status VARCHAR(20) DEFAULT 'pendente',
+    observacao TEXT,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ===== CREDENCIAIS DIGITAIS =====
+CREATE TABLE IF NOT EXISTS ministro_credenciais (
+    id SERIAL PRIMARY KEY,
+    ministro_id INTEGER REFERENCES ministros(id) ON DELETE CASCADE,
+    numero_credencial VARCHAR(50) UNIQUE,
+    tipo VARCHAR(30) DEFAULT 'ministro',
+    data_emissao DATE DEFAULT CURRENT_DATE,
+    data_validade DATE,
+    arquivo_frente_url VARCHAR(500),
+    arquivo_verso_url VARCHAR(500),
+    arquivo_pdf_url VARCHAR(500),
+    qrcode_url VARCHAR(500),
+    status VARCHAR(20) DEFAULT 'ativa',
+    observacao TEXT,
+    emitido_por VARCHAR(200),
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ===== HISTÓRICO DE AÇÕES NO MEMBRO =====
+CREATE TABLE IF NOT EXISTS ministro_historico (
+    id SERIAL PRIMARY KEY,
+    ministro_id INTEGER REFERENCES ministros(id) ON DELETE CASCADE,
+    acao VARCHAR(100) NOT NULL,
+    descricao TEXT,
+    admin_nome VARCHAR(200),
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Adicionar colunas extras em ministros
+ALTER TABLE ministros ADD COLUMN IF NOT EXISTS observacoes_admin TEXT;
+ALTER TABLE ministros ADD COLUMN IF NOT EXISTS anuidade_status VARCHAR(20) DEFAULT 'pendente';
+ALTER TABLE ministros ADD COLUMN IF NOT EXISTS credencial_status VARCHAR(20) DEFAULT 'pendente';
+
 `;
 
 async function initDB() {

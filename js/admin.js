@@ -54,13 +54,26 @@ const AdminAPI = {
         ],
         '/ministros': {
             ministros: [
-                { id: 1, nome: 'Pr. João Carlos da Silva', cpf: '123.456.789-00', cargo: 'Pastor Presidente', registro: 'CIEIB-2020-001', status: 'ATIVO' },
-                { id: 2, nome: 'Pra. Maria Aparecida Souza', cpf: '234.567.890-11', cargo: 'Missionária', registro: 'CIEIB-2019-015', status: 'ATIVO' },
-                { id: 3, nome: 'Ev. Pedro Henrique Lima', cpf: '345.678.901-22', cargo: 'Evangelista', registro: 'CIEIB-2021-032', status: 'ATIVO' },
-                { id: 4, nome: 'Dc. Ana Paula Santos', cpf: '456.789.012-33', cargo: 'Diaconisa', registro: 'CIEIB-2023-048', status: 'PENDENTE' },
-                { id: 5, nome: 'Pb. Roberto Oliveira', cpf: '567.890.123-44', cargo: 'Presbítero', registro: 'CIEIB-2022-027', status: 'ATIVO' }
+                { id: 1, nome: 'Pr. João Carlos da Silva', cpf: '123.456.789-00', cargo: 'PASTOR', registro: 'CIEIB-2020-001', status: 'ATIVO', email: 'joao@igreja.com', telefone: '(11) 99999-0001', anuidade_status: 'paga', credencial_status: 'ativa', foto_url: '', cidade: 'São Paulo', uf: 'SP', nome_igreja: 'Igreja Evangélica Betel' },
+                { id: 2, nome: 'Pra. Maria Aparecida Souza', cpf: '234.567.890-11', cargo: 'MISSIONÁRIO', registro: 'CIEIB-2019-015', status: 'ATIVO', email: 'maria@igreja.com', telefone: '(21) 98888-0002', anuidade_status: 'paga', credencial_status: 'ativa', foto_url: '', cidade: 'Rio de Janeiro', uf: 'RJ', nome_igreja: 'Igreja Evangélica Shalom' },
+                { id: 3, nome: 'Ev. Pedro Henrique Lima', cpf: '345.678.901-22', cargo: 'EVANGELISTA', registro: 'CIEIB-2021-032', status: 'ATIVO', email: 'pedro@email.com', telefone: '(31) 97777-0003', anuidade_status: 'pendente', credencial_status: 'pendente', foto_url: '', cidade: 'Belo Horizonte', uf: 'MG', nome_igreja: '' },
+                { id: 4, nome: 'Dc. Ana Paula Santos', cpf: '456.789.012-33', cargo: 'DIÁCONO', registro: 'CIEIB-2023-048', status: 'PENDENTE', email: 'ana@email.com', telefone: '', anuidade_status: 'pendente', credencial_status: 'pendente', foto_url: '', cidade: '', uf: '', nome_igreja: 'Igreja Restauração' },
+                { id: 5, nome: 'Pb. Roberto Oliveira', cpf: '567.890.123-44', cargo: 'PRESBÍTERO', registro: 'CIEIB-2022-027', status: 'ATIVO', email: 'roberto@email.com', telefone: '(41) 96666-0005', anuidade_status: 'vencida', credencial_status: 'vencida', foto_url: '', cidade: 'Curitiba', uf: 'PR', nome_igreja: 'Igreja Evangélica Central' }
             ],
-            total: 5, page: 1, totalPages: 1
+            total: 5, page: 1, pages: 1
+        },
+        '/relatorios/stats-membros': {
+            total: 128, ativos: 95, inativos: 18, pendentes: 15,
+            anuidade_paga: 72, anuidade_pendente: 56,
+            credencial_ativa: 65, credencial_pendente: 63,
+            por_cargo: [
+                { cargo: 'PASTOR', total: 48 },
+                { cargo: 'EVANGELISTA', total: 25 },
+                { cargo: 'MISSIONÁRIO', total: 20 },
+                { cargo: 'PRESBÍTERO', total: 18 },
+                { cargo: 'DIÁCONO', total: 12 },
+                { cargo: 'COOPERADOR', total: 5 }
+            ]
         },
         '/diretoria': [
             { id: 1, nome: 'Pr. Nome do Presidente', cargo: 'Presidente', tipo: 'diretoria', email: 'presidente@cieib.org.br', descricao: 'Líder da convenção e responsável pela condução dos trabalhos e representação institucional.', foto_url: '', ordem: 1 },
@@ -107,6 +120,40 @@ const AdminAPI = {
     _getMockResponse(method, endpoint) {
         if (method !== 'GET') return { success: true, message: 'Mock: operação simulada' };
         const base = endpoint.split('?')[0];
+
+        // Handle /ministros/:id detail
+        if (/^\/ministros\/\d+$/.test(base)) {
+            const id = parseInt(base.split('/')[2]);
+            const mockMin = (this._mockData['/ministros']?.ministros || []).find(m => m.id === id);
+            return {
+                ...(mockMin || { id, nome: 'Membro Mock', cpf: '000.000.000-00', cargo: 'PASTOR', status: 'ATIVO' }),
+                nome_social: '', rg: '12.345.678-9', orgao_expedidor: 'SSP/SP', sexo: 'M',
+                data_nascimento: '1980-05-15', estado_civil: 'Casado(a)', nome_conjuge: 'Esposa Mock',
+                escolaridade: 'Superior Completo', funcao_ministerial: 'Pastor Titular',
+                tempo_ministerio: '15 anos', data_consagracao: '2010-03-20', data_registro: '2020-01-15',
+                whatsapp: '(11) 99999-0001',
+                endereco: { cep: '01001-000', endereco: 'Rua Exemplo', numero: '100', complemento: 'Apto 12', bairro: 'Centro', cidade: 'São Paulo', uf: 'SP' },
+                filhos: [{ nome: 'Filho 1', data_nascimento: '2005-08-10' }, { nome: 'Filho 2', data_nascimento: '2010-12-25' }],
+                documentos: null, convencoes: [],
+                boletos: [
+                    { id: 1, tipo: 'anuidade', referencia: '2025', ano: 2025, valor: 350.00, data_vencimento: '2025-03-31', status: 'pago', data_pagamento: '2025-03-15', valor_pago: 350.00, arquivo_boleto_url: '' },
+                    { id: 2, tipo: 'anuidade', referencia: '2024', ano: 2024, valor: 300.00, data_vencimento: '2024-03-31', status: 'pago', data_pagamento: '2024-02-28', valor_pago: 300.00, arquivo_boleto_url: '' },
+                ],
+                credenciais: [
+                    { id: 1, numero_credencial: 'CIEIB-2025-0001', tipo: 'ministro', data_emissao: '2025-01-15', data_validade: '2025-12-31', status: 'ativa', arquivo_frente_url: '', arquivo_verso_url: '', arquivo_pdf_url: '' }
+                ],
+                historico: [
+                    { acao: 'CADASTRO', descricao: 'Membro cadastrado no sistema', admin_nome: 'Sistema', created_at: '2020-01-15' },
+                    { acao: 'CREDENCIAL EMITIDA', descricao: 'Credencial CIEIB-2025-0001 emitida', admin_nome: 'Administrador', created_at: '2025-01-15' },
+                ],
+                contas: [], observacoes_admin: ''
+            };
+        }
+
+        // Handle /ministros/:id/boletos and /ministros/:id/credenciais
+        if (/^\/ministros\/\d+\/boletos$/.test(base)) return [];
+        if (/^\/ministros\/\d+\/credenciais$/.test(base)) return [];
+
         return this._mockData[base] || [];
     },
 
@@ -804,39 +851,113 @@ async function saveConteudo(id) {
 }
 
 // ================================================================
-// MINISTROS
+// GESTÃO DE MEMBROS — Sistema Completo
 // ================================================================
 let ministrosPage = 1;
 let ministrosTimer;
+let currentMembro = null; // objeto completo do membro selecionado
 
 function debounceMinistros() {
     clearTimeout(ministrosTimer);
     ministrosTimer = setTimeout(() => loadAdminMinistros(), 400);
 }
 
+function limparFiltrosMembros() {
+    document.getElementById('ministrosSearch').value = '';
+    document.getElementById('filtroStatus').value = '';
+    document.getElementById('filtroAnuidade').value = '';
+    document.getElementById('filtroCredencial').value = '';
+    loadAdminMinistros(1);
+}
+
 async function loadAdminMinistros(page) {
     try {
         if (page) ministrosPage = page;
         const search = document.getElementById('ministrosSearch')?.value || '';
-        const data = await AdminAPI.get(`/ministros?page=${ministrosPage}&search=${encodeURIComponent(search)}`);
+        const status = document.getElementById('filtroStatus')?.value || '';
+        const anuidade = document.getElementById('filtroAnuidade')?.value || '';
+        const credencial = document.getElementById('filtroCredencial')?.value || '';
+
+        let qs = `?page=${ministrosPage}`;
+        if (search) qs += `&search=${encodeURIComponent(search)}`;
+        if (status) qs += `&status=${status}`;
+        if (anuidade) qs += `&anuidade=${anuidade}`;
+        if (credencial) qs += `&credencial=${credencial}`;
+
+        const data = await AdminAPI.get(`/ministros${qs}`);
         renderMinistrosTable(data);
-    } catch (err) { showToast('Erro ao carregar ministros', 'error'); }
+        loadMembrosStats();
+    } catch (err) { showToast('Erro ao carregar membros', 'error'); }
+}
+
+async function loadMembrosStats() {
+    try {
+        const s = await AdminAPI.get('/relatorios/stats-membros');
+        document.getElementById('membrosStats').innerHTML = `
+            <div class="mstat-card"><div class="mstat-icon blue"><i class="fas fa-users"></i></div><div class="mstat-info"><h4>${s.total}</h4><p>Total</p></div></div>
+            <div class="mstat-card"><div class="mstat-icon green"><i class="fas fa-user-check"></i></div><div class="mstat-info"><h4>${s.ativos}</h4><p>Ativos</p></div></div>
+            <div class="mstat-card"><div class="mstat-icon red"><i class="fas fa-user-slash"></i></div><div class="mstat-info"><h4>${s.inativos}</h4><p>Inativos</p></div></div>
+            <div class="mstat-card"><div class="mstat-icon orange"><i class="fas fa-user-clock"></i></div><div class="mstat-info"><h4>${s.pendentes}</h4><p>Pendentes</p></div></div>
+            <div class="mstat-card"><div class="mstat-icon teal"><i class="fas fa-receipt"></i></div><div class="mstat-info"><h4>${s.anuidade_paga}</h4><p>Anuidade OK</p></div></div>
+            <div class="mstat-card"><div class="mstat-icon gold"><i class="fas fa-exclamation-triangle"></i></div><div class="mstat-info"><h4>${s.anuidade_pendente}</h4><p>Anuid. Pendente</p></div></div>
+            <div class="mstat-card"><div class="mstat-icon purple"><i class="fas fa-id-badge"></i></div><div class="mstat-info"><h4>${s.credencial_ativa}</h4><p>Credencial OK</p></div></div>
+        `;
+    } catch (err) {
+        // Stats are optional, don't block
+        document.getElementById('membrosStats').innerHTML = '';
+    }
 }
 
 function renderMinistrosTable(data) {
     const el = document.getElementById('ministrosTable');
-    if (data.ministros.length === 0) { el.innerHTML = '<p style="text-align:center;color:#aaa;padding:40px;">Nenhum ministro encontrado</p>'; return; }
-    el.innerHTML = `<table class="admin-table"><thead><tr><th>Nome</th><th>CPF</th><th>Cargo</th><th>Registro</th><th>Status</th><th>Ações</th></tr></thead><tbody>
-        ${data.ministros.map(m => `<tr>
-            <td>${m.nome}</td>
-            <td>${m.cpf}</td>
-            <td>${m.cargo || '-'}</td>
-            <td>${m.registro || '-'}</td>
-            <td><span class="badge ${m.status === 'ATIVO' ? 'badge-ativo' : 'badge-inativo'}">${m.status}</span></td>
-            <td class="actions-cell">
+    if (!data.ministros || data.ministros.length === 0) {
+        el.innerHTML = '<p style="text-align:center;color:#aaa;padding:40px;">Nenhum membro encontrado</p>';
+        return;
+    }
+
+    const getInitials = (nome) => {
+        const parts = (nome || '').split(' ');
+        return parts.length > 1 ? parts[0][0] + parts[parts.length - 1][0] : (parts[0] || 'M')[0];
+    };
+
+    const statusBadge = (s) => {
+        const map = { ATIVO: 'badge-ativo', INATIVO: 'badge-inativo', PENDENTE: 'badge-pendente' };
+        return `<span class="badge ${map[s] || 'badge-inativo'}">${s || 'N/A'}</span>`;
+    };
+
+    const anuidadeBadge = (s) => {
+        const map = { paga: 'badge-paga', pendente: 'badge-pendente', vencida: 'badge-vencida' };
+        return `<span class="badge ${map[s] || 'badge-pendente'}">${(s || 'pendente').charAt(0).toUpperCase() + (s || 'pendente').slice(1)}</span>`;
+    };
+
+    const credBadge = (s) => {
+        const map = { ativa: 'badge-ativa', pendente: 'badge-pendente', vencida: 'badge-vencida' };
+        return `<span class="badge ${map[s] || 'badge-pendente'}">${(s || 'pendente').charAt(0).toUpperCase() + (s || 'pendente').slice(1)}</span>`;
+    };
+
+    el.innerHTML = `<table class="admin-table"><thead><tr>
+        <th style="width:48px;"></th><th>Nome</th><th>CPF</th><th>Cargo</th><th>Cidade/UF</th>
+        <th>Status</th><th>Anuidade</th><th>Credencial</th><th>Ações</th>
+    </tr></thead><tbody>
+        ${data.ministros.map(m => `<tr class="membro-row" onclick="openMembroDetail(${m.id})" style="cursor:pointer;">
+            <td>
+                <div class="membros-avatar" style="width:34px;height:34px;font-size:0.72rem;">
+                    ${m.foto_url ? `<img src="${m.foto_url}" alt="">` : getInitials(m.nome)}
+                </div>
+            </td>
+            <td><strong style="font-size:0.82rem;">${m.nome}</strong><br><span style="font-size:0.68rem;color:#999;">${m.registro || 'Sem registro'}</span></td>
+            <td style="font-size:0.8rem;">${m.cpf || '-'}</td>
+            <td style="font-size:0.8rem;">${m.cargo || '-'}</td>
+            <td style="font-size:0.8rem;">${m.cidade && m.uf ? `${m.cidade}/${m.uf}` : '-'}</td>
+            <td>${statusBadge(m.status)}</td>
+            <td>${anuidadeBadge(m.anuidade_status)}</td>
+            <td>${credBadge(m.credencial_status)}</td>
+            <td class="actions-cell" onclick="event.stopPropagation()">
+                <button class="btn-table-action btn-table-view" onclick="openMembroDetail(${m.id})" title="Ver detalhes"><i class="fas fa-eye"></i></button>
                 <button class="btn-table-action btn-table-edit" onclick="toggleMinistroStatus(${m.id}, '${m.status}')" title="${m.status === 'ATIVO' ? 'Desativar' : 'Ativar'}">
                     <i class="fas ${m.status === 'ATIVO' ? 'fa-ban' : 'fa-check'}"></i>
                 </button>
+                <button class="btn-table-action btn-table-delete" onclick="deleteMinistro(${m.id})" title="Excluir"><i class="fas fa-trash"></i></button>
             </td>
         </tr>`).join('')}
     </tbody></table>`;
@@ -852,12 +973,641 @@ function renderMinistrosTable(data) {
 
 async function toggleMinistroStatus(id, currentStatus) {
     const newStatus = currentStatus === 'ATIVO' ? 'INATIVO' : 'ATIVO';
-    if (!confirm(`${newStatus === 'INATIVO' ? 'Desativar' : 'Ativar'} este ministro?`)) return;
+    if (!confirm(`${newStatus === 'INATIVO' ? 'Desativar' : 'Ativar'} este membro?`)) return;
     try {
         await AdminAPI.put(`/ministros/${id}/status`, { status: newStatus });
         showToast('Status alterado!', 'success');
         loadAdminMinistros();
     } catch (err) { showToast(err.message, 'error'); }
+}
+
+async function deleteMinistro(id) {
+    if (!confirm('ATENÇÃO: Excluir este membro permanentemente? Todos os dados relacionados serão removidos.')) return;
+    try {
+        await AdminAPI.del(`/ministros/${id}`);
+        showToast('Membro excluído', 'success');
+        loadAdminMinistros();
+    } catch (err) { showToast(err.message, 'error'); }
+}
+
+// ---- Relatório CSV ----
+async function exportarRelatorio(formato) {
+    try {
+        const status = document.getElementById('filtroStatus')?.value || '';
+        const anuidade = document.getElementById('filtroAnuidade')?.value || '';
+        const credencial = document.getElementById('filtroCredencial')?.value || '';
+
+        let qs = `?formato=${formato}`;
+        if (status) qs += `&status=${status}`;
+        if (anuidade) qs += `&anuidade=${anuidade}`;
+        if (credencial) qs += `&credencial=${credencial}`;
+
+        const response = await fetch(`/api/admin/relatorios/membros${qs}`, {
+            headers: { 'Authorization': `Bearer ${AdminAPI.token()}` }
+        });
+
+        if (!response.ok) throw new Error('Erro ao gerar relatório');
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `relatorio_membros_${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        showToast('Relatório baixado com sucesso!', 'success');
+    } catch (err) {
+        showToast(err.message, 'error');
+    }
+}
+
+// ================================================================
+// DETALHE DO MEMBRO — Painel lateral
+// ================================================================
+async function openMembroDetail(id) {
+    try {
+        currentMembro = await AdminAPI.get(`/ministros/${id}`);
+        const m = currentMembro;
+
+        // Profile area
+        const getInitials = (nome) => {
+            const parts = (nome || '').split(' ');
+            return parts.length > 1 ? parts[0][0] + parts[parts.length - 1][0] : (parts[0] || 'M')[0];
+        };
+
+        document.getElementById('mdpProfileArea').innerHTML = `
+            <div class="mdp-profile">
+                <div class="mdp-profile-avatar">
+                    ${m.foto_url ? `<img src="${m.foto_url}" alt="">` : getInitials(m.nome)}
+                </div>
+                <div class="mdp-profile-info">
+                    <h4>${m.nome}</h4>
+                    <p>${m.cargo || 'Sem cargo'} — ${m.nome_igreja || 'Sem igreja'}</p>
+                    <p>CPF: ${m.cpf} ${m.registro ? `| Registro: ${m.registro}` : ''}</p>
+                    <div class="mdp-profile-badges">
+                        <span class="badge ${m.status === 'ATIVO' ? 'badge-ativo' : m.status === 'PENDENTE' ? 'badge-pendente' : 'badge-inativo'}">${m.status}</span>
+                        <span class="badge ${m.anuidade_status === 'paga' ? 'badge-paga' : 'badge-pendente'}">Anuid. ${(m.anuidade_status || 'pendente')}</span>
+                        <span class="badge ${m.credencial_status === 'ativa' ? 'badge-ativa' : 'badge-pendente'}">Cred. ${(m.credencial_status || 'pendente')}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Render first tab
+        switchMdpTab('dados');
+
+        // Show panel
+        document.getElementById('membroDetailOverlay').classList.add('active');
+    } catch (err) {
+        showToast('Erro ao carregar detalhes do membro', 'error');
+    }
+}
+
+function closeMembroDetail() {
+    document.getElementById('membroDetailOverlay').classList.remove('active');
+    currentMembro = null;
+}
+
+function switchMdpTab(tab) {
+    document.querySelectorAll('.mdp-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector(`.mdp-tab[data-tab="${tab}"]`)?.classList.add('active');
+
+    const content = document.getElementById('mdpContent');
+    const m = currentMembro;
+    if (!m) return;
+
+    const fmtDate = d => d ? new Date(d).toLocaleDateString('pt-BR') : '—';
+
+    if (tab === 'dados') {
+        content.innerHTML = `
+            <div class="mdp-section-title"><i class="fas fa-user"></i> Informações Pessoais</div>
+            <div class="mdp-info-grid">
+                <div class="mdp-info-item"><label>Nome Completo</label><span>${m.nome || '—'}</span></div>
+                <div class="mdp-info-item"><label>Nome Social</label><span>${m.nome_social || '—'}</span></div>
+                <div class="mdp-info-item"><label>CPF</label><span>${m.cpf || '—'}</span></div>
+                <div class="mdp-info-item"><label>RG</label><span>${m.rg || '—'} ${m.orgao_expedidor ? `(${m.orgao_expedidor})` : ''}</span></div>
+                <div class="mdp-info-item"><label>Sexo</label><span>${m.sexo === 'M' ? 'Masculino' : m.sexo === 'F' ? 'Feminino' : '—'}</span></div>
+                <div class="mdp-info-item"><label>Data Nascimento</label><span>${fmtDate(m.data_nascimento)}</span></div>
+                <div class="mdp-info-item"><label>Estado Civil</label><span>${m.estado_civil || '—'}</span></div>
+                <div class="mdp-info-item"><label>Cônjuge</label><span>${m.nome_conjuge || '—'}</span></div>
+                <div class="mdp-info-item"><label>Escolaridade</label><span>${m.escolaridade || '—'}</span></div>
+            </div>
+
+            <div class="mdp-section-title"><i class="fas fa-phone"></i> Contato</div>
+            <div class="mdp-info-grid">
+                <div class="mdp-info-item"><label>Email</label><span>${m.email || '—'}</span></div>
+                <div class="mdp-info-item"><label>Telefone</label><span>${m.telefone || '—'}</span></div>
+                <div class="mdp-info-item"><label>WhatsApp</label><span>${m.whatsapp || '—'}</span></div>
+            </div>
+
+            <div class="mdp-section-title"><i class="fas fa-map-marker-alt"></i> Endereço</div>
+            ${m.endereco ? `
+                <div class="mdp-info-grid">
+                    <div class="mdp-info-item"><label>CEP</label><span>${m.endereco.cep || '—'}</span></div>
+                    <div class="mdp-info-item"><label>Logradouro</label><span>${m.endereco.endereco || '—'}, ${m.endereco.numero || 'S/N'}</span></div>
+                    <div class="mdp-info-item"><label>Complemento</label><span>${m.endereco.complemento || '—'}</span></div>
+                    <div class="mdp-info-item"><label>Bairro</label><span>${m.endereco.bairro || '—'}</span></div>
+                    <div class="mdp-info-item"><label>Cidade/UF</label><span>${m.endereco.cidade || '—'}/${m.endereco.uf || '—'}</span></div>
+                </div>
+            ` : '<p style="color:#aaa;font-size:0.82rem;">Endereço não cadastrado</p>'}
+
+            <div class="mdp-section-title"><i class="fas fa-church"></i> Dados Ministeriais</div>
+            <div class="mdp-info-grid">
+                <div class="mdp-info-item"><label>Cargo</label><span>${m.cargo || '—'}</span></div>
+                <div class="mdp-info-item"><label>Função Ministerial</label><span>${m.funcao_ministerial || '—'}</span></div>
+                <div class="mdp-info-item"><label>Igreja</label><span>${m.nome_igreja || '—'}</span></div>
+                <div class="mdp-info-item"><label>Tempo de Ministério</label><span>${m.tempo_ministerio || '—'}</span></div>
+                <div class="mdp-info-item"><label>Data Consagração</label><span>${fmtDate(m.data_consagracao)}</span></div>
+                <div class="mdp-info-item"><label>Registro</label><span>${m.registro || '—'}</span></div>
+                <div class="mdp-info-item"><label>Data Registro</label><span>${fmtDate(m.data_registro)}</span></div>
+                <div class="mdp-info-item"><label>Cadastrado em</label><span>${fmtDate(m.created_at)}</span></div>
+            </div>
+
+            ${m.filhos && m.filhos.length > 0 ? `
+                <div class="mdp-section-title"><i class="fas fa-child"></i> Filhos (${m.filhos.length})</div>
+                ${m.filhos.map(f => `
+                    <div class="mdp-list-item">
+                        <div class="mdp-list-item-info">
+                            <h5>${f.nome}</h5>
+                            <p>Nascimento: ${fmtDate(f.data_nascimento)}</p>
+                        </div>
+                    </div>
+                `).join('')}
+            ` : ''}
+
+            ${m.observacoes_admin ? `
+                <div class="mdp-section-title"><i class="fas fa-sticky-note"></i> Observações do Admin</div>
+                <p style="font-size:0.82rem;color:#555;background:#f8f9fc;padding:12px;border-radius:8px;">${m.observacoes_admin}</p>
+            ` : ''}
+        `;
+    }
+
+    else if (tab === 'financeiro') {
+        const boletos = m.boletos || [];
+        const contas = m.contas || [];
+
+        content.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div class="mdp-section-title" style="margin-top:0;"><i class="fas fa-barcode"></i> Boletos / Anuidades</div>
+                <button class="btn-admin-primary" style="font-size:0.78rem;padding:6px 14px;" onclick="openBoletoModal(${m.id})"><i class="fas fa-plus"></i> Novo Boleto</button>
+            </div>
+
+            ${boletos.length === 0 ? `
+                <div class="mdp-empty"><i class="fas fa-receipt"></i><p>Nenhum boleto registrado</p></div>
+            ` : boletos.map(b => `
+                <div class="mdp-list-item">
+                    <div class="mdp-list-item-info">
+                        <h5>${b.tipo === 'anuidade' ? '📄 Anuidade' : '📄 Mensalidade'} — ${b.referencia || ''} ${b.ano || ''}</h5>
+                        <p>Vencimento: ${fmtDate(b.data_vencimento)} | Valor: R$ ${parseFloat(b.valor || 0).toFixed(2)} | <span class="badge ${b.status === 'pago' ? 'badge-paga' : b.status === 'vencido' ? 'badge-vencida' : 'badge-pendente'}">${(b.status || 'pendente').toUpperCase()}</span></p>
+                        ${b.data_pagamento ? `<p style="color:#0f9d58;font-size:0.7rem;">Pago em ${fmtDate(b.data_pagamento)} — R$ ${parseFloat(b.valor_pago || 0).toFixed(2)}</p>` : ''}
+                    </div>
+                    <div class="mdp-list-item-actions">
+                        ${b.arquivo_boleto_url ? `<a href="${b.arquivo_boleto_url}" target="_blank" class="mdp-btn-view" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none;width:30px;height:30px;border-radius:6px;" title="Ver boleto"><i class="fas fa-file-pdf"></i></a>` : ''}
+                        <button class="mdp-btn-edit" onclick="openBoletoEditModal(${b.id})" title="Editar/Baixar"><i class="fas fa-edit"></i></button>
+                        <button class="mdp-btn-del" onclick="deleteBoleto(${b.id})" title="Excluir"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('')}
+
+            ${contas.length > 0 ? `
+                <div class="mdp-section-title"><i class="fas fa-wallet"></i> Contas a Receber</div>
+                ${contas.map(c => `
+                    <div class="mdp-list-item">
+                        <div class="mdp-list-item-info">
+                            <h5>${c.servico || 'Conta'} — Doc. ${c.nro_docto || 'N/A'}</h5>
+                            <p>Venc: ${fmtDate(c.data_vencimento)} | Valor: R$ ${parseFloat(c.valor || 0).toFixed(2)} | Saldo: R$ ${parseFloat(c.saldo || 0).toFixed(2)}</p>
+                        </div>
+                        <span class="badge ${c.status === 'PAGO' ? 'badge-paga' : 'badge-pendente'}">${c.status || 'ABERTO'}</span>
+                    </div>
+                `).join('')}
+            ` : ''}
+        `;
+    }
+
+    else if (tab === 'credencial') {
+        const creds = m.credenciais || [];
+
+        content.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div class="mdp-section-title" style="margin-top:0;"><i class="fas fa-id-badge"></i> Credenciais Digitais</div>
+                <button class="btn-admin-primary" style="font-size:0.78rem;padding:6px 14px;" onclick="openCredencialModal(${m.id})"><i class="fas fa-plus"></i> Nova Credencial</button>
+            </div>
+
+            ${creds.length === 0 ? `
+                <div class="mdp-empty"><i class="fas fa-id-badge"></i><p>Nenhuma credencial emitida</p></div>
+            ` : creds.map(c => `
+                <div class="mdp-list-item" style="flex-direction:column;align-items:flex-start;gap:10px;">
+                    <div style="display:flex;justify-content:space-between;width:100%;align-items:center;">
+                        <div class="mdp-list-item-info">
+                            <h5><i class="fas fa-id-card" style="color:var(--admin-secondary);"></i> ${c.numero_credencial}</h5>
+                            <p>Tipo: ${c.tipo || 'ministro'} | Emissão: ${fmtDate(c.data_emissao)} | Validade: ${fmtDate(c.data_validade)}</p>
+                            <p>Status: <span class="badge ${c.status === 'ativa' ? 'badge-ativa' : c.status === 'vencida' ? 'badge-vencida' : 'badge-pendente'}">${(c.status || 'pendente').toUpperCase()}</span></p>
+                        </div>
+                        <div class="mdp-list-item-actions">
+                            ${c.arquivo_pdf_url ? `<a href="${c.arquivo_pdf_url}" target="_blank" class="mdp-btn-view" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none;width:30px;height:30px;border-radius:6px;" title="Download PDF"><i class="fas fa-file-pdf"></i></a>` : ''}
+                            <button class="mdp-btn-edit" onclick="openCredencialEditModal(${c.id})" title="Editar"><i class="fas fa-edit"></i></button>
+                            <button class="mdp-btn-del" onclick="deleteCredencial(${c.id})" title="Excluir"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                    ${c.arquivo_frente_url || c.arquivo_verso_url ? `
+                        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                            ${c.arquivo_frente_url ? `<div style="text-align:center;"><img src="${c.arquivo_frente_url}" style="max-width:200px;border-radius:8px;border:1px solid #eee;"><p style="font-size:0.7rem;color:#999;margin-top:4px;">Frente</p></div>` : ''}
+                            ${c.arquivo_verso_url ? `<div style="text-align:center;"><img src="${c.arquivo_verso_url}" style="max-width:200px;border-radius:8px;border:1px solid #eee;"><p style="font-size:0.7rem;color:#999;margin-top:4px;">Verso</p></div>` : ''}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('')}
+        `;
+    }
+
+    else if (tab === 'historico') {
+        const hist = m.historico || [];
+
+        content.innerHTML = `
+            <div class="mdp-section-title" style="margin-top:0;"><i class="fas fa-history"></i> Histórico de Ações</div>
+            ${hist.length === 0 ? `
+                <div class="mdp-empty"><i class="fas fa-history"></i><p>Nenhum registro no histórico</p></div>
+            ` : `
+                <div class="mdp-timeline">
+                    ${hist.map(h => `
+                        <div class="mdp-timeline-item">
+                            <h5>${h.acao}</h5>
+                            <p>${h.descricao || ''}</p>
+                            <small>${fmtDate(h.created_at)} ${h.admin_nome ? `— ${h.admin_nome}` : ''}</small>
+                        </div>
+                    `).join('')}
+                </div>
+            `}
+        `;
+    }
+}
+
+// ---- Editar Membro (modal) ----
+function editMembroModal() {
+    const m = currentMembro;
+    if (!m) return;
+
+    document.getElementById('modalTitle').textContent = `Editar — ${m.nome}`;
+    document.getElementById('modalBody').innerHTML = `
+        <div class="form-grid">
+            <div class="admin-form-group"><label>Nome</label><input type="text" id="mEditNome" value="${m.nome || ''}"></div>
+            <div class="admin-form-group"><label>Cargo</label>
+                <select id="mEditCargo">
+                    ${['PASTOR','MISSIONÁRIO','EVANGELISTA','PRESBÍTERO','DIÁCONO','COOPERADOR','OBREIRO'].map(c => `<option value="${c}" ${m.cargo === c ? 'selected' : ''}>${c}</option>`).join('')}
+                </select>
+            </div>
+        </div>
+        <div class="form-grid">
+            <div class="admin-form-group"><label>Email</label><input type="email" id="mEditEmail" value="${m.email || ''}"></div>
+            <div class="admin-form-group"><label>Telefone</label><input type="text" id="mEditTel" value="${m.telefone || ''}"></div>
+            <div class="admin-form-group"><label>WhatsApp</label><input type="text" id="mEditWpp" value="${m.whatsapp || ''}"></div>
+        </div>
+        <div class="form-grid">
+            <div class="admin-form-group"><label>Igreja</label><input type="text" id="mEditIgreja" value="${m.nome_igreja || ''}"></div>
+            <div class="admin-form-group"><label>Função Ministerial</label><input type="text" id="mEditFuncao" value="${m.funcao_ministerial || ''}"></div>
+        </div>
+        <div class="form-grid">
+            <div class="admin-form-group"><label>Registro</label><input type="text" id="mEditRegistro" value="${m.registro || ''}"></div>
+            <div class="admin-form-group"><label>Escolaridade</label><input type="text" id="mEditEscol" value="${m.escolaridade || ''}"></div>
+            <div class="admin-form-group"><label>Tempo Ministério</label><input type="text" id="mEditTempoMin" value="${m.tempo_ministerio || ''}"></div>
+        </div>
+        <div class="form-grid">
+            <div class="admin-form-group"><label>Status</label>
+                <select id="mEditStatus">
+                    <option value="ATIVO" ${m.status === 'ATIVO' ? 'selected' : ''}>ATIVO</option>
+                    <option value="INATIVO" ${m.status === 'INATIVO' ? 'selected' : ''}>INATIVO</option>
+                    <option value="PENDENTE" ${m.status === 'PENDENTE' ? 'selected' : ''}>PENDENTE</option>
+                </select>
+            </div>
+            <div class="admin-form-group"><label>Anuidade</label>
+                <select id="mEditAnuidade">
+                    <option value="pendente" ${m.anuidade_status === 'pendente' ? 'selected' : ''}>Pendente</option>
+                    <option value="paga" ${m.anuidade_status === 'paga' ? 'selected' : ''}>Paga</option>
+                    <option value="vencida" ${m.anuidade_status === 'vencida' ? 'selected' : ''}>Vencida</option>
+                </select>
+            </div>
+            <div class="admin-form-group"><label>Credencial</label>
+                <select id="mEditCredencial">
+                    <option value="pendente" ${m.credencial_status === 'pendente' ? 'selected' : ''}>Pendente</option>
+                    <option value="ativa" ${m.credencial_status === 'ativa' ? 'selected' : ''}>Ativa</option>
+                    <option value="vencida" ${m.credencial_status === 'vencida' ? 'selected' : ''}>Vencida</option>
+                </select>
+            </div>
+        </div>
+        <div class="admin-form-group"><label>Observações do Admin</label><textarea id="mEditObs" style="min-height:80px;">${m.observacoes_admin || ''}</textarea></div>
+    `;
+    document.getElementById('modalFooter').innerHTML = `
+        <button class="btn-admin-secondary" onclick="closeModal()">Cancelar</button>
+        <button class="btn-admin-primary" onclick="saveMembroEdit(${m.id})"><i class="fas fa-save"></i> Salvar</button>
+    `;
+    openModal();
+}
+
+async function saveMembroEdit(id) {
+    const body = {
+        nome: document.getElementById('mEditNome').value,
+        cargo: document.getElementById('mEditCargo').value,
+        email: document.getElementById('mEditEmail').value,
+        telefone: document.getElementById('mEditTel').value,
+        whatsapp: document.getElementById('mEditWpp').value,
+        nome_igreja: document.getElementById('mEditIgreja').value,
+        funcao_ministerial: document.getElementById('mEditFuncao').value,
+        registro: document.getElementById('mEditRegistro').value,
+        escolaridade: document.getElementById('mEditEscol').value,
+        tempo_ministerio: document.getElementById('mEditTempoMin').value,
+        status: document.getElementById('mEditStatus').value,
+        anuidade_status: document.getElementById('mEditAnuidade').value,
+        credencial_status: document.getElementById('mEditCredencial').value,
+        observacoes_admin: document.getElementById('mEditObs').value,
+    };
+    try {
+        await AdminAPI.put(`/ministros/${id}`, body);
+        closeModal();
+        showToast('Membro atualizado!', 'success');
+        openMembroDetail(id); // Refresh detail
+        loadAdminMinistros(); // Refresh table
+    } catch (err) { showToast(err.message, 'error'); }
+}
+
+// ---- Boleto Modal ----
+function openBoletoModal(ministroId) {
+    document.getElementById('modalTitle').textContent = 'Novo Boleto / Anuidade';
+    document.getElementById('modalBody').innerHTML = `
+        <div class="form-grid">
+            <div class="admin-form-group"><label>Tipo</label>
+                <select id="mBoletoTipo">
+                    <option value="anuidade">Anuidade</option>
+                    <option value="mensalidade">Mensalidade</option>
+                    <option value="taxa">Taxa</option>
+                </select>
+            </div>
+            <div class="admin-form-group"><label>Referência</label><input type="text" id="mBoletoRef" placeholder="Ex: 2025, Jan/2025"></div>
+        </div>
+        <div class="form-grid">
+            <div class="admin-form-group"><label>Ano</label><input type="number" id="mBoletoAno" value="${new Date().getFullYear()}"></div>
+            <div class="admin-form-group"><label>Mês (opcional)</label><input type="number" id="mBoletoMes" min="1" max="12" placeholder="1-12"></div>
+        </div>
+        <div class="form-grid">
+            <div class="admin-form-group"><label>Valor (R$)</label><input type="number" id="mBoletoValor" step="0.01" placeholder="0.00"></div>
+            <div class="admin-form-group"><label>Vencimento</label><input type="date" id="mBoletoVenc"></div>
+        </div>
+        <div class="admin-form-group"><label>Observação</label><textarea id="mBoletoObs"></textarea></div>
+        ${adminUploadField('mBoletoArquivo', 'Arquivo do Boleto (PDF/Imagem)', '')}
+    `;
+    document.getElementById('modalFooter').innerHTML = `
+        <button class="btn-admin-secondary" onclick="closeModal()">Cancelar</button>
+        <button class="btn-admin-primary" onclick="saveBoleto(${ministroId})"><i class="fas fa-save"></i> Salvar</button>
+    `;
+    openModal();
+}
+
+async function saveBoleto(ministroId) {
+    const body = {
+        tipo: document.getElementById('mBoletoTipo').value,
+        referencia: document.getElementById('mBoletoRef').value,
+        ano: parseInt(document.getElementById('mBoletoAno').value) || new Date().getFullYear(),
+        mes: parseInt(document.getElementById('mBoletoMes').value) || null,
+        valor: parseFloat(document.getElementById('mBoletoValor').value) || 0,
+        data_vencimento: document.getElementById('mBoletoVenc').value || null,
+        observacao: document.getElementById('mBoletoObs').value,
+        arquivo_boleto_url: document.getElementById('mBoletoArquivo').value || null,
+        status: 'pendente',
+    };
+    try {
+        await AdminAPI.post(`/ministros/${ministroId}/boletos`, body);
+        closeModal();
+        showToast('Boleto registrado!', 'success');
+        openMembroDetail(ministroId);
+    } catch (err) { showToast(err.message, 'error'); }
+}
+
+async function openBoletoEditModal(boletoId) {
+    const m = currentMembro;
+    const b = (m?.boletos || []).find(x => x.id === boletoId);
+    if (!b) return;
+
+    document.getElementById('modalTitle').textContent = 'Editar Boleto';
+    const fmtD = d => d ? new Date(d).toISOString().split('T')[0] : '';
+    document.getElementById('modalBody').innerHTML = `
+        <div class="form-grid">
+            <div class="admin-form-group"><label>Status</label>
+                <select id="mBolEditStatus">
+                    <option value="pendente" ${b.status === 'pendente' ? 'selected' : ''}>Pendente</option>
+                    <option value="pago" ${b.status === 'pago' ? 'selected' : ''}>Pago</option>
+                    <option value="vencido" ${b.status === 'vencido' ? 'selected' : ''}>Vencido</option>
+                    <option value="cancelado" ${b.status === 'cancelado' ? 'selected' : ''}>Cancelado</option>
+                </select>
+            </div>
+            <div class="admin-form-group"><label>Data Pagamento</label><input type="date" id="mBolEditPagDt" value="${fmtD(b.data_pagamento)}"></div>
+            <div class="admin-form-group"><label>Valor Pago (R$)</label><input type="number" id="mBolEditPagVal" step="0.01" value="${b.valor_pago || ''}"></div>
+        </div>
+        <div class="admin-form-group"><label>Observação</label><textarea id="mBolEditObs">${b.observacao || ''}</textarea></div>
+        ${adminUploadField('mBolEditComprov', 'Comprovante de Pagamento', b.arquivo_comprovante_url)}
+    `;
+    document.getElementById('modalFooter').innerHTML = `
+        <button class="btn-admin-secondary" onclick="closeModal()">Cancelar</button>
+        <button class="btn-admin-primary" onclick="updateBoleto(${boletoId}, ${m.id})"><i class="fas fa-save"></i> Salvar</button>
+    `;
+    openModal();
+}
+
+async function updateBoleto(boletoId, ministroId) {
+    try {
+        await AdminAPI.put(`/boletos/${boletoId}`, {
+            status: document.getElementById('mBolEditStatus').value,
+            data_pagamento: document.getElementById('mBolEditPagDt').value || null,
+            valor_pago: parseFloat(document.getElementById('mBolEditPagVal').value) || 0,
+            observacao: document.getElementById('mBolEditObs').value,
+            arquivo_comprovante_url: document.getElementById('mBolEditComprov').value || null,
+        });
+        closeModal();
+        showToast('Boleto atualizado!', 'success');
+        openMembroDetail(ministroId);
+    } catch (err) { showToast(err.message, 'error'); }
+}
+
+async function deleteBoleto(boletoId) {
+    if (!confirm('Excluir este boleto?')) return;
+    try {
+        await AdminAPI.del(`/boletos/${boletoId}`);
+        showToast('Boleto excluído', 'success');
+        if (currentMembro) openMembroDetail(currentMembro.id);
+    } catch (err) { showToast(err.message, 'error'); }
+}
+
+// ---- Credencial Modal ----
+function openCredencialModal(ministroId) {
+    const m = currentMembro;
+    const numSugestao = `CIEIB-${new Date().getFullYear()}-${String(ministroId).padStart(4, '0')}`;
+
+    document.getElementById('modalTitle').textContent = 'Nova Credencial Digital';
+    document.getElementById('modalBody').innerHTML = `
+        <div class="form-grid">
+            <div class="admin-form-group"><label>Nº Credencial</label><input type="text" id="mCredNum" value="${numSugestao}"></div>
+            <div class="admin-form-group"><label>Tipo</label>
+                <select id="mCredTipo">
+                    <option value="ministro">Ministro</option>
+                    <option value="obreiro">Obreiro</option>
+                    <option value="missionario">Missionário</option>
+                    <option value="temporaria">Temporária</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-grid">
+            <div class="admin-form-group"><label>Data Emissão</label><input type="date" id="mCredEmissao" value="${new Date().toISOString().split('T')[0]}"></div>
+            <div class="admin-form-group"><label>Data Validade</label><input type="date" id="mCredValidade"></div>
+        </div>
+        ${adminUploadField('mCredFrente', 'Imagem Frente da Credencial', '')}
+        ${adminUploadField('mCredVerso', 'Imagem Verso da Credencial', '')}
+        ${adminUploadField('mCredPDF', 'Credencial em PDF', '')}
+        <div class="admin-form-group"><label>Observação</label><textarea id="mCredObs"></textarea></div>
+    `;
+    document.getElementById('modalFooter').innerHTML = `
+        <button class="btn-admin-secondary" onclick="closeModal()">Cancelar</button>
+        <button class="btn-admin-primary" onclick="saveCredencial(${ministroId})"><i class="fas fa-save"></i> Emitir Credencial</button>
+    `;
+    openModal();
+}
+
+async function saveCredencial(ministroId) {
+    const body = {
+        numero_credencial: document.getElementById('mCredNum').value,
+        tipo: document.getElementById('mCredTipo').value,
+        data_emissao: document.getElementById('mCredEmissao').value,
+        data_validade: document.getElementById('mCredValidade').value || null,
+        arquivo_frente_url: document.getElementById('mCredFrente').value || null,
+        arquivo_verso_url: document.getElementById('mCredVerso').value || null,
+        arquivo_pdf_url: document.getElementById('mCredPDF').value || null,
+        observacao: document.getElementById('mCredObs').value,
+        status: 'ativa',
+    };
+    try {
+        await AdminAPI.post(`/ministros/${ministroId}/credenciais`, body);
+        closeModal();
+        showToast('Credencial emitida com sucesso!', 'success');
+        openMembroDetail(ministroId);
+    } catch (err) { showToast(err.message, 'error'); }
+}
+
+async function openCredencialEditModal(credencialId) {
+    const m = currentMembro;
+    const c = (m?.credenciais || []).find(x => x.id === credencialId);
+    if (!c) return;
+    const fmtD = d => d ? new Date(d).toISOString().split('T')[0] : '';
+
+    document.getElementById('modalTitle').textContent = `Editar Credencial — ${c.numero_credencial}`;
+    document.getElementById('modalBody').innerHTML = `
+        <div class="form-grid">
+            <div class="admin-form-group"><label>Status</label>
+                <select id="mCredEditStatus">
+                    <option value="ativa" ${c.status === 'ativa' ? 'selected' : ''}>Ativa</option>
+                    <option value="suspensa" ${c.status === 'suspensa' ? 'selected' : ''}>Suspensa</option>
+                    <option value="vencida" ${c.status === 'vencida' ? 'selected' : ''}>Vencida</option>
+                    <option value="cancelada" ${c.status === 'cancelada' ? 'selected' : ''}>Cancelada</option>
+                </select>
+            </div>
+            <div class="admin-form-group"><label>Data Validade</label><input type="date" id="mCredEditVal" value="${fmtD(c.data_validade)}"></div>
+        </div>
+        ${adminUploadField('mCredEditFrente', 'Frente', c.arquivo_frente_url)}
+        ${adminUploadField('mCredEditVerso', 'Verso', c.arquivo_verso_url)}
+        ${adminUploadField('mCredEditPDF', 'PDF', c.arquivo_pdf_url)}
+        <div class="admin-form-group"><label>Observação</label><textarea id="mCredEditObs">${c.observacao || ''}</textarea></div>
+    `;
+    document.getElementById('modalFooter').innerHTML = `
+        <button class="btn-admin-secondary" onclick="closeModal()">Cancelar</button>
+        <button class="btn-admin-primary" onclick="updateCredencial(${credencialId}, ${m.id})"><i class="fas fa-save"></i> Salvar</button>
+    `;
+    openModal();
+}
+
+async function updateCredencial(credencialId, ministroId) {
+    try {
+        await AdminAPI.put(`/credenciais/${credencialId}`, {
+            status: document.getElementById('mCredEditStatus').value,
+            data_validade: document.getElementById('mCredEditVal').value || null,
+            arquivo_frente_url: document.getElementById('mCredEditFrente').value || null,
+            arquivo_verso_url: document.getElementById('mCredEditVerso').value || null,
+            arquivo_pdf_url: document.getElementById('mCredEditPDF').value || null,
+            observacao: document.getElementById('mCredEditObs').value,
+        });
+        closeModal();
+        showToast('Credencial atualizada!', 'success');
+        openMembroDetail(ministroId);
+    } catch (err) { showToast(err.message, 'error'); }
+}
+
+async function deleteCredencial(credencialId) {
+    if (!confirm('Excluir esta credencial?')) return;
+    try {
+        await AdminAPI.del(`/credenciais/${credencialId}`);
+        showToast('Credencial excluída', 'success');
+        if (currentMembro) openMembroDetail(currentMembro.id);
+    } catch (err) { showToast(err.message, 'error'); }
+}
+
+// ---- Bulk Credencial (placeholder) ----
+function openBulkCredencialModal() {
+    document.getElementById('modalTitle').textContent = 'Gerar Credenciais em Lote';
+    document.getElementById('modalBody').innerHTML = `
+        <p style="font-size:0.85rem;color:#555;margin-bottom:16px;">Selecione os critérios para gerar credenciais automaticamente para múltiplos membros:</p>
+        <div class="form-grid">
+            <div class="admin-form-group"><label>Filtrar por Status</label>
+                <select id="mBulkStatus">
+                    <option value="ATIVO">Apenas Ativos</option>
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            <div class="admin-form-group"><label>Filtrar por Anuidade</label>
+                <select id="mBulkAnuidade">
+                    <option value="paga">Anuidade Paga</option>
+                    <option value="">Qualquer</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-grid">
+            <div class="admin-form-group"><label>Validade da Credencial</label><input type="date" id="mBulkValidade" value="${new Date(new Date().getFullYear() + 1, 11, 31).toISOString().split('T')[0]}"></div>
+        </div>
+        <div style="background:#fff3e0;padding:12px;border-radius:8px;margin-top:12px;">
+            <p style="font-size:0.8rem;color:#e65100;"><i class="fas fa-info-circle"></i> As credenciais serão geradas apenas para membros que ainda não possuem credencial ativa. Você poderá baixar o relatório CSV com os dados para produção das credenciais físicas.</p>
+        </div>
+    `;
+    document.getElementById('modalFooter').innerHTML = `
+        <button class="btn-admin-secondary" onclick="closeModal()">Cancelar</button>
+        <button class="btn-admin-primary" onclick="executarBulkCredencial()"><i class="fas fa-id-badge"></i> Gerar e Baixar Relatório</button>
+    `;
+    openModal();
+}
+
+async function executarBulkCredencial() {
+    const status = document.getElementById('mBulkStatus').value;
+    const anuidade = document.getElementById('mBulkAnuidade').value;
+
+    try {
+        // Download CSV with credential data
+        let qs = '?formato=csv';
+        if (status) qs += `&status=${status}`;
+        if (anuidade) qs += `&anuidade=${anuidade}`;
+        qs += '&credencial=pendente';
+
+        const response = await fetch(`/api/admin/relatorios/membros${qs}`, {
+            headers: { 'Authorization': `Bearer ${AdminAPI.token()}` }
+        });
+
+        if (!response.ok) throw new Error('Erro ao gerar relatório');
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `credenciais_pendentes_${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+
+        closeModal();
+        showToast('Relatório para credenciais baixado!', 'success');
+    } catch (err) {
+        showToast(err.message, 'error');
+    }
 }
 
 // ================================================================

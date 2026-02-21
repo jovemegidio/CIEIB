@@ -306,25 +306,102 @@ router.delete('/aulas/:id', adminAuth, async (req, res) => {
 });
 
 // ================================================================
-// MINISTROS (Admin view)
+// MINISTROS (Admin view) — GESTÃO COMPLETA DE MEMBROS
 // ================================================================
 router.get('/ministros', adminAuth, async (req, res) => {
     try {
-        const { status, search, page = 1 } = req.query;
+        const { status, search, page = 1, anuidade, credencial, cargo } = req.query;
         const limit = 20;
         const offset = (page - 1) * limit;
         let where = [];
         let params = [];
         let idx = 1;
 
-        if (status) { where.push(`status = $${idx++}`); params.push(status); }
-        if (search) { where.push(`(nome ILIKE $${idx++} OR cpf ILIKE $${idx++} OR email ILIKE $${idx++})`); params.push(`%${search}%`, `%${search}%`, `%${search}%`); }
+        if (status) { where.push(`m.status = $${idx++}`); params.push(status); }
+        if (cargo) { where.push(`m.cargo = $${idx++}`); params.push(cargo); }
+        if (anuidade) { where.push(`m.anuidade_status = $${idx++}`); params.push(anuidade); }
+        if (credencial) { where.push(`m.credencial_status = $${idx++}`); params.push(credencial); }
+        if (search) { where.push(`(m.nome ILIKE $${idx++} OR m.cpf ILIKE $${idx++} OR m.email ILIKE $${idx++} OR m.registro ILIKE $${idx++})`); params.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`); }
 
         const whereStr = where.length > 0 ? 'WHERE ' + where.join(' AND ') : '';
-        const countR = await pool.query(`SELECT COUNT(*) as total FROM ministros ${whereStr}`, params);
-        const r = await pool.query(`SELECT id, cpf, nome, cargo, email, status, registro, created_at FROM ministros ${whereStr} ORDER BY nome LIMIT $${idx++} OFFSET $${idx++}`, [...params, limit, offset]);
+        const countR = await pool.query(`SELECT COUNT(*) as total FROM ministros m ${whereStr}`, params);
+        const r = await pool.query(`
+            SELECT m.id, m.cpf, m.nome, m.cargo, m.email, m.telefone, m.whatsapp, m.status, m.registro,
+                   m.foto_url, m.nome_igreja, m.data_nascimento, m.sexo, m.estado_civil,
+                   m.anuidade_status, m.credencial_status, m.aprovado, m.created_at, m.data_registro,
+                   m.funcao_ministerial, m.tempo_ministerio, m.data_consagracao, m.escolaridade,
+                   e.cidade, e.uf
+            FROM ministros m
+            LEFT JOIN ministro_endereco e ON e.ministro_id = m.id
+            ${whereStr}
+            ORDER BY m.nome
+            LIMIT $${idx++} OFFSET $${idx++}
+        `, [...params, limit, offset]);
 
         res.json({ ministros: r.rows, total: parseInt(countR.rows[0].total), page: parseInt(page), pages: Math.ceil(countR.rows[0].total / limit) });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// GET /api/admin/ministros/:id — Detalhe completo do membro
+router.get('/ministros/:id', adminAuth, async (req, res) => {
+    try {
+        const mid = req.params.id;
+        const [ministro, endereco, filhos, docs, convencoes, boletos, credenciais, historico, contas] = await Promise.all([
+            pool.query('SELECT * FROM ministros WHERE id = $1', [mid]),
+            pool.query('SELECT * FROM ministro_endereco WHERE ministro_id = $1', [mid]),
+            pool.query('SELECT * FROM ministro_filhos WHERE ministro_id = $1 ORDER BY nome', [mid]),
+            pool.query('SELECT * FROM ministro_documentos WHERE ministro_id = $1', [mid]),
+            pool.query('SELECT * FROM ministro_convencoes WHERE ministro_id = $1', [mid]),
+            pool.query('SELECT * FROM ministro_boletos WHERE ministro_id = $1 ORDER BY ano DESC, mes DESC', [mid]),
+            pool.query('SELECT * FROM ministro_credenciais WHERE ministro_id = $1 ORDER BY created_at DESC', [mid]),
+            pool.query('SELECT * FROM ministro_historico WHERE ministro_id = $1 ORDER BY created_at DESC LIMIT 50', [mid]),
+            pool.query('SELECT * FROM contas_receber WHERE ministro_id = $1 ORDER BY data_vencimento DESC', [mid]),
+        ]);
+
+        if (ministro.rows.length === 0) return res.status(404).json({ error: 'Ministro não encontrado' });
+
+        res.json({
+            ...ministro.rows[0],
+            endereco: endereco.rows[0] || null,
+            filhos: filhos.rows,
+            documentos: docs.rows[0] || null,
+            convencoes: convencoes.rows,
+            boletos: boletos.rows,
+            credenciais: credenciais.rows,
+            historico: historico.rows,
+            contas: contas.rows,
+        });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// PUT /api/admin/ministros/:id — Editar dados do membro
+router.put('/ministros/:id', adminAuth, async (req, res) => {
+    try {
+        const { nome, cargo, email, telefone, whatsapp, status, nome_igreja, funcao_ministerial,
+                tempo_ministerio, data_consagracao, escolaridade, registro, observacoes_admin,
+                anuidade_status, credencial_status, aprovado } = req.body;
+        const r = await pool.query(`
+            UPDATE ministros SET
+                nome = COALESCE($1, nome), cargo = COALESCE($2, cargo), email = COALESCE($3, email),
+                telefone = COALESCE($4, telefone), whatsapp = COALESCE($5, whatsapp), status = COALESCE($6, status),
+                nome_igreja = COALESCE($7, nome_igreja), funcao_ministerial = COALESCE($8, funcao_ministerial),
+                tempo_ministerio = COALESCE($9, tempo_ministerio), data_consagracao = COALESCE($10, data_consagracao),
+                escolaridade = COALESCE($11, escolaridade), registro = COALESCE($12, registro),
+                observacoes_admin = COALESCE($13, observacoes_admin), anuidade_status = COALESCE($14, anuidade_status),
+                credencial_status = COALESCE($15, credencial_status), aprovado = COALESCE($16, aprovado),
+                updated_at = NOW()
+            WHERE id = $17 RETURNING id, nome, status
+        `, [nome, cargo, email, telefone, whatsapp, status, nome_igreja, funcao_ministerial,
+            tempo_ministerio, data_consagracao || null, escolaridade, registro, observacoes_admin,
+            anuidade_status, credencial_status, aprovado, req.params.id]);
+
+        // Log histórico
+        await pool.query(
+            'INSERT INTO ministro_historico (ministro_id, acao, descricao, admin_nome) VALUES ($1, $2, $3, $4)',
+            [req.params.id, 'EDIÇÃO', 'Dados do membro atualizados pelo admin', 'Administrador']
+        );
+
+        res.json(r.rows[0]);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -332,7 +409,236 @@ router.put('/ministros/:id/status', adminAuth, async (req, res) => {
     try {
         const { status } = req.body;
         const r = await pool.query('UPDATE ministros SET status = $1 WHERE id = $2 RETURNING id, nome, status', [status, req.params.id]);
+
+        await pool.query(
+            'INSERT INTO ministro_historico (ministro_id, acao, descricao, admin_nome) VALUES ($1, $2, $3, $4)',
+            [req.params.id, 'ALTERAÇÃO DE STATUS', `Status alterado para ${status}`, 'Administrador']
+        );
+
         res.json(r.rows[0]);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// DELETE /api/admin/ministros/:id
+router.delete('/ministros/:id', adminAuth, async (req, res) => {
+    try {
+        await pool.query('DELETE FROM ministros WHERE id = $1', [req.params.id]);
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ================================================================
+// BOLETOS / ANUIDADES
+// ================================================================
+router.get('/ministros/:id/boletos', adminAuth, async (req, res) => {
+    try {
+        const r = await pool.query('SELECT * FROM ministro_boletos WHERE ministro_id = $1 ORDER BY ano DESC, mes DESC', [req.params.id]);
+        res.json(r.rows);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+router.post('/ministros/:id/boletos', adminAuth, async (req, res) => {
+    try {
+        const { tipo, referencia, ano, mes, valor, data_vencimento, status, observacao, arquivo_boleto_url } = req.body;
+        const r = await pool.query(
+            `INSERT INTO ministro_boletos (ministro_id, tipo, referencia, ano, mes, valor, data_vencimento, status, observacao, arquivo_boleto_url)
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
+            [req.params.id, tipo || 'anuidade', referencia, ano, mes, valor || 0, data_vencimento, status || 'pendente', observacao, arquivo_boleto_url]
+        );
+
+        await pool.query(
+            'INSERT INTO ministro_historico (ministro_id, acao, descricao, admin_nome) VALUES ($1, $2, $3, $4)',
+            [req.params.id, 'BOLETO ADICIONADO', `Boleto ${tipo || 'anuidade'} - ${referencia || ''} - R$ ${valor || 0}`, 'Administrador']
+        );
+
+        res.status(201).json(r.rows[0]);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+router.put('/boletos/:id', adminAuth, async (req, res) => {
+    try {
+        const { status, data_pagamento, valor_pago, arquivo_comprovante_url, observacao } = req.body;
+        const r = await pool.query(
+            `UPDATE ministro_boletos SET status=COALESCE($1,status), data_pagamento=$2, valor_pago=COALESCE($3,valor_pago),
+             arquivo_comprovante_url=COALESCE($4,arquivo_comprovante_url), observacao=COALESCE($5,observacao), updated_at=NOW()
+             WHERE id=$6 RETURNING *`,
+            [status, data_pagamento || null, valor_pago, arquivo_comprovante_url, observacao, req.params.id]
+        );
+        res.json(r.rows[0]);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+router.delete('/boletos/:id', adminAuth, async (req, res) => {
+    try {
+        await pool.query('DELETE FROM ministro_boletos WHERE id = $1', [req.params.id]);
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Upload de boleto/comprovante
+router.post('/ministros/:id/upload-boleto', adminAuth, upload.single('arquivo'), async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ error: 'Nenhum arquivo enviado' });
+        const url = `/uploads/${req.file.filename}`;
+        res.json({ url, filename: req.file.filename, size: req.file.size });
+    } catch (err) { res.status(500).json({ error: 'Erro ao fazer upload' }); }
+});
+
+// ================================================================
+// CREDENCIAIS DIGITAIS
+// ================================================================
+router.get('/ministros/:id/credenciais', adminAuth, async (req, res) => {
+    try {
+        const r = await pool.query('SELECT * FROM ministro_credenciais WHERE ministro_id = $1 ORDER BY created_at DESC', [req.params.id]);
+        res.json(r.rows);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+router.post('/ministros/:id/credenciais', adminAuth, async (req, res) => {
+    try {
+        const { numero_credencial, tipo, data_emissao, data_validade, arquivo_frente_url,
+                arquivo_verso_url, arquivo_pdf_url, status, observacao } = req.body;
+
+        // Gerar número de credencial se não fornecido
+        const numCred = numero_credencial || `CIEIB-${new Date().getFullYear()}-${String(req.params.id).padStart(4, '0')}`;
+
+        const r = await pool.query(
+            `INSERT INTO ministro_credenciais (ministro_id, numero_credencial, tipo, data_emissao, data_validade,
+             arquivo_frente_url, arquivo_verso_url, arquivo_pdf_url, status, observacao, emitido_por)
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`,
+            [req.params.id, numCred, tipo || 'ministro', data_emissao || new Date(), data_validade,
+             arquivo_frente_url, arquivo_verso_url, arquivo_pdf_url, status || 'ativa', observacao, 'Administrador']
+        );
+
+        // Atualizar status no ministro
+        await pool.query('UPDATE ministros SET credencial_status = $1 WHERE id = $2', ['ativa', req.params.id]);
+
+        await pool.query(
+            'INSERT INTO ministro_historico (ministro_id, acao, descricao, admin_nome) VALUES ($1, $2, $3, $4)',
+            [req.params.id, 'CREDENCIAL EMITIDA', `Credencial ${numCred} emitida`, 'Administrador']
+        );
+
+        res.status(201).json(r.rows[0]);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+router.put('/credenciais/:id', adminAuth, async (req, res) => {
+    try {
+        const { status, data_validade, arquivo_frente_url, arquivo_verso_url, arquivo_pdf_url, observacao } = req.body;
+        const r = await pool.query(
+            `UPDATE ministro_credenciais SET status=COALESCE($1,status), data_validade=$2,
+             arquivo_frente_url=COALESCE($3,arquivo_frente_url), arquivo_verso_url=COALESCE($4,arquivo_verso_url),
+             arquivo_pdf_url=COALESCE($5,arquivo_pdf_url), observacao=COALESCE($6,observacao), updated_at=NOW()
+             WHERE id=$7 RETURNING *`,
+            [status, data_validade || null, arquivo_frente_url, arquivo_verso_url, arquivo_pdf_url, observacao, req.params.id]
+        );
+        res.json(r.rows[0]);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+router.delete('/credenciais/:id', adminAuth, async (req, res) => {
+    try {
+        await pool.query('DELETE FROM ministro_credenciais WHERE id = $1', [req.params.id]);
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ================================================================
+// RELATÓRIOS — Download de dados para credencial
+// ================================================================
+router.get('/relatorios/membros', adminAuth, async (req, res) => {
+    try {
+        const { formato, status, anuidade, credencial } = req.query;
+        let where = [];
+        let params = [];
+        let idx = 1;
+
+        if (status) { where.push(`m.status = $${idx++}`); params.push(status); }
+        if (anuidade) { where.push(`m.anuidade_status = $${idx++}`); params.push(anuidade); }
+        if (credencial) { where.push(`m.credencial_status = $${idx++}`); params.push(credencial); }
+
+        const whereStr = where.length > 0 ? 'WHERE ' + where.join(' AND ') : '';
+
+        const r = await pool.query(`
+            SELECT m.id, m.cpf, m.nome, m.nome_social, m.cargo, m.registro, m.email, m.telefone, m.whatsapp,
+                   m.sexo, m.data_nascimento, m.estado_civil, m.nome_conjuge, m.rg, m.orgao_expedidor,
+                   m.nome_igreja, m.funcao_ministerial, m.tempo_ministerio, m.data_consagracao,
+                   m.escolaridade, m.status, m.anuidade_status, m.credencial_status,
+                   m.foto_url, m.data_registro, m.created_at,
+                   e.cep, e.endereco, e.numero, e.complemento, e.bairro, e.cidade, e.uf,
+                   mc.numero_credencial, mc.data_emissao AS cred_emissao, mc.data_validade AS cred_validade,
+                   mc.status AS cred_status_atual
+            FROM ministros m
+            LEFT JOIN ministro_endereco e ON e.ministro_id = m.id
+            LEFT JOIN LATERAL (
+                SELECT * FROM ministro_credenciais WHERE ministro_id = m.id ORDER BY created_at DESC LIMIT 1
+            ) mc ON true
+            ${whereStr}
+            ORDER BY m.nome
+        `, params);
+
+        if (formato === 'csv') {
+            // CSV export
+            const headers = ['ID','CPF','Nome','Cargo','Registro','Email','Telefone','WhatsApp','Sexo',
+                           'Data Nascimento','Estado Civil','Cônjuge','RG','Órgão Expedidor','Igreja',
+                           'Função Ministerial','Tempo Ministério','Data Consagração','Escolaridade',
+                           'Status','Anuidade','Credencial','CEP','Endereço','Número','Complemento',
+                           'Bairro','Cidade','UF','Nº Credencial','Emissão Credencial','Validade Credencial'];
+
+            const csvRows = [headers.join(';')];
+            for (const m of r.rows) {
+                csvRows.push([
+                    m.id, m.cpf, `"${(m.nome||'').replace(/"/g,'""')}"`, m.cargo, m.registro, m.email,
+                    m.telefone, m.whatsapp, m.sexo === 'M' ? 'Masculino' : 'Feminino',
+                    m.data_nascimento ? new Date(m.data_nascimento).toLocaleDateString('pt-BR') : '',
+                    m.estado_civil, `"${(m.nome_conjuge||'').replace(/"/g,'""')}"`, m.rg, m.orgao_expedidor,
+                    `"${(m.nome_igreja||'').replace(/"/g,'""')}"`, m.funcao_ministerial, m.tempo_ministerio,
+                    m.data_consagracao ? new Date(m.data_consagracao).toLocaleDateString('pt-BR') : '',
+                    m.escolaridade, m.status, m.anuidade_status, m.credencial_status,
+                    m.cep, `"${(m.endereco||'').replace(/"/g,'""')}"`, m.numero, m.complemento,
+                    m.bairro, m.cidade, m.uf,
+                    m.numero_credencial, m.cred_emissao ? new Date(m.cred_emissao).toLocaleDateString('pt-BR') : '',
+                    m.cred_validade ? new Date(m.cred_validade).toLocaleDateString('pt-BR') : ''
+                ].join(';'));
+            }
+
+            res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+            res.setHeader('Content-Disposition', `attachment; filename=relatorio_membros_${new Date().toISOString().split('T')[0]}.csv`);
+            return res.send('\uFEFF' + csvRows.join('\n')); // BOM para Excel reconhecer UTF-8
+        }
+
+        // JSON (default)
+        res.json({ membros: r.rows, total: r.rows.length, gerado_em: new Date().toISOString() });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Estatísticas rápidas dos membros
+router.get('/relatorios/stats-membros', adminAuth, async (req, res) => {
+    try {
+        const [total, ativos, inativos, pendentes, anuidadeOk, anuidadePend, credAtiva, credPend] = await Promise.all([
+            pool.query("SELECT COUNT(*) as n FROM ministros"),
+            pool.query("SELECT COUNT(*) as n FROM ministros WHERE status = 'ATIVO'"),
+            pool.query("SELECT COUNT(*) as n FROM ministros WHERE status = 'INATIVO'"),
+            pool.query("SELECT COUNT(*) as n FROM ministros WHERE status = 'PENDENTE'"),
+            pool.query("SELECT COUNT(*) as n FROM ministros WHERE anuidade_status = 'paga'"),
+            pool.query("SELECT COUNT(*) as n FROM ministros WHERE anuidade_status = 'pendente' OR anuidade_status IS NULL"),
+            pool.query("SELECT COUNT(*) as n FROM ministros WHERE credencial_status = 'ativa'"),
+            pool.query("SELECT COUNT(*) as n FROM ministros WHERE credencial_status = 'pendente' OR credencial_status IS NULL"),
+        ]);
+
+        const cargos = await pool.query("SELECT cargo, COUNT(*) as total FROM ministros GROUP BY cargo ORDER BY total DESC");
+
+        res.json({
+            total: parseInt(total.rows[0].n),
+            ativos: parseInt(ativos.rows[0].n),
+            inativos: parseInt(inativos.rows[0].n),
+            pendentes: parseInt(pendentes.rows[0].n),
+            anuidade_paga: parseInt(anuidadeOk.rows[0].n),
+            anuidade_pendente: parseInt(anuidadePend.rows[0].n),
+            credencial_ativa: parseInt(credAtiva.rows[0].n),
+            credencial_pendente: parseInt(credPend.rows[0].n),
+            por_cargo: cargos.rows,
+        });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 

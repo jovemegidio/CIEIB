@@ -1164,34 +1164,151 @@ async function deleteMinistro(id) {
     } catch (err) { showToast(err.message, 'error'); }
 }
 
-// ---- Relatório CSV ----
-async function exportarRelatorio(formato) {
+// ---- Relatório PDF Profissional ----
+async function exportarRelatorio() {
     try {
+        showToast('Gerando relatório...', 'info');
+
         const status = document.getElementById('filtroStatus')?.value || '';
         const anuidade = document.getElementById('filtroAnuidade')?.value || '';
         const credencial = document.getElementById('filtroCredencial')?.value || '';
 
-        let qs = `?formato=${formato}`;
+        let qs = '?formato=json';
         if (status) qs += `&status=${status}`;
         if (anuidade) qs += `&anuidade=${anuidade}`;
         if (credencial) qs += `&credencial=${credencial}`;
 
-        const response = await fetch(`/api/admin/relatorios/membros${qs}`, {
-            headers: { 'Authorization': `Bearer ${AdminAPI.token()}` }
-        });
+        const data = await AdminAPI.get(`/relatorios/membros${qs}`);
+        const stats = await AdminAPI.get('/relatorios/stats-membros');
+        const membros = data.membros || [];
 
-        if (!response.ok) throw new Error('Erro ao gerar relatório');
+        if (membros.length === 0) { showToast('Nenhum membro encontrado com os filtros aplicados', 'warning'); return; }
 
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `relatorio_membros_${new Date().toISOString().split('T')[0]}.csv`;
-        a.click();
-        window.URL.revokeObjectURL(url);
-        showToast('Relatório baixado com sucesso!', 'success');
+        const fmtD = d => d ? new Date(d).toLocaleDateString('pt-BR') : '—';
+        const fmtCPF2 = c => { if (!c) return '—'; const d = c.replace(/\D/g,''); return d.length === 11 ? d.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') : c; };
+        const now = new Date();
+        const filtrosAtivos = [status ? `Status: ${status}` : '', anuidade ? `Anuidade: ${anuidade}` : '', credencial ? `Credencial: ${credencial}` : ''].filter(Boolean).join(' | ') || 'Nenhum filtro aplicado';
+
+        const w = window.open('', '_blank');
+        w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>Relatório de Membros — CIEIB</title>
+<style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Segoe UI',Tahoma,sans-serif; color:#1a1a2e; font-size:10px; background:#fff; }
+    .page { max-width:1100px; margin:0 auto; padding:24px 32px; }
+
+    /* Header */
+    .rpt-header { display:flex; align-items:center; justify-content:space-between; border-bottom:3px solid #1a3a5c; padding-bottom:14px; margin-bottom:16px; }
+    .rpt-brand { display:flex; align-items:center; gap:12px; }
+    .rpt-logo { width:50px; height:50px; background:linear-gradient(135deg,#1a3a5c,#2d5a8c); border-radius:10px; display:flex; align-items:center; justify-content:center; color:#c8a951; font-size:16px; font-weight:900; }
+    .rpt-org strong { font-size:15px; color:#1a3a5c; display:block; }
+    .rpt-org span { font-size:9px; color:#64748b; }
+    .rpt-meta { text-align:right; font-size:9px; color:#64748b; line-height:1.6; }
+    .rpt-meta .rpt-title { font-size:14px; font-weight:700; color:#1a3a5c; letter-spacing:0.5px; }
+
+    /* Stats strip */
+    .rpt-stats { display:flex; gap:6px; margin-bottom:16px; }
+    .rpt-stat { flex:1; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:8px 10px; text-align:center; }
+    .rpt-stat-val { font-size:16px; font-weight:800; color:#1a3a5c; }
+    .rpt-stat-lbl { font-size:8px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; }
+
+    /* Filters info */
+    .rpt-filters { background:#fffbeb; border:1px solid #fde68a; border-radius:6px; padding:6px 12px; font-size:9px; color:#92400e; margin-bottom:14px; }
+
+    /* Table */
+    .rpt-table { width:100%; border-collapse:collapse; font-size:9px; }
+    .rpt-table thead { background:#1a3a5c; color:#fff; }
+    .rpt-table th { padding:7px 6px; text-align:left; font-size:8px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; white-space:nowrap; }
+    .rpt-table td { padding:6px; border-bottom:1px solid #f1f5f9; vertical-align:top; }
+    .rpt-table tr:nth-child(even) { background:#fafbfc; }
+    .rpt-table tr:hover { background:#f0f9ff; }
+    .rpt-table .num { text-align:center; color:#94a3b8; font-size:8px; }
+    .badge-s { padding:2px 8px; border-radius:10px; font-size:8px; font-weight:700; white-space:nowrap; }
+    .b-ativo { background:#dcfce7; color:#166534; }
+    .b-inativo { background:#fee2e2; color:#991b1b; }
+    .b-pendente { background:#fef3c7; color:#92400e; }
+    .b-paga { background:#dbeafe; color:#1e40af; }
+
+    /* Footer */
+    .rpt-footer { margin-top:20px; padding-top:10px; border-top:2px solid #1a3a5c; display:flex; justify-content:space-between; font-size:9px; color:#94a3b8; }
+    .rpt-footer strong { color:#1a3a5c; }
+
+    /* Watermark */
+    .rpt-wm { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-30deg); font-size:80px; color:rgba(26,58,92,0.03); font-weight:900; letter-spacing:15px; pointer-events:none; }
+
+    @media print {
+        body { padding:0; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+        .page { padding:12px 20px; }
+        .rpt-table tr:hover { background:inherit; }
+        @page { size:A4 landscape; margin:10mm; }
+    }
+</style></head><body>
+<div class="rpt-wm">CIEIB</div>
+<div class="page">
+    <div class="rpt-header">
+        <div class="rpt-brand">
+            <div class="rpt-logo">CIEIB</div>
+            <div class="rpt-org">
+                <strong>CIEIB</strong>
+                <span>Convenção das Igrejas Evangélicas Interdenominacional do Brasil</span>
+            </div>
+        </div>
+        <div class="rpt-meta">
+            <div class="rpt-title">📊 Relatório de Membros</div>
+            Gerado em ${now.toLocaleDateString('pt-BR')} às ${now.toLocaleTimeString('pt-BR')}<br>
+            Total: <strong>${membros.length}</strong> membro(s)
+        </div>
+    </div>
+
+    <div class="rpt-stats">
+        <div class="rpt-stat"><div class="rpt-stat-val">${stats.total}</div><div class="rpt-stat-lbl">Total</div></div>
+        <div class="rpt-stat"><div class="rpt-stat-val" style="color:#16a34a;">${stats.ativos}</div><div class="rpt-stat-lbl">Ativos</div></div>
+        <div class="rpt-stat"><div class="rpt-stat-val" style="color:#dc2626;">${stats.inativos}</div><div class="rpt-stat-lbl">Inativos</div></div>
+        <div class="rpt-stat"><div class="rpt-stat-val" style="color:#ea580c;">${stats.pendentes}</div><div class="rpt-stat-lbl">Pendentes</div></div>
+        <div class="rpt-stat"><div class="rpt-stat-val" style="color:#2563eb;">${stats.anuidade_paga}</div><div class="rpt-stat-lbl">Anuidade OK</div></div>
+        <div class="rpt-stat"><div class="rpt-stat-val" style="color:#7c3aed;">${stats.credencial_ativa}</div><div class="rpt-stat-lbl">Credencial OK</div></div>
+    </div>
+
+    <div class="rpt-filters">📋 Filtros: ${filtrosAtivos}</div>
+
+    <table class="rpt-table">
+        <thead>
+            <tr>
+                <th>#</th><th>Nome</th><th>CPF</th><th>Cargo</th><th>Registro</th>
+                <th>Telefone</th><th>Email</th><th>Igreja</th>
+                <th>Status</th><th>Anuidade</th><th>Credencial</th><th>Cidade/UF</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${membros.map((m, i) => `<tr>
+                <td class="num">${i+1}</td>
+                <td style="font-weight:600;white-space:nowrap;">${m.nome || '—'}</td>
+                <td style="font-family:monospace;font-size:9px;">${fmtCPF2(m.cpf)}</td>
+                <td>${m.cargo ? m.cargo.charAt(0) + m.cargo.slice(1).toLowerCase() : '—'}</td>
+                <td>${m.registro || '—'}</td>
+                <td style="font-size:9px;">${m.telefone || m.whatsapp || '—'}</td>
+                <td style="font-size:8px;max-width:120px;overflow:hidden;text-overflow:ellipsis;">${m.email || '—'}</td>
+                <td style="font-size:9px;">${m.nome_igreja || '—'}</td>
+                <td><span class="badge-s b-${(m.status||'').toLowerCase()}">${m.status || '—'}</span></td>
+                <td><span class="badge-s ${m.anuidade_status === 'paga' ? 'b-paga' : 'b-pendente'}">${m.anuidade_status || 'pendente'}</span></td>
+                <td><span class="badge-s ${m.credencial_status === 'ativa' ? 'b-paga' : 'b-pendente'}">${m.credencial_status || 'pendente'}</span></td>
+                <td style="font-size:9px;">${m.cidade ? m.cidade + '/' + (m.uf||'') : '—'}</td>
+            </tr>`).join('')}
+        </tbody>
+    </table>
+
+    <div class="rpt-footer">
+        <div><strong>CIEIB</strong> — Convenção das Igrejas Evangélicas Interdenominacional do Brasil</div>
+        <div>Página 1 de 1 • ${membros.length} registro(s) • ${now.toLocaleDateString('pt-BR')}</div>
+    </div>
+</div>
+</body></html>`);
+        w.document.close();
+        w.focus();
+        setTimeout(() => w.print(), 500);
+        showToast('Relatório gerado!', 'success');
     } catch (err) {
-        showToast(err.message, 'error');
+        showToast(err.message || 'Erro ao gerar relatório', 'error');
     }
 }
 
@@ -2215,11 +2332,11 @@ async function deleteCredencial(credencialId) {
     } catch (err) { showToast(err.message, 'error'); }
 }
 
-// ---- Bulk Credencial (placeholder) ----
+// ---- Bulk Credencial — PDF Profissional ----
 function openBulkCredencialModal() {
     document.getElementById('modalTitle').textContent = 'Gerar Credenciais em Lote';
     document.getElementById('modalBody').innerHTML = `
-        <p style="font-size:0.85rem;color:#555;margin-bottom:16px;">Selecione os critérios para gerar credenciais automaticamente para múltiplos membros:</p>
+        <p style="font-size:0.85rem;color:#555;margin-bottom:16px;">Gera um relatório PDF profissional com dados de todos os membros elegíveis para produção de credenciais.</p>
         <div class="form-grid">
             <div class="admin-form-group"><label>Filtrar por Status</label>
                 <select id="mBulkStatus">
@@ -2237,13 +2354,13 @@ function openBulkCredencialModal() {
         <div class="form-grid">
             <div class="admin-form-group"><label>Validade da Credencial</label><input type="date" id="mBulkValidade" value="${new Date(new Date().getFullYear() + 1, 11, 31).toISOString().split('T')[0]}"></div>
         </div>
-        <div style="background:#fff3e0;padding:12px;border-radius:8px;margin-top:12px;">
-            <p style="font-size:0.8rem;color:#e65100;"><i class="fas fa-info-circle"></i> As credenciais serão geradas apenas para membros que ainda não possuem credencial ativa. Você poderá baixar o relatório CSV com os dados para produção das credenciais físicas.</p>
+        <div style="background:#eff6ff;padding:12px;border-radius:8px;margin-top:12px;border:1px solid #bfdbfe;">
+            <p style="font-size:0.8rem;color:#1e40af;margin:0;"><i class="fas fa-info-circle"></i> O PDF incluirá: foto, nome, CPF, cargo, registro, número credencial, validade e QR code placeholder para cada membro elegível.</p>
         </div>
     `;
     document.getElementById('modalFooter').innerHTML = `
         <button class="btn-admin-secondary" onclick="closeModal()">Cancelar</button>
-        <button class="btn-admin-primary" onclick="executarBulkCredencial()"><i class="fas fa-id-badge"></i> Gerar e Baixar Relatório</button>
+        <button class="btn-admin-primary" onclick="executarBulkCredencial()"><i class="fas fa-file-pdf"></i> Gerar PDF de Credenciais</button>
     `;
     openModal();
 }
@@ -2251,32 +2368,139 @@ function openBulkCredencialModal() {
 async function executarBulkCredencial() {
     const status = document.getElementById('mBulkStatus').value;
     const anuidade = document.getElementById('mBulkAnuidade').value;
+    const validade = document.getElementById('mBulkValidade').value || new Date(new Date().getFullYear() + 1, 11, 31).toISOString().split('T')[0];
 
     try {
-        // Download CSV with credential data
-        let qs = '?formato=csv';
+        showToast('Gerando relatório de credenciais...', 'info');
+
+        let qs = '?formato=json';
         if (status) qs += `&status=${status}`;
         if (anuidade) qs += `&anuidade=${anuidade}`;
-        qs += '&credencial=pendente';
 
-        const response = await fetch(`/api/admin/relatorios/membros${qs}`, {
-            headers: { 'Authorization': `Bearer ${AdminAPI.token()}` }
-        });
+        const data = await AdminAPI.get(`/relatorios/membros${qs}`);
+        const membros = data.membros || [];
+        if (membros.length === 0) { showToast('Nenhum membro encontrado', 'warning'); return; }
 
-        if (!response.ok) throw new Error('Erro ao gerar relatório');
+        const now = new Date();
+        const fmtCPF2 = c => { if (!c) return '—'; const d = c.replace(/\D/g,''); return d.length === 11 ? d.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') : c; };
+        const fmtVal = new Date(validade).toLocaleDateString('pt-BR');
 
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `credenciais_pendentes_${new Date().toISOString().split('T')[0]}.csv`;
-        a.click();
-        window.URL.revokeObjectURL(url);
+        const w = window.open('', '_blank');
+        w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>Credenciais — CIEIB</title>
+<style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Segoe UI',Tahoma,sans-serif; color:#1a1a2e; font-size:10px; background:#fff; }
+    .page { max-width:900px; margin:0 auto; padding:24px 32px; }
+
+    .rpt-header { display:flex; align-items:center; justify-content:space-between; border-bottom:3px solid #1a3a5c; padding-bottom:12px; margin-bottom:20px; }
+    .rpt-brand { display:flex; align-items:center; gap:12px; }
+    .rpt-logo { width:48px; height:48px; background:linear-gradient(135deg,#1a3a5c,#2d5a8c); border-radius:10px; display:flex; align-items:center; justify-content:center; color:#c8a951; font-size:15px; font-weight:900; }
+    .rpt-org strong { font-size:14px; color:#1a3a5c; display:block; }
+    .rpt-org span { font-size:9px; color:#64748b; }
+    .rpt-meta { text-align:right; font-size:9px; color:#64748b; line-height:1.6; }
+    .rpt-meta .rpt-title { font-size:13px; font-weight:700; color:#1a3a5c; }
+
+    .info-bar { background:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; padding:8px 14px; margin-bottom:18px; font-size:9px; color:#0369a1; display:flex; justify-content:space-between; }
+
+    /* Cards Grid */
+    .cred-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:14px; }
+
+    .cred-card { border:2px solid #e2e8f0; border-radius:12px; overflow:hidden; break-inside:avoid; page-break-inside:avoid; }
+    .cred-card-header { background:linear-gradient(135deg,#0f2740,#1a3a5c); color:#fff; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; }
+    .cred-card-header .cred-hlogo { font-size:10px; font-weight:800; color:#c8a951; letter-spacing:1px; }
+    .cred-card-header .cred-htitle { font-size:8px; color:rgba(255,255,255,0.7); text-transform:uppercase; letter-spacing:0.5px; }
+    .cred-card-body { padding:12px 14px; display:flex; gap:12px; }
+    .cred-foto { width:56px; height:68px; border-radius:6px; background:#e2e8f0; display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden; border:1px solid #cbd5e1; color:#94a3b8; font-size:20px; }
+    .cred-foto img { width:100%; height:100%; object-fit:cover; }
+    .cred-info { flex:1; }
+    .cred-name { font-size:13px; font-weight:700; color:#1a3a5c; margin-bottom:3px; }
+    .cred-detail { font-size:9px; color:#475569; line-height:1.7; }
+    .cred-detail strong { color:#1e293b; }
+    .cred-card-footer { background:#f8fafc; border-top:1px solid #e2e8f0; padding:6px 14px; display:flex; justify-content:space-between; align-items:center; }
+    .cred-num { font-family:monospace; font-size:10px; font-weight:700; color:#1a3a5c; letter-spacing:1px; }
+    .cred-valid { font-size:8px; color:#64748b; }
+    .cred-qr { width:40px; height:40px; border:1px dashed #cbd5e1; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:7px; color:#94a3b8; text-align:center; line-height:1.2; }
+
+    .rpt-footer { margin-top:24px; padding-top:10px; border-top:2px solid #1a3a5c; display:flex; justify-content:space-between; font-size:9px; color:#94a3b8; }
+    .rpt-footer strong { color:#1a3a5c; }
+
+    .rpt-wm { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-30deg); font-size:80px; color:rgba(26,58,92,0.03); font-weight:900; letter-spacing:15px; pointer-events:none; }
+
+    @media print {
+        body { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+        .page { padding:10px 16px; }
+        @page { size:A4 portrait; margin:8mm; }
+    }
+</style></head><body>
+<div class="rpt-wm">CIEIB</div>
+<div class="page">
+    <div class="rpt-header">
+        <div class="rpt-brand">
+            <div class="rpt-logo">CIEIB</div>
+            <div class="rpt-org">
+                <strong>CIEIB</strong>
+                <span>Convenção das Igrejas Evangélicas Interdenominacional do Brasil</span>
+            </div>
+        </div>
+        <div class="rpt-meta">
+            <div class="rpt-title">🪪 Relatório de Credenciais</div>
+            Gerado em ${now.toLocaleDateString('pt-BR')} às ${now.toLocaleTimeString('pt-BR')}<br>
+            Validade: <strong>${fmtVal}</strong>
+        </div>
+    </div>
+
+    <div class="info-bar">
+        <span>📋 ${membros.length} membro(s) elegíve(is) para credencial</span>
+        <span>Filtros: ${status || 'Todos'} | Anuidade: ${anuidade || 'Qualquer'} | Validade até: ${fmtVal}</span>
+    </div>
+
+    <div class="cred-grid">
+        ${membros.map((m, i) => {
+            const credNum = m.numero_credencial || ('CIEIB-' + String(m.registro || m.id).padStart(5, '0'));
+            return `<div class="cred-card">
+                <div class="cred-card-header">
+                    <span class="cred-hlogo">CIEIB</span>
+                    <span class="cred-htitle">Credencial Ministerial</span>
+                </div>
+                <div class="cred-card-body">
+                    <div class="cred-foto">${m.foto_url ? `<img src="${m.foto_url}" alt="">` : '👤'}</div>
+                    <div class="cred-info">
+                        <div class="cred-name">${m.nome || '—'}</div>
+                        <div class="cred-detail">
+                            <strong>CPF:</strong> ${fmtCPF2(m.cpf)}<br>
+                            <strong>Cargo:</strong> ${m.cargo ? m.cargo.charAt(0) + m.cargo.slice(1).toLowerCase() : '—'}<br>
+                            <strong>Registro:</strong> ${m.registro || '—'}<br>
+                            <strong>Igreja:</strong> ${m.nome_igreja || '—'}
+                        </div>
+                    </div>
+                    <div class="cred-qr">QR<br>Code</div>
+                </div>
+                <div class="cred-card-footer">
+                    <div>
+                        <div class="cred-num">${credNum}</div>
+                        <div class="cred-valid">Válido até ${fmtVal}</div>
+                    </div>
+                    <div style="font-size:8px;color:#16a34a;font-weight:700;">✓ ATIVO</div>
+                </div>
+            </div>`;
+        }).join('')}
+    </div>
+
+    <div class="rpt-footer">
+        <div><strong>CIEIB</strong> — Convenção das Igrejas Evangélicas Interdenominacional do Brasil</div>
+        <div>${membros.length} credencial(is) • ${now.toLocaleDateString('pt-BR')}</div>
+    </div>
+</div>
+</body></html>`);
+        w.document.close();
+        w.focus();
+        setTimeout(() => w.print(), 500);
 
         closeModal();
-        showToast('Relatório para credenciais baixado!', 'success');
+        showToast('Relatório de credenciais gerado!', 'success');
     } catch (err) {
-        showToast(err.message, 'error');
+        showToast(err.message || 'Erro ao gerar credenciais', 'error');
     }
 }
 

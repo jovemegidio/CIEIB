@@ -241,7 +241,7 @@
                             <div>
                                 <h4>Quer se filiar?</h4>
                                 <p>Conheça os requisitos para credenciamento e filiação de ministros à CIEIB.</p>
-                                <a href="#" class="btn-link">Saiba mais <i class="fas fa-arrow-right"></i></a>
+                                <a href="#" id="btnFiliar" class="btn-link">Saiba mais <i class="fas fa-arrow-right"></i></a>
                             </div>
                         </div>
                     </div>
@@ -800,6 +800,11 @@
 
         // Abrir / Fechar modal
         document.getElementById('btnPrimeiroAcesso').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('regOverlay').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        });
+        document.getElementById('btnFiliar').addEventListener('click', (e) => {
             e.preventDefault();
             document.getElementById('regOverlay').classList.add('open');
             document.body.style.overflow = 'hidden';

@@ -507,20 +507,19 @@ async function loadSiteConfig() {
         // Atualizar <title> com nome_site
         if (config.nome_site) {
             const baseName = config.nome_site;
+            const sigla = baseName.split(/[—:|]/)[0].trim(); // Ex: 'CIEIB'
             const currentPage = window.location.pathname.split('/').pop() || 'index.html';
             const isHome = !currentPage || currentPage === '' || currentPage === '/' || currentPage === 'index.html' || currentPage === 'index';
             if (isHome) {
                 // Página inicial: usa o nome completo da config
                 document.title = baseName;
             } else {
-                // Subpáginas: extrai o nome da página do título original
-                // Detecta separadores: — | -
-                const separatorMatch = document.title.match(/^(.+?)\s*(?:—|\||-)\s*(.+)$/);
+                // Subpáginas: formato "CIEIB: Nome da Página"
+                const separatorMatch = document.title.match(/^(?:CIEIB\s*[:\u2014|\-]\s*)?(.+?)(?:\s*[:\u2014|\-]\s*CIEIB)?$/i);
                 if (separatorMatch) {
-                    // Usa o prefixo da página + nome do site da config
-                    document.title = separatorMatch[1].trim() + ' — ' + baseName;
+                    const pageName = separatorMatch[1].trim();
+                    document.title = sigla + ': ' + pageName;
                 } else {
-                    // Título sem separador → usa nome completo
                     document.title = baseName;
                 }
             }

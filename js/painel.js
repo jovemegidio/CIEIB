@@ -1646,3 +1646,218 @@ document.addEventListener('DOMContentLoaded', () => {
     // Init form events
     bindSupFormEvents();
 });
+
+// ================================================================
+//  SOLICITAÇÃO DE CREDENCIAL — Modal
+// ================================================================
+
+function openCredModal() {
+    document.getElementById('credOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeCredModal() {
+    document.getElementById('credOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+function showCredStep(stepId) {
+    document.querySelectorAll('.cred-step').forEach(s => s.style.display = 'none');
+    const step = document.getElementById(stepId);
+    if (step) step.style.display = 'block';
+}
+
+function navigateToCredencialTab() {
+    closeCredModal();
+    // Activate the credencial tab
+    const tab = document.getElementById('ptab-credencial');
+    if (tab) {
+        tab.click();
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+function formatCredDate(dateStr) {
+    if (!dateStr) return '---';
+    return new Date(dateStr).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+async function checkCredencialStatus() {
+    showCredStep('credStepLoading');
+    openCredModal();
+
+    try {
+        const cred = await API.getCredencial();
+
+        if (cred && cred.codigo) {
+            // Has a credential - check if expired
+            const validade = cred.data_validade ? new Date(cred.data_validade) : null;
+            const expirada = validade && validade < new Date();
+            const ativo = cred.status === 'ATIVO' && !expirada;
+
+            if (expirada) {
+                // Show expired step
+                document.getElementById('credExpCodigo').textContent = cred.codigo;
+                document.getElementById('credExpValidade').textContent = formatCredDate(cred.data_validade);
+                showCredStep('credStepExpirada');
+            } else {
+                // Show active step
+                document.getElementById('credInfoCodigo').textContent = cred.codigo;
+                document.getElementById('credInfoNome').textContent = cred.nome || '---';
+                document.getElementById('credInfoCargo').textContent = cred.cargo || '---';
+                document.getElementById('credInfoValidade').textContent = formatCredDate(cred.data_validade);
+
+                const statusBadge = document.getElementById('credInfoStatus');
+                if (ativo) {
+                    statusBadge.textContent = 'ATIVA';
+                    statusBadge.className = 'cred-status-badge ativa';
+                } else {
+                    statusBadge.textContent = 'INATIVA';
+                    statusBadge.className = 'cred-status-badge inativa';
+                }
+
+                showCredStep('credStepAtiva');
+            }
+        } else {
+            // No credential - show solicitation form
+            await checkRequisitos();
+            showCredStep('credStepSolicitar');
+        }
+    } catch (err) {
+        // No credential found or error - show solicitation form
+        await checkRequisitos();
+        showCredStep('credStepSolicitar');
+    }
+}
+
+async function checkRequisitos() {
+    try {
+        const m = await API.getMinistro();
+
+        const reqCadastro = document.getElementById('credReqCadastro');
+        const reqFoto = document.getElementById('credReqFoto');
+        const reqAprovado = document.getElementById('credReqAprovado');
+
+        // Check cadastro completo (has nome, cargo, cpf)
+        const cadastroOk = !!(m.nome && m.cargo && m.cpf);
+        if (reqCadastro) {
+            reqCadastro.className = cadastroOk ? 'req-ok' : 'req-pending';
+            reqCadastro.innerHTML = cadastroOk
+                ? '<i class="fas fa-check-circle"></i> Cadastro completo (dados pessoais)'
+                : '<i class="fas fa-exclamation-circle"></i> Cadastro completo (dados pessoais) — <em>pendente</em>';
+        }
+
+        // Check foto
+        const fotoOk = !!m.foto_url;
+        if (reqFoto) {
+            reqFoto.className = fotoOk ? 'req-ok' : 'req-pending';
+            reqFoto.innerHTML = fotoOk
+                ? '<i class="fas fa-check-circle"></i> Foto de perfil cadastrada'
+                : '<i class="fas fa-exclamation-circle"></i> Foto de perfil cadastrada — <em>pendente</em>';
+        }
+
+        // Check aprovado
+        const aprovadoOk = m.aprovado === true;
+        if (reqAprovado) {
+            reqAprovado.className = aprovadoOk ? 'req-ok' : 'req-pending';
+            reqAprovado.innerHTML = aprovadoOk
+                ? '<i class="fas fa-check-circle"></i> Aprovação pela administração'
+                : '<i class="fas fa-exclamation-circle"></i> Aprovação pela administração — <em>pendente</em>';
+        }
+    } catch (err) {
+        // Silently fail, show default state
+    }
+}
+
+async function solicitarCredencial() {
+    const btn = document.getElementById('btnConfirmarSolicitar');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+
+    try {
+        // Call getCredencial which auto-generates the credential if none exists
+        const cred = await API.getCredencial();
+
+        if (cred && cred.codigo) {
+            document.getElementById('credSucessoTitulo').textContent = 'Credencial Gerada!';
+            document.getElementById('credSucessoMsg').textContent = 'Sua credencial ministerial digital foi gerada com sucesso.';
+            document.getElementById('credSucessoDetalhe').textContent = 
+                'Código: ' + cred.codigo + ' — Acesse a aba "Credencial" para visualizar, baixar e compartilhar.';
+            showCredStep('credStepSucesso');
+
+            // Reset credencial tab cache so it reloads
+            credencialLoaded = false;
+        } else {
+            throw new Error('Não foi possível gerar a credencial');
+        }
+    } catch (err) {
+        document.getElementById('credErroDetalhe').textContent = 
+            err.message || 'Não foi possível processar sua solicitação. Tente novamente mais tarde ou entre em contato com o suporte.';
+        showCredStep('credStepErro');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
+}
+
+async function renovarCredencialModal() {
+    const btn = document.getElementById('btnRenovarCred');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Renovando...';
+
+    try {
+        await API.renovarCredencial();
+
+        document.getElementById('credSucessoTitulo').textContent = 'Credencial Renovada!';
+        document.getElementById('credSucessoMsg').textContent = 'Sua credencial ministerial foi renovada por mais 1 ano.';
+        document.getElementById('credSucessoDetalhe').textContent = 
+            'Acesse a aba "Credencial" para ver os novos dados de validade.';
+        showCredStep('credStepSucesso');
+
+        // Reset credencial tab cache
+        credencialLoaded = false;
+    } catch (err) {
+        document.getElementById('credErroDetalhe').textContent = 
+            err.message || 'Erro ao renovar credencial. Tente novamente.';
+        showCredStep('credStepErro');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
+}
+
+// Init credential modal events on DOMContentLoaded
+document.addEventListener('DOMContentLoaded', () => {
+    // Open modal
+    document.getElementById('btnSolicitarCredencial')?.addEventListener('click', () => {
+        checkCredencialStatus();
+    });
+
+    // Close
+    document.getElementById('credCloseBtn')?.addEventListener('click', closeCredModal);
+
+    // Overlay click
+    document.getElementById('credOverlay')?.addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) closeCredModal();
+    });
+
+    // Cancel buttons
+    ['credCancelBtn1', 'credCancelBtn2', 'credCancelBtn3', 'credCancelBtn4'].forEach(id => {
+        document.getElementById(id)?.addEventListener('click', closeCredModal);
+    });
+
+    // Solicitar
+    document.getElementById('btnConfirmarSolicitar')?.addEventListener('click', solicitarCredencial);
+
+    // Renovar
+    document.getElementById('btnRenovarCred')?.addEventListener('click', renovarCredencialModal);
+
+    // Ver credencial completa (go to tab)
+    document.getElementById('btnVerCredencial')?.addEventListener('click', navigateToCredencialTab);
+
+    // Ir para credencial (success step)
+    document.getElementById('btnIrCredencial')?.addEventListener('click', navigateToCredencialTab);
+});

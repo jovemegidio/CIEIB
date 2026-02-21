@@ -2803,6 +2803,430 @@
 }
 
 /* ==============================================================
+   MODAL SOLICITAÇÃO DE CREDENCIAL
+   ============================================================== */
+
+.cred-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.35s ease;
+}
+
+.cred-overlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.cred-modal {
+    background: #fff;
+    border-radius: 18px;
+    width: 100%;
+    max-width: 540px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+    transform: translateY(30px) scale(0.95);
+    transition: transform 0.35s ease;
+    position: relative;
+}
+
+.cred-overlay.open .cred-modal {
+    transform: translateY(0) scale(1);
+}
+
+.cred-close {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: #fff;
+    font-size: 1.6rem;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 2;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cred-close:hover {
+    background: rgba(255, 255, 255, 0.35);
+}
+
+/* Header variants */
+.cred-header {
+    background: linear-gradient(135deg, #1a3a5c 0%, #2d5a87 50%, #c8a951 100%);
+    padding: 28px 28px 22px;
+    border-radius: 18px 18px 0 0;
+    text-align: center;
+    color: #fff;
+}
+
+.cred-header-success {
+    background: linear-gradient(135deg, #047857 0%, #059669 50%, #10b981 100%);
+}
+
+.cred-header-warning {
+    background: linear-gradient(135deg, #92400e 0%, #b45309 50%, #d97706 100%);
+}
+
+.cred-header-error {
+    background: linear-gradient(135deg, #991b1b 0%, #dc2626 50%, #ef4444 100%);
+}
+
+.cred-header-icon {
+    width: 56px;
+    height: 56px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin: 0 auto 12px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.cred-header h2 {
+    margin: 0 0 6px;
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+.cred-header p {
+    margin: 0;
+    font-size: 0.85rem;
+    opacity: 0.85;
+}
+
+/* Body */
+.cred-body {
+    padding: 24px;
+}
+
+.cred-center {
+    text-align: center;
+}
+
+/* Spinner */
+.cred-spinner {
+    font-size: 2.5rem;
+    color: #c8a951;
+    margin-bottom: 16px;
+}
+
+.cred-loading-text {
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+/* Info box */
+.cred-info-box {
+    display: flex;
+    gap: 14px;
+    padding: 14px 16px;
+    background: #f0f9ff;
+    border-radius: 10px;
+    border-left: 4px solid #1a3a5c;
+    margin-bottom: 18px;
+}
+
+.cred-info-icon {
+    font-size: 1.2rem;
+    color: #1a3a5c;
+    margin-top: 2px;
+}
+
+.cred-info-box strong {
+    display: block;
+    color: #1a3a5c;
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+}
+
+.cred-info-box p {
+    margin: 0;
+    font-size: 0.82rem;
+    color: #4b5563;
+    line-height: 1.5;
+}
+
+/* Benefits */
+.cred-benefits {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.cred-benefit {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: #f9fafb;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    transition: all 0.2s;
+}
+
+.cred-benefit:hover {
+    background: #f0f9ff;
+    border-color: #bfdbfe;
+}
+
+.cred-benefit i {
+    color: #c8a951;
+    font-size: 1rem;
+    width: 20px;
+    text-align: center;
+}
+
+.cred-benefit span {
+    font-size: 0.84rem;
+    color: #374151;
+    font-weight: 500;
+}
+
+/* Requisitos */
+.cred-requisitos {
+    background: #fffbeb;
+    border-radius: 10px;
+    border: 1px solid #fde68a;
+    padding: 14px 16px;
+    margin-bottom: 18px;
+}
+
+.cred-requisitos h4 {
+    margin: 0 0 10px;
+    font-size: 0.85rem;
+    color: #92400e;
+}
+
+.cred-requisitos h4 i {
+    margin-right: 6px;
+}
+
+.cred-requisitos ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.cred-requisitos li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    font-size: 0.82rem;
+    color: #4b5563;
+}
+
+.cred-requisitos li i {
+    font-size: 0.5rem;
+    width: 16px;
+    text-align: center;
+}
+
+.cred-requisitos li.req-ok i {
+    color: #059669;
+    font-size: 0.85rem;
+}
+
+.cred-requisitos li.req-ok {
+    color: #047857;
+}
+
+.cred-requisitos li.req-pending i {
+    color: #d97706;
+    font-size: 0.85rem;
+}
+
+.cred-requisitos li.req-pending {
+    color: #b45309;
+}
+
+/* Status card */
+.cred-status-card {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 4px 0;
+    margin-bottom: 20px;
+}
+
+.cred-status-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 18px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.cred-status-row:last-child {
+    border-bottom: none;
+}
+
+.cred-status-label {
+    font-size: 0.82rem;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cred-status-label i {
+    color: #c8a951;
+    width: 16px;
+    text-align: center;
+}
+
+.cred-status-value {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.cred-expired-date {
+    color: #dc2626 !important;
+}
+
+.cred-status-badge {
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+.cred-status-badge.ativa {
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+}
+
+.cred-status-badge.expirada {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.cred-status-badge.inativa {
+    background: #f3f4f6;
+    color: #6b7280;
+    border: 1px solid #d1d5db;
+}
+
+/* Success icon */
+.cred-success-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #c8a951, #d4af37);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2rem;
+    color: #fff;
+    margin: 0 auto 16px;
+    box-shadow: 0 8px 20px rgba(200, 169, 81, 0.3);
+}
+
+.cred-success-text {
+    color: #4b5563;
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+}
+
+.cred-error-text {
+    color: #6b7280;
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+}
+
+/* Actions */
+.cred-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    padding-top: 8px;
+}
+
+.cred-btn {
+    padding: 12px 22px;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    transition: all 0.2s;
+}
+
+.cred-btn-cancel {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.cred-btn-cancel:hover {
+    background: #e5e7eb;
+}
+
+.cred-btn-primary {
+    background: linear-gradient(135deg, #1a3a5c, #2d5a87);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(26, 58, 92, 0.3);
+}
+
+.cred-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(26, 58, 92, 0.4);
+}
+
+.cred-btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.cred-btn-warning {
+    background: linear-gradient(135deg, #b45309, #d97706);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(180, 83, 9, 0.3);
+}
+
+.cred-btn-warning:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(180, 83, 9, 0.4);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .cred-modal { max-width: 100%; border-radius: 14px; margin: 10px; }
+    .cred-header { padding: 22px 18px 18px; }
+    .cred-body { padding: 18px; }
+    .cred-actions { flex-direction: column; }
+    .cred-btn { justify-content: center; width: 100%; }
+    .cred-status-row { flex-direction: column; gap: 4px; align-items: flex-start; }
+}
+
+/* ==============================================================
    MODAL MATRÍCULA
    ============================================================== */
 

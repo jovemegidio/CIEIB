@@ -68,7 +68,7 @@
                     <button class="phb-btn phb-btn-save" onclick="salvarDados()"><i class="fas fa-save"></i> Salvar</button>
                     <button class="phb-btn phb-btn-refresh" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
                     <span class="phb-separator">|</span>
-                    <button class="phb-btn phb-btn-credencial"><i class="fas fa-id-badge"></i> Solicitação de Credencial</button>
+                    <button class="phb-btn phb-btn-credencial" id="btnSolicitarCredencial"><i class="fas fa-id-badge"></i> Solicitação de Credencial</button>
                 </div>
             </div>
         </div>
@@ -964,6 +964,164 @@
                     <small>Seus chamados aparecerão aqui após o envio.</small>
                 </div>
                 <div class="sup-tickets-list" id="supTicketsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL SOLICITAÇÃO DE CREDENCIAL ===== -->
+    <div class="cred-overlay" id="credOverlay">
+        <div class="cred-modal">
+            <button class="cred-close" id="credCloseBtn" aria-label="Fechar">&times;</button>
+
+            <!-- Step 1: Loading/Verificando -->
+            <div class="cred-step" id="credStepLoading">
+                <div class="cred-header">
+                    <div class="cred-header-icon"><i class="fas fa-id-badge"></i></div>
+                    <h2>Credencial Ministerial</h2>
+                    <p>Verificando sua situação...</p>
+                </div>
+                <div class="cred-body cred-center">
+                    <div class="cred-spinner"><i class="fas fa-spinner fa-spin"></i></div>
+                    <p class="cred-loading-text">Consultando dados da credencial...</p>
+                </div>
+            </div>
+
+            <!-- Step 2: Sem credencial (Solicitar) -->
+            <div class="cred-step" id="credStepSolicitar" style="display:none;">
+                <div class="cred-header">
+                    <div class="cred-header-icon"><i class="fas fa-id-badge"></i></div>
+                    <h2>Solicitar Credencial</h2>
+                    <p>Sua credencial ministerial digital oficial.</p>
+                </div>
+                <div class="cred-body">
+                    <div class="cred-info-box">
+                        <div class="cred-info-icon"><i class="fas fa-info-circle"></i></div>
+                        <div>
+                            <strong>Sobre a Credencial Digital CIEIB</strong>
+                            <p>A credencial ministerial digital é o documento oficial que comprova seu vínculo com a CIEIB, possibilitando:</p>
+                        </div>
+                    </div>
+                    <div class="cred-benefits">
+                        <div class="cred-benefit"><i class="fas fa-shield-alt"></i><span>Autenticação oficial junto à convenção</span></div>
+                        <div class="cred-benefit"><i class="fas fa-qrcode"></i><span>QR Code para verificação instantânea</span></div>
+                        <div class="cred-benefit"><i class="fas fa-globe"></i><span>Validação pública online em todo o Brasil</span></div>
+                        <div class="cred-benefit"><i class="fas fa-mobile-alt"></i><span>Acesso digital pelo celular a qualquer momento</span></div>
+                        <div class="cred-benefit"><i class="fas fa-calendar-check"></i><span>Validade de 1 ano com renovação simplificada</span></div>
+                    </div>
+                    <div class="cred-requisitos">
+                        <h4><i class="fas fa-clipboard-check"></i> Requisitos</h4>
+                        <ul>
+                            <li id="credReqCadastro"><i class="fas fa-circle"></i> Cadastro completo (dados pessoais)</li>
+                            <li id="credReqFoto"><i class="fas fa-circle"></i> Foto de perfil cadastrada</li>
+                            <li id="credReqAprovado"><i class="fas fa-circle"></i> Aprovação pela administração</li>
+                        </ul>
+                    </div>
+                    <div class="cred-actions">
+                        <button type="button" class="cred-btn cred-btn-cancel" id="credCancelBtn1">Cancelar</button>
+                        <button type="button" class="cred-btn cred-btn-primary" id="btnConfirmarSolicitar">
+                            <i class="fas fa-paper-plane"></i> Solicitar Credencial
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Credencial ativa -->
+            <div class="cred-step" id="credStepAtiva" style="display:none;">
+                <div class="cred-header cred-header-success">
+                    <div class="cred-header-icon"><i class="fas fa-check-circle"></i></div>
+                    <h2>Credencial Ativa</h2>
+                    <p>Sua credencial ministerial está em dia.</p>
+                </div>
+                <div class="cred-body">
+                    <div class="cred-status-card">
+                        <div class="cred-status-row">
+                            <span class="cred-status-label"><i class="fas fa-hashtag"></i> Código</span>
+                            <span class="cred-status-value" id="credInfoCodigo">---</span>
+                        </div>
+                        <div class="cred-status-row">
+                            <span class="cred-status-label"><i class="fas fa-user"></i> Titular</span>
+                            <span class="cred-status-value" id="credInfoNome">---</span>
+                        </div>
+                        <div class="cred-status-row">
+                            <span class="cred-status-label"><i class="fas fa-briefcase"></i> Cargo</span>
+                            <span class="cred-status-value" id="credInfoCargo">---</span>
+                        </div>
+                        <div class="cred-status-row">
+                            <span class="cred-status-label"><i class="fas fa-calendar-alt"></i> Validade</span>
+                            <span class="cred-status-value" id="credInfoValidade">---</span>
+                        </div>
+                        <div class="cred-status-row">
+                            <span class="cred-status-label"><i class="fas fa-signal"></i> Status</span>
+                            <span class="cred-status-badge" id="credInfoStatus">ATIVA</span>
+                        </div>
+                    </div>
+                    <div class="cred-actions">
+                        <button type="button" class="cred-btn cred-btn-cancel" id="credCancelBtn2">Fechar</button>
+                        <button type="button" class="cred-btn cred-btn-primary" id="btnVerCredencial">
+                            <i class="fas fa-eye"></i> Ver Credencial Completa
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Credencial expirada -->
+            <div class="cred-step" id="credStepExpirada" style="display:none;">
+                <div class="cred-header cred-header-warning">
+                    <div class="cred-header-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                    <h2>Credencial Expirada</h2>
+                    <p>Sua credencial precisa ser renovada.</p>
+                </div>
+                <div class="cred-body">
+                    <div class="cred-status-card">
+                        <div class="cred-status-row">
+                            <span class="cred-status-label"><i class="fas fa-hashtag"></i> Código</span>
+                            <span class="cred-status-value" id="credExpCodigo">---</span>
+                        </div>
+                        <div class="cred-status-row">
+                            <span class="cred-status-label"><i class="fas fa-calendar-times"></i> Expirou em</span>
+                            <span class="cred-status-value cred-expired-date" id="credExpValidade">---</span>
+                        </div>
+                    </div>
+                    <div class="cred-actions">
+                        <button type="button" class="cred-btn cred-btn-cancel" id="credCancelBtn3">Fechar</button>
+                        <button type="button" class="cred-btn cred-btn-warning" id="btnRenovarCred">
+                            <i class="fas fa-sync-alt"></i> Renovar Credencial
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5: Sucesso (após solicitar/renovar) -->
+            <div class="cred-step" id="credStepSucesso" style="display:none;">
+                <div class="cred-header cred-header-success">
+                    <div class="cred-header-icon"><i class="fas fa-check-circle"></i></div>
+                    <h2 id="credSucessoTitulo">Solicitação Enviada!</h2>
+                    <p id="credSucessoMsg">Sua credencial foi gerada com sucesso.</p>
+                </div>
+                <div class="cred-body cred-center">
+                    <div class="cred-success-icon"><i class="fas fa-id-badge"></i></div>
+                    <p class="cred-success-text" id="credSucessoDetalhe">Acesse a aba "Credencial" para visualizar e baixar.</p>
+                    <div class="cred-actions" style="justify-content:center;">
+                        <button type="button" class="cred-btn cred-btn-primary" id="btnIrCredencial">
+                            <i class="fas fa-arrow-right"></i> Ir para Credencial
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 6: Erro -->
+            <div class="cred-step" id="credStepErro" style="display:none;">
+                <div class="cred-header cred-header-error">
+                    <div class="cred-header-icon"><i class="fas fa-times-circle"></i></div>
+                    <h2>Ops! Algo deu errado</h2>
+                    <p>Não foi possível processar sua solicitação.</p>
+                </div>
+                <div class="cred-body cred-center">
+                    <p class="cred-error-text" id="credErroDetalhe">Tente novamente mais tarde ou entre em contato com o suporte.</p>
+                    <div class="cred-actions" style="justify-content:center;">
+                        <button type="button" class="cred-btn cred-btn-cancel" id="credCancelBtn4">Fechar</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

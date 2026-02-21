@@ -35,7 +35,7 @@ app.use('/api/', apiLimiter);
 
 // ---- Favicon redirect ----
 app.get('/favicon.ico', (req, res) => {
-    res.redirect(301, '/favicon.svg');
+    res.redirect(301, '/fav.jpg');
 });
 
 // ---- Servir arquivos estáticos (HTML, CSS, JS) ----

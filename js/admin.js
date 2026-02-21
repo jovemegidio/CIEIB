@@ -6,177 +6,12 @@
 const AdminAPI = {
     baseUrl: '/api/admin',
     token: () => localStorage.getItem('admin_token'),
-    isMock: () => localStorage.getItem('admin_token') === 'mock_token_dev',
     headers: () => ({
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${AdminAPI.token()}`
     }),
 
-    // Mock data for dev/visualization mode (dados de demonstração)
-    _mockData: {
-        '/dashboard': {
-            stats: { ministros: 128, eventos: 5, noticias: 24, cursos: 8, contatos_pendentes: 3, matriculas: 47 },
-            recentMinistros: [
-                { nome: 'Pr. João Carlos da Silva', cargo: 'Pastor Presidente', status: 'ATIVO' },
-                { nome: 'Pra. Maria Aparecida Souza', cargo: 'Missionária', status: 'ATIVO' },
-                { nome: 'Ev. Pedro Henrique Lima', cargo: 'Evangelista', status: 'PENDENTE' }
-            ],
-            recentContatos: [
-                { nome: 'Carlos Eduardo Oliveira', assunto: 'Filiação de Igreja', lida: false },
-                { nome: 'Ana Paula Santos', assunto: 'Credenciamento Ministerial', lida: true },
-                { nome: 'Roberto da Silva', assunto: 'Eventos e Convenções', lida: false }
-            ]
-        },
-        '/noticias': [
-            { id: 1, titulo: 'CIEIB Realiza 15ª Convenção Nacional em Brasília', categoria: 'Institucional', destaque: true, data_publicacao: '2025-07-01', resumo: 'O evento reunirá líderes de todo o Brasil para discutir os rumos da convenção e eleger a nova diretoria.', conteudo: 'A Convenção de Igrejas Evangélicas Independentes do Brasil realizará sua 15ª edição na capital federal, reunindo pastores, missionários e líderes eclesiásticos de todos os estados.', imagem_url: '' },
-            { id: 2, titulo: 'Programa de Capacitação Ministerial 2025 Abre Inscrições', categoria: 'Educação', destaque: false, data_publicacao: '2025-06-28', resumo: 'Nova turma do programa oferece cursos de teologia, liderança e aconselhamento bíblico com certificação.', conteudo: 'O programa de capacitação ministerial da CIEIB abre inscrições para o segundo semestre de 2025 com diversas modalidades de cursos.', imagem_url: '' },
-            { id: 3, titulo: 'Campanha Nacional de Missões Urbanas é Lançada', categoria: 'Missões', destaque: true, data_publicacao: '2025-06-25', resumo: 'A CIEIB convoca igrejas afiliadas para a maior ação missionária do ano nas capitais brasileiras.', conteudo: 'A campanha visa alcançar comunidades em situação de vulnerabilidade social nas principais capitais do Brasil.', imagem_url: '' },
-            { id: 4, titulo: 'Encontro Nacional de Jovens Reunirá 500 Participantes', categoria: 'Juventude', destaque: false, data_publicacao: '2025-06-20', resumo: 'O encontro acontecerá em agosto com palestras, oficinas e momentos de louvor e adoração.', conteudo: 'O Encontro Nacional de Jovens da CIEIB promete ser o maior já realizado, com palestrantes renomados e atividades para todas as idades.', imagem_url: '' },
-            { id: 5, titulo: 'Nova Sede Regional Inaugurada em Minas Gerais', categoria: 'Expansão', destaque: false, data_publicacao: '2025-06-15', resumo: 'A nova sede fortalece a presença da CIEIB na região sudeste do país.', conteudo: 'Foi inaugurada nesta semana a nova sede regional da CIEIB em Belo Horizonte, que atenderá igrejas de Minas Gerais e Espírito Santo.', imagem_url: '' }
-        ],
-        '/eventos': [
-            { id: 1, titulo: '15ª Convenção Nacional CIEIB', data_evento: '2025-09-15', data_termino: '2025-09-18', hora_inicio: '09:00', local: 'Centro de Convenções — Brasília/DF', status: 'ABERTO', valor: 250.00, descricao: 'Principal evento anual da convenção com assembleias, palestras e eleição da nova diretoria.' },
-            { id: 2, titulo: 'Seminário de Liderança Pastoral', data_evento: '2025-08-20', data_termino: '2025-08-21', hora_inicio: '14:00', local: 'Igreja Sede — São Paulo/SP', status: 'ABERTO', valor: 80.00, descricao: 'Capacitação intensiva para líderes e pastores com foco em gestão eclesiástica.' },
-            { id: 3, titulo: 'Retiro de Obreiros 2025', data_evento: '2025-07-25', data_termino: '2025-07-27', hora_inicio: '08:00', local: 'Sítio Betel — Campinas/SP', status: 'CONFIRMADO', valor: 180.00, descricao: 'Retiro espiritual para obreiros com momentos de oração, louvor e comunhão.' },
-            { id: 4, titulo: 'Congresso de Missões', data_evento: '2025-10-10', data_termino: '2025-10-12', hora_inicio: '19:00', local: 'Auditório Central — Belo Horizonte/MG', status: 'EM BREVE', valor: 0, descricao: 'Congresso missionário com palestrantes nacionais e internacionais. Entrada gratuita.' }
-        ],
-        '/cursos': [
-            { id: 1, titulo: 'Teologia Básica', categoria: 'Teologia', nivel: 'Básico', carga_horaria: 120, total_modulos: 12, total_matriculas: 35, certificado: true, imagem_url: '' },
-            { id: 2, titulo: 'Liderança Pastoral Avançada', categoria: 'Liderança', nivel: 'Avançado', carga_horaria: 80, total_modulos: 8, total_matriculas: 22, certificado: true, imagem_url: '' },
-            { id: 3, titulo: 'Aconselhamento Bíblico', categoria: 'Pastoral', nivel: 'Intermediário', carga_horaria: 60, total_modulos: 6, total_matriculas: 18, certificado: true, imagem_url: '' },
-            { id: 4, titulo: 'Missões Transculturais', categoria: 'Missões', nivel: 'Intermediário', carga_horaria: 40, total_modulos: 4, total_matriculas: 12, certificado: false, imagem_url: '' }
-        ],
-        '/conteudos': [
-            { id: 1, pagina: 'home', secao: 'hero', titulo: 'Bem-vindo à CIEIB', conteudo: 'Convenção de Igrejas Evangélicas Independentes do Brasil — Servindo ao Reino de Deus desde 1990.', imagem_url: '' },
-            { id: 2, pagina: 'quem-somos', secao: 'introducao', titulo: 'Nossa História', conteudo: 'Fundada em 1990, a CIEIB nasceu do desejo de unir igrejas evangélicas independentes em torno de uma missão comum de edificação e expansão do evangelho.', imagem_url: '' },
-            { id: 3, pagina: 'home', secao: 'sobre', titulo: 'Sobre a CIEIB', conteudo: 'Somos uma convenção que preza pela autonomia das igrejas locais, oferecendo suporte jurídico, educacional e ministerial aos nossos filiados.', imagem_url: '' },
-            { id: 4, pagina: 'contato', secao: 'info', titulo: 'Fale Conosco', conteudo: 'Entre em contato com nossa equipe para tirar dúvidas sobre filiação, credenciamento e eventos da convenção.', imagem_url: '' }
-        ],
-        '/ministros': {
-            ministros: [
-                { id: 1, nome: 'Pr. João Carlos da Silva', cpf: '123.456.789-00', cargo: 'PASTOR', registro: 'CIEIB-2020-001', status: 'ATIVO', email: 'joao@igreja.com', telefone: '(11) 99999-0001', anuidade_status: 'paga', credencial_status: 'ativa', foto_url: '', cidade: 'São Paulo', uf: 'SP', nome_igreja: 'Igreja Evangélica Betel' },
-                { id: 2, nome: 'Pra. Maria Aparecida Souza', cpf: '234.567.890-11', cargo: 'MISSIONÁRIO', registro: 'CIEIB-2019-015', status: 'ATIVO', email: 'maria@igreja.com', telefone: '(21) 98888-0002', anuidade_status: 'paga', credencial_status: 'ativa', foto_url: '', cidade: 'Rio de Janeiro', uf: 'RJ', nome_igreja: 'Igreja Evangélica Shalom' },
-                { id: 3, nome: 'Ev. Pedro Henrique Lima', cpf: '345.678.901-22', cargo: 'EVANGELISTA', registro: 'CIEIB-2021-032', status: 'ATIVO', email: 'pedro@email.com', telefone: '(31) 97777-0003', anuidade_status: 'pendente', credencial_status: 'pendente', foto_url: '', cidade: 'Belo Horizonte', uf: 'MG', nome_igreja: '' },
-                { id: 4, nome: 'Dc. Ana Paula Santos', cpf: '456.789.012-33', cargo: 'DIÁCONO', registro: 'CIEIB-2023-048', status: 'PENDENTE', email: 'ana@email.com', telefone: '', anuidade_status: 'pendente', credencial_status: 'pendente', foto_url: '', cidade: '', uf: '', nome_igreja: 'Igreja Restauração' },
-                { id: 5, nome: 'Pb. Roberto Oliveira', cpf: '567.890.123-44', cargo: 'PRESBÍTERO', registro: 'CIEIB-2022-027', status: 'ATIVO', email: 'roberto@email.com', telefone: '(41) 96666-0005', anuidade_status: 'vencida', credencial_status: 'vencida', foto_url: '', cidade: 'Curitiba', uf: 'PR', nome_igreja: 'Igreja Evangélica Central' }
-            ],
-            total: 5, page: 1, pages: 1
-        },
-        '/relatorios/stats-membros': {
-            total: 128, ativos: 95, inativos: 18, pendentes: 15,
-            anuidade_paga: 72, anuidade_pendente: 56,
-            credencial_ativa: 65, credencial_pendente: 63,
-            por_cargo: [
-                { cargo: 'PASTOR', total: 48 },
-                { cargo: 'EVANGELISTA', total: 25 },
-                { cargo: 'MISSIONÁRIO', total: 20 },
-                { cargo: 'PRESBÍTERO', total: 18 },
-                { cargo: 'DIÁCONO', total: 12 },
-                { cargo: 'COOPERADOR', total: 5 }
-            ]
-        },
-        '/diretoria': [
-            { id: 1, nome: 'Pr. Nome do Presidente', cargo: 'Presidente', tipo: 'diretoria', email: 'presidente@cieib.org.br', descricao: 'Líder da convenção e responsável pela condução dos trabalhos e representação institucional.', foto_url: '', ordem: 1 },
-            { id: 2, nome: 'Pr. Nome do Vice-Presidente', cargo: '1º Vice-Presidente', tipo: 'diretoria', email: 'vice@cieib.org.br', descricao: 'Auxiliar direto do presidente e responsável por substituí-lo em suas ausências.', foto_url: '', ordem: 2 },
-            { id: 3, nome: 'Pr. Nome do 2º Vice', cargo: '2º Vice-Presidente', tipo: 'diretoria', email: '', descricao: 'Membro da diretoria executiva com atribuições de apoio à presidência.', foto_url: '', ordem: 3 },
-            { id: 4, nome: 'Pr. Nome do Secretário', cargo: 'Secretário Geral', tipo: 'diretoria', email: 'secretaria@cieib.org.br', descricao: 'Responsável pela administração, documentação e comunicação oficial da convenção.', foto_url: '', ordem: 4 },
-            { id: 5, nome: 'Pr. Nome do 1º Secretário', cargo: '1º Secretário', tipo: 'diretoria', email: '', descricao: 'Auxiliar do Secretário Geral nas funções administrativas e burocráticas.', foto_url: '', ordem: 5 },
-            { id: 6, nome: 'Pr. Nome do Tesoureiro', cargo: 'Tesoureiro Geral', tipo: 'diretoria', email: 'tesouraria@cieib.org.br', descricao: 'Responsável pela gestão financeira e prestação de contas da convenção.', foto_url: '', ordem: 6 },
-            { id: 7, nome: 'Pr. Nome do Conselheiro', cargo: 'Presidente do Conselho', tipo: 'conselho_fiscal', email: '', descricao: 'Presidente do Conselho Fiscal da convenção.', foto_url: '', ordem: 1 },
-            { id: 8, nome: 'Pr. Nome do Conselheiro', cargo: 'Membro', tipo: 'conselho_fiscal', email: '', descricao: 'Membro do Conselho Fiscal.', foto_url: '', ordem: 2 },
-            { id: 9, nome: 'Pr. Nome do Conselheiro', cargo: 'Membro', tipo: 'conselho_fiscal', email: '', descricao: 'Membro do Conselho Fiscal.', foto_url: '', ordem: 3 }
-        ],
-        '/contatos': [
-            { id: 1, nome: 'Carlos Eduardo Oliveira', email: 'carlos@email.com', telefone: '(11) 99999-0001', assunto: 'Filiação de Igreja', mensagem: 'Gostaria de saber os requisitos para filiar nossa igreja à CIEIB. Somos uma igreja independente localizada em Guarulhos/SP com 150 membros.', lida: false, created_at: '2025-07-05T10:30:00' },
-            { id: 2, nome: 'Ana Paula Santos', email: 'ana.santos@email.com', telefone: '(21) 98888-0002', assunto: 'Credenciamento Ministerial', mensagem: 'Sou pastora há 8 anos e gostaria de informações sobre o processo de credenciamento junto à convenção.', lida: true, created_at: '2025-07-03T14:15:00' },
-            { id: 3, nome: 'Roberto da Silva', email: 'roberto.silva@email.com', telefone: '(31) 97777-0003', assunto: 'Eventos e Convenções', mensagem: 'Quando será a próxima convenção nacional? Gostaria de inscrever uma delegação de 20 pessoas da nossa igreja.', lida: false, created_at: '2025-07-01T09:00:00' }
-        ],
-        '/configuracoes': [
-            { chave: 'nome_site', valor: 'CIEIB — Convenção de Igrejas Evangélicas Independentes do Brasil', descricao: 'Nome do Site' },
-            { chave: 'meta_description', valor: 'CIEIB é uma convenção que reúne igrejas evangélicas independentes em todo o Brasil, promovendo unidade, comunhão e crescimento do Reino de Deus.', descricao: 'Meta Description (SEO)' },
-            { chave: 'site_telefone', valor: '(11) 3000-0000', descricao: 'Telefone principal' },
-            { chave: 'site_email', valor: 'contato@cieib.org.br', descricao: 'Email principal' },
-            { chave: 'site_email_atendimento', valor: 'atendimento@cieib.org.br', descricao: 'Email de atendimento' },
-            { chave: 'site_endereco', valor: 'Rua da Convenção, 123 — Centro, São Paulo/SP', descricao: 'Endereço' },
-            { chave: 'site_horario', valor: 'Seg a Sex — 9h às 18h', descricao: 'Horário de funcionamento' },
-            { chave: 'site_whatsapp', valor: '5511900000000', descricao: 'WhatsApp' },
-            { chave: 'site_whatsapp_display', valor: '(11) 90000-0000', descricao: 'WhatsApp para exibição' },
-            { chave: 'site_logo_url', valor: '', descricao: 'URL do Logo do Site' },
-            { chave: 'site_maps_embed', valor: '', descricao: 'Código Embed do Google Maps (iframe)' },
-            { chave: 'hero_badge', valor: 'Fundada com propósito e fé', descricao: 'Badge do hero na home' },
-            { chave: 'hero_titulo', valor: 'CONVENÇÃO DAS IGREJAS EVANGÉLICAS<br><span>INTERDENOMINACIONAL DO BRASIL</span>', descricao: 'Título do hero na home' },
-            { chave: 'hero_descricao', valor: 'Promovendo a unidade, comunhão e crescimento do Reino de Deus através da cooperação entre igrejas e ministros em todo o território nacional.', descricao: 'Descrição do hero na home' },
-            { chave: 'footer_sobre', valor: 'Convenção das Igrejas Evangélicas Interdenominacional do Brasil — promovendo a unidade e o crescimento do evangelho em todo o território nacional.', descricao: 'Texto sobre no footer' },
-            { chave: 'footer_copyright', valor: 'Copyright © CIEIB 2026. Todos os direitos reservados.', descricao: 'Copyright no rodapé' },
-            { chave: 'stat_igrejas', valor: '500', descricao: 'Contador: Igrejas afiliadas' },
-            { chave: 'stat_ministros', valor: '1200', descricao: 'Contador: Ministros credenciados' },
-            { chave: 'stat_estados', valor: '26', descricao: 'Contador: Estados alcançados' },
-            { chave: 'stat_convencoes', valor: '50', descricao: 'Contador: Convenções regionais' }
-        ],
-        '/redes-sociais': [
-            { id: 1, nome: 'Facebook', url: 'https://facebook.com/cieib', icone: 'fab fa-facebook-f', ordem: 1, ativa: true },
-            { id: 2, nome: 'Instagram', url: 'https://instagram.com/cieib', icone: 'fab fa-instagram', ordem: 2, ativa: true },
-            { id: 3, nome: 'YouTube', url: 'https://youtube.com/@cieib', icone: 'fab fa-youtube', ordem: 3, ativa: true },
-            { id: 4, nome: 'WhatsApp', url: 'https://wa.me/5511900000000', icone: 'fab fa-whatsapp', ordem: 4, ativa: true }
-        ],
-        '/midias': [
-            { id: 1, titulo: 'Logo CIEIB', tipo: 'imagem', url: '/uploads/logo-cieib.png', tamanho: 45056 },
-            { id: 2, titulo: 'Banner Convenção 2025', tipo: 'imagem', url: '/uploads/banner-convencao.jpg', tamanho: 256000 },
-            { id: 3, titulo: 'Regimento Interno PDF', tipo: 'documento', url: '/uploads/regimento-interno.pdf', tamanho: 1024000 }
-        ],
-        '/notificacoes-site': [
-            { id: 1, titulo: '15ª Convenção Nacional', mensagem: 'Inscrições abertas até 30 de agosto!', tipo: 'evento', link: '#eventos', ativa: true, data_inicio: '2026-01-01T00:00', data_fim: '2026-08-30T23:59' },
-            { id: 2, titulo: 'Novo Curso de Teologia Básica', mensagem: 'Matrículas abertas para o segundo semestre.', tipo: 'curso', link: '#cursos', ativa: true, data_inicio: '2026-02-01T00:00', data_fim: null },
-            { id: 3, titulo: 'Horário de Atendimento', mensagem: 'Secretaria funciona de segunda a sexta, das 9h às 18h.', tipo: 'info', link: '', ativa: false, data_inicio: '2026-01-01T00:00', data_fim: null }
-        ],
-    },
-
-    _getMockResponse(method, endpoint) {
-        if (method !== 'GET') return { success: true, message: 'Mock: operação simulada' };
-        const base = endpoint.split('?')[0];
-
-        // Handle /ministros/:id detail
-        if (/^\/ministros\/\d+$/.test(base)) {
-            const id = parseInt(base.split('/')[2]);
-            const mockMin = (this._mockData['/ministros']?.ministros || []).find(m => m.id === id);
-            return {
-                ...(mockMin || { id, nome: 'Membro Mock', cpf: '000.000.000-00', cargo: 'PASTOR', status: 'ATIVO' }),
-                nome_social: '', rg: '12.345.678-9', orgao_expedidor: 'SSP/SP', sexo: 'M',
-                data_nascimento: '1980-05-15', estado_civil: 'Casado(a)', nome_conjuge: 'Esposa Mock',
-                escolaridade: 'Superior Completo', funcao_ministerial: 'Pastor Titular',
-                tempo_ministerio: '15 anos', data_consagracao: '2010-03-20', data_registro: '2020-01-15',
-                whatsapp: '(11) 99999-0001',
-                endereco: { cep: '01001-000', endereco: 'Rua Exemplo', numero: '100', complemento: 'Apto 12', bairro: 'Centro', cidade: 'São Paulo', uf: 'SP' },
-                filhos: [{ nome: 'Filho 1', data_nascimento: '2005-08-10' }, { nome: 'Filho 2', data_nascimento: '2010-12-25' }],
-                documentos: null, convencoes: [],
-                boletos: [
-                    { id: 1, tipo: 'anuidade', referencia: '2025', ano: 2025, valor: 350.00, data_vencimento: '2025-03-31', status: 'pago', data_pagamento: '2025-03-15', valor_pago: 350.00, arquivo_boleto_url: '' },
-                    { id: 2, tipo: 'anuidade', referencia: '2024', ano: 2024, valor: 300.00, data_vencimento: '2024-03-31', status: 'pago', data_pagamento: '2024-02-28', valor_pago: 300.00, arquivo_boleto_url: '' },
-                ],
-                credenciais: [
-                    { id: 1, numero_credencial: 'CIEIB-2025-0001', tipo: 'ministro', data_emissao: '2025-01-15', data_validade: '2025-12-31', status: 'ativa', arquivo_frente_url: '', arquivo_verso_url: '', arquivo_pdf_url: '' }
-                ],
-                historico: [
-                    { acao: 'CADASTRO', descricao: 'Membro cadastrado no sistema', admin_nome: 'Sistema', created_at: '2020-01-15' },
-                    { acao: 'CREDENCIAL EMITIDA', descricao: 'Credencial CIEIB-2025-0001 emitida', admin_nome: 'Administrador', created_at: '2025-01-15' },
-                ],
-                contas: [], observacoes_admin: ''
-            };
-        }
-
-        // Handle /ministros/:id/boletos and /ministros/:id/credenciais
-        if (/^\/ministros\/\d+\/boletos$/.test(base)) return [];
-        if (/^\/ministros\/\d+\/credenciais$/.test(base)) return [];
-
-        return this._mockData[base] || [];
-    },
-
     async request(method, endpoint, body) {
-        // Mock mode — return fake data, no network calls
-        if (AdminAPI.isMock()) {
-            return AdminAPI._getMockResponse(method, endpoint);
-        }
-
         const opts = { method, headers: AdminAPI.headers() };
         if (body) opts.body = JSON.stringify(body);
         const res = await fetch(`${AdminAPI.baseUrl}${endpoint}`, opts);
@@ -1948,8 +1783,8 @@ async function loadConfiguracoes() {
                 iconClass: 'icon-site',
                 fields: [
                     { chave: 'nome_site', label: 'Nome do Site', type: 'text', full: true },
-                    { chave: 'site_logo_url', label: 'URL do Logo', type: 'text', placeholder: 'https://... ou /uploads/logo.png' },
-                    { chave: 'site_favicon_url', label: 'URL do Favicon', type: 'text', placeholder: 'https://... ou /favicon.svg' },
+                    { chave: 'site_logo_url', label: 'Logo do Site', type: 'upload', hint: 'Recomendado: 312×72px (Cabeçalho) / 154×64px (Rodapé)' },
+                    { chave: 'site_favicon_url', label: 'Favicon do Site', type: 'upload', hint: 'Recomendado: 64×64px (formato quadrado)' },
                 ]
             },
             {
@@ -1961,7 +1796,7 @@ async function loadConfiguracoes() {
                 fields: [
                     { chave: 'meta_description', label: 'Meta Description', type: 'textarea', full: true },
                     { chave: 'meta_keywords', label: 'Meta Keywords', type: 'text', full: true, placeholder: 'igreja, evangélica, convenção, CIEIB...' },
-                    { chave: 'meta_og_image', label: 'OG Image (compartilhamento social)', type: 'text', full: true, placeholder: 'URL da imagem para redes sociais' },
+                    { chave: 'meta_og_image', label: 'OG Image (compartilhamento social)', type: 'upload', hint: 'Recomendado: 1200×630px' },
                 ]
             },
             {
@@ -1990,7 +1825,7 @@ async function loadConfiguracoes() {
                     { chave: 'hero_badge', label: 'Badge / Subtítulo', type: 'text', full: true },
                     { chave: 'hero_titulo', label: 'Título Principal (aceita HTML)', type: 'textarea', full: true },
                     { chave: 'hero_descricao', label: 'Descrição', type: 'textarea', full: true },
-                    { chave: 'hero_bg_image', label: 'Imagem de Fundo do Hero', type: 'text', full: true, placeholder: 'URL da imagem de fundo' },
+                    { chave: 'hero_bg_image', label: 'Imagem de Fundo do Hero', type: 'upload', hint: 'Recomendado: 1920×1080px ou maior' },
                     { chave: 'hero_bg_overlay', label: 'Cor do Overlay', type: 'color', placeholder: 'rgba(15,36,64,0.85)' },
                 ]
             },
@@ -2073,6 +1908,30 @@ async function loadConfiguracoes() {
                         <div style="display:flex;align-items:center;gap:8px;">
                             <input type="text" class="config-input" data-chave="${f.chave}" value="${val.replace(/"/g, '&quot;')}" style="flex:1;"${ph}>
                             <input type="color" value="${val && val.startsWith('#') ? val : '#1a3a5c'}" onchange="this.previousElementSibling.value=this.value" style="width:42px;height:38px;border:1.5px solid #ddd;border-radius:8px;padding:2px;cursor:pointer;">
+                        </div>
+                    </div>`;
+                } else if (f.type === 'upload') {
+                    const hintHtml = f.hint ? `<small class="config-upload-hint" style="display:block;color:#888;font-size:12px;margin-top:4px;">${f.hint}</small>` : '';
+                    html += `<div class="admin-form-group full-width">
+                        <label>${desc} <span class="config-key">(${f.chave})</span></label>
+                        ${hintHtml}
+                        <input type="hidden" class="config-input" data-chave="${f.chave}" id="cfgUpload_${f.chave}" value="${val.replace(/"/g, '&quot;')}">
+                        <div class="admin-upload-box" id="cfgUpload_${f.chave}_box">
+                            <div class="admin-upload-preview" id="cfgUpload_${f.chave}_preview" style="${val ? '' : 'display:none;'}">
+                                <img id="cfgUpload_${f.chave}_img" src="${val || ''}" alt="Preview">
+                                <button type="button" class="admin-upload-remove" onclick="adminRemoveImage('cfgUpload_${f.chave}')" title="Remover"><i class="fas fa-times"></i></button>
+                            </div>
+                            <div class="admin-upload-area" id="cfgUpload_${f.chave}_area" style="${val ? 'display:none;' : ''}">
+                                <input type="file" id="cfgUpload_${f.chave}_file" accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml,image/x-icon" onchange="adminUploadFile('cfgUpload_${f.chave}')" style="display:none;">
+                                <div class="admin-upload-placeholder" onclick="document.getElementById('cfgUpload_${f.chave}_file').click()">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <span>Clique para enviar imagem do dispositivo</span>
+                                    <small>JPG, PNG, WebP, GIF, SVG ou ICO (máx. 5MB)</small>
+                                </div>
+                            </div>
+                            <div class="admin-upload-loading" id="cfgUpload_${f.chave}_loading" style="display:none;">
+                                <i class="fas fa-spinner fa-spin"></i> Enviando...
+                            </div>
                         </div>
                     </div>`;
                 } else {

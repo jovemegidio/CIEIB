@@ -7,67 +7,6 @@ const API = {
     baseUrl: '/api',
     token: localStorage.getItem('cieib_token'),
 
-    // ---- Fallback mock (quando backend indisponível / Live Server) ----
-    _offline: null,
-    _mockData: {
-        '/dashboard/stats': { igrejas: 156, ministros: 1243, estados: 22, convencoes: 8 },
-        '/dashboard/config': { nome_site: 'CIEIB', tema: 'default' },
-        '/dashboard/config-all': {
-            site_telefone: '(00) 0000-0000',
-            site_email: 'contato@cieib.org.br',
-            site_whatsapp: '5500000000000',
-            site_whatsapp_display: '(00) 00000-0000',
-            site_endereco: 'Rua Exemplo, 1000<br>Bairro Centro<br>CEP 00000-000<br>Cidade - UF',
-            site_horario: 'Seg a Sex: 09h às 17h',
-            site_email_atendimento: 'atendimento@cieib.org.br',
-            hero_badge: 'Fundada com propósito e fé',
-            hero_titulo: 'CONVENÇÃO DAS IGREJAS EVANGÉLICAS<br><span>INTERDENOMINACIONAL DO BRASIL</span>',
-            hero_descricao: 'Promovendo a unidade, comunhão e crescimento do Reino de Deus através da cooperação entre igrejas e ministros em todo o território nacional.',
-            footer_sobre: 'Convenção das Igrejas Evangélicas Interdenominacional do Brasil — promovendo a unidade e o crescimento do evangelho em todo o território nacional.',
-            footer_copyright: 'Copyright © CIEIB 2026. Todos os direitos reservados.',
-            stat_igrejas: '500', stat_ministros: '1200', stat_estados: '26', stat_convencoes: '50'
-        },
-        '/dashboard/redes-sociais': [
-            { nome: 'Facebook', url: 'https://facebook.com/cieib', icone: 'fab fa-facebook-f', ordem: 1 },
-            { nome: 'Instagram', url: 'https://instagram.com/cieib', icone: 'fab fa-instagram', ordem: 2 },
-            { nome: 'YouTube', url: 'https://youtube.com/cieib', icone: 'fab fa-youtube', ordem: 3 },
-            { nome: 'WhatsApp', url: 'https://wa.me/5500000000000', icone: 'fab fa-whatsapp', ordem: 4 }
-        ],
-        '/dashboard/eventos-proximos': [
-            { titulo: '15ª Convenção Nacional CIEIB', data_evento: '2025-09-15T09:00:00', local: 'Brasília - DF', tipo: 'Convenção', hora_inicio: '09:00', hora_fim: '18:00' },
-            { titulo: 'Seminário de Liderança Pastoral', data_evento: '2025-08-20T14:00:00', local: 'São Paulo - SP', tipo: 'Seminário', hora_inicio: '14:00', hora_fim: '21:00' },
-            { titulo: 'Retiro de Obreiros 2025', data_evento: '2025-07-25T08:00:00', local: 'Campinas - SP', tipo: 'Retiro', hora_inicio: '08:00', hora_fim: '17:00' }
-        ],
-        '/noticias': {
-            noticias: [
-                { id: 1, titulo: 'CIEIB Realiza 15ª Convenção Nacional em Brasília', resumo: 'Evento reunirá líderes de todo o Brasil para discutir os rumos da convenção.', imagem_url: '', data_publicacao: '2025-07-01', categoria: 'Institucional', destaque: true },
-                { id: 2, titulo: 'Programa de Capacitação Ministerial 2025', resumo: 'Nova turma oferece cursos de teologia e liderança com certificação.', imagem_url: '', data_publicacao: '2025-06-28', categoria: 'Educação', destaque: false },
-                { id: 3, titulo: 'Campanha Nacional de Missões Urbanas', resumo: 'Igrejas afiliadas participam da maior ação missionária do ano.', imagem_url: '', data_publicacao: '2025-06-25', categoria: 'Missões', destaque: false },
-                { id: 4, titulo: 'Encontro de Jovens Reunirá 500 Participantes', resumo: 'O encontro acontecerá em agosto com palestras e oficinas.', imagem_url: '', data_publicacao: '2025-06-20', categoria: 'Juventude', destaque: true }
-            ],
-            total: 4, page: 1, totalPages: 1
-        },
-        '/dashboard/diretoria': [
-            { id:1, nome:'Ap. Osni Egidio', cargo:'Presidente', tipo:'diretoria', descricao:'Apóstolo presidente da CIEIB, liderando a convenção desde sua fundação com visão missionária e compromisso com a formação ministerial.', foto_url:null, ordem:1, ativo:true },
-            { id:2, nome:'Pra. Alessandra Egidio', cargo:'Vice-Presidente', tipo:'diretoria', descricao:'Pastora e vice-presidente, responsável pela coordenação dos projetos sociais e pelo fortalecimento das igrejas filiadas.', foto_url:null, ordem:2, ativo:true },
-            { id:3, nome:'Pr. Jonathan Egidio', cargo:'1º Secretário', tipo:'diretoria', descricao:'Pastor e primeiro secretário da convenção, gerenciando a comunicação institucional e os registros oficiais.', foto_url:null, ordem:3, ativo:true },
-            { id:4, nome:'Miss. Rafael Egidio', cargo:'2º Secretário', tipo:'diretoria', descricao:'Missionário e segundo secretário, auxiliando nas atividades administrativas e na organização de eventos.', foto_url:null, ordem:4, ativo:true },
-            { id:5, nome:'Pr. Vitor Hugo', cargo:'1º Tesoureiro', tipo:'diretoria', descricao:'Pastor e primeiro tesoureiro, responsável pela gestão financeira e pela transparência das contas da convenção.', foto_url:null, ordem:5, ativo:true },
-            { id:6, nome:'Pr. Willian Egidio', cargo:'2º Tesoureiro', tipo:'diretoria', descricao:'Pastor e segundo tesoureiro, auxiliando na administração financeira e no planejamento orçamentário.', foto_url:null, ordem:6, ativo:true },
-            { id:7, nome:'Pr. Marcus Vinicius', cargo:'Membro', tipo:'conselho_fiscal', descricao:'', foto_url:null, ordem:1, ativo:true },
-            { id:8, nome:'Pr. Marcos Egidio', cargo:'Membro', tipo:'conselho_fiscal', descricao:'', foto_url:null, ordem:2, ativo:true },
-            { id:9, nome:'Pr. Lucas Egidio', cargo:'Membro', tipo:'conselho_fiscal', descricao:'', foto_url:null, ordem:3, ativo:true }
-        ],
-        '/notificacoes/site': [
-            { id: 1, titulo: '15ª Convenção Nacional', mensagem: 'Inscrições abertas até 30 de agosto!', tipo: 'evento', link: '#eventos', ativa: true, data_inicio: '2026-01-01T00:00' },
-            { id: 2, titulo: 'Novo Curso de Teologia', mensagem: 'Matrículas abertas para o segundo semestre.', tipo: 'curso', link: '#cursos', ativa: true, data_inicio: '2026-02-01T00:00' }
-        ],
-    },
-    _getMockResponse(endpoint) {
-        const base = endpoint.split('?')[0];
-        return this._mockData[base] !== undefined ? this._mockData[base] : null;
-    },
-
     // ---- Headers padrão ----
     headers(extra = {}) {
         const h = { 'Content-Type': 'application/json', ...extra };
@@ -75,31 +14,17 @@ const API = {
         return h;
     },
 
-    // ---- Fetch genérico (com fallback mock) ----
+    // ---- Fetch genérico ----
     async request(method, endpoint, body = null) {
-        if (this._offline === true) {
-            const mock = this._getMockResponse(endpoint);
-            if (mock !== null) return JSON.parse(JSON.stringify(mock));
-            throw new Error('Backend indisponível');
-        }
-
         const options = { method, headers: this.headers() };
         if (body) options.body = JSON.stringify(body);
 
-        try {
-            const res = await fetch(`${this.baseUrl}${endpoint}`, options);
-            const ct = res.headers.get('content-type') || '';
-            if (!ct.includes('application/json')) throw new Error('Resposta não-JSON');
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || 'Erro na requisição');
-            this._offline = false;
-            return data;
-        } catch (err) {
-            this._offline = true;
-            const mock = this._getMockResponse(endpoint);
-            if (mock !== null) return JSON.parse(JSON.stringify(mock));
-            throw err;
-        }
+        const res = await fetch(`${this.baseUrl}${endpoint}`, options);
+        const ct = res.headers.get('content-type') || '';
+        if (!ct.includes('application/json')) throw new Error('Resposta não-JSON');
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Erro na requisição');
+        return data;
     },
 
     // ---- Upload de arquivo ----
@@ -125,17 +50,6 @@ const API = {
 
     // =============== AUTH ===============
     async login(cpf, senha) {
-        // Mock login — CPF: 000.000.000-00 / Senha: 123456
-        if (cpf.replace(/\D/g, '') === '00000000000' && senha === '123456') {
-            const mock = { token: 'mock_token_ministro', ministro: { nome: 'Pr. João Silva (Demo)', cpf: '00000000000' } };
-            this.token = mock.token;
-            localStorage.setItem('cieib_token', mock.token);
-            localStorage.setItem('cieib_usuario', mock.ministro.nome);
-            localStorage.setItem('cieib_cpf', mock.ministro.cpf);
-            localStorage.setItem('cieib_logado', 'true');
-            return mock;
-        }
-
         const data = await this.post('/auth/login', { cpf, senha });
         this.token = data.token;
         localStorage.setItem('cieib_token', data.token);
@@ -161,7 +75,6 @@ const API = {
     async verifyToken() {
         try {
             if (!this.token) return false;
-            if (this.token === 'mock_token_ministro') return true;
             await this.get('/auth/verify');
             return true;
         } catch {

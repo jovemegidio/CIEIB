@@ -558,8 +558,15 @@ async function loadSiteConfig() {
 
         // Atualizar hero (index.html)
         if (config.hero_titulo) {
+            let titulo = config.hero_titulo;
+            // Auto-wrap: se tem <br> mas não tem <span>, destaca a segunda linha
+            if (titulo.includes('<br>') && !titulo.includes('<span>')) {
+                const parts = titulo.split(/<br\s*\/?>/i);
+                const first = parts.shift();
+                titulo = first + '<br><span>' + parts.join('<br>') + '</span>';
+            }
             const heroTitulo = document.getElementById('heroTitulo');
-            if (heroTitulo) heroTitulo.innerHTML = config.hero_titulo;
+            if (heroTitulo) heroTitulo.innerHTML = titulo;
         }
 
     } catch (err) {

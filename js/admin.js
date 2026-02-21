@@ -1823,7 +1823,7 @@ async function loadConfiguracoes() {
                 iconClass: 'icon-hero',
                 fields: [
                     { chave: 'hero_badge', label: 'Badge / Subtítulo', type: 'text', full: true },
-                    { chave: 'hero_titulo', label: 'Título Principal (aceita HTML)', type: 'textarea', full: true },
+                    { chave: 'hero_titulo', label: 'Título Principal', type: 'textarea', full: true, placeholder: 'Linha 1\nLinha 2 (será destacada automaticamente)' },
                     { chave: 'hero_descricao', label: 'Descrição', type: 'textarea', full: true },
                     { chave: 'hero_bg_image', label: 'Imagem de Fundo do Hero', type: 'upload', hint: 'Recomendado: 1920×1080px ou maior' },
                     { chave: 'hero_bg_overlay', label: 'Cor do Overlay', type: 'color', placeholder: 'rgba(15,36,64,0.85)' },
@@ -1898,9 +1898,11 @@ async function loadConfiguracoes() {
                 const ph = f.placeholder ? ` placeholder="${f.placeholder}"` : '';
 
                 if (f.type === 'textarea') {
+                    // Converter HTML para texto legível no admin
+                    let displayVal = val.replace(/<br\s*\/?>/gi, '\n').replace(/<\/?span[^>]*>/gi, '');
                     html += `<div class="admin-form-group${fullClass}">
                         <label>${desc} <span class="config-key">(${f.chave})</span></label>
-                        <textarea class="config-input" data-chave="${f.chave}" rows="3"${ph}>${val}</textarea>
+                        <textarea class="config-input" data-chave="${f.chave}" rows="3"${ph}>${displayVal}</textarea>
                     </div>`;
                 } else if (f.type === 'color') {
                     html += `<div class="admin-form-group${fullClass}">
@@ -1970,7 +1972,24 @@ async function loadConfiguracoes() {
 
 async function saveConfiguracoes() {
     const inputs = document.querySelectorAll('.config-input');
-    const configs = Array.from(inputs).map(i => ({ chave: i.dataset.chave, valor: i.value }));
+    const configs = Array.from(inputs).map(i => {
+        let valor = i.value;
+        // Textarea: converter quebras de linha reais em <br>
+        if (i.tagName === 'TEXTAREA') {
+            valor = valor.replace(/\n/g, '<br>');
+        }
+        // hero_titulo: segunda linha automaticamente envolta em <span> para destaque
+        if (i.dataset.chave === 'hero_titulo' && valor.includes('<br>')) {
+            const parts = valor.split('<br>');
+            const first = parts.shift();
+            const rest = parts.join('<br>');
+            // Só envolve se ainda não tem <span>
+            if (!rest.includes('<span>')) {
+                valor = first + '<br><span>' + rest + '</span>';
+            }
+        }
+        return { chave: i.dataset.chave, valor };
+    });
     try {
         await AdminAPI.put('/configuracoes', { configs });
         showToast('Configurações salvas! As alterações já refletem no site.', 'success');

@@ -453,11 +453,79 @@ async function loadSiteConfig() {
             }
         }
 
+        // Atualizar meta keywords
+        if (config.meta_keywords) {
+            let metaKw = document.querySelector('meta[name="keywords"]');
+            if (!metaKw) { metaKw = document.createElement('meta'); metaKw.name = 'keywords'; document.head.appendChild(metaKw); }
+            metaKw.setAttribute('content', config.meta_keywords);
+        }
+
+        // Atualizar OG Image
+        if (config.meta_og_image) {
+            let ogImg = document.querySelector('meta[property="og:image"]');
+            if (!ogImg) { ogImg = document.createElement('meta'); ogImg.setAttribute('property', 'og:image'); document.head.appendChild(ogImg); }
+            ogImg.setAttribute('content', config.meta_og_image);
+        }
+
+        // Atualizar favicon
+        if (config.site_favicon_url) {
+            let link = document.querySelector('link[rel="icon"]') || document.querySelector('link[rel="shortcut icon"]');
+            if (link) {
+                link.href = config.site_favicon_url;
+            } else {
+                link = document.createElement('link');
+                link.rel = 'icon';
+                link.href = config.site_favicon_url;
+                document.head.appendChild(link);
+            }
+        }
+
         // Atualizar logo do site (se definido)
         if (config.site_logo_url) {
             document.querySelectorAll('.logo img, .footer-logo img').forEach(img => {
                 if (config.site_logo_url) img.src = config.site_logo_url;
             });
+        }
+
+        // Aplicar cores do header dinamicamente
+        const dynStyles = [];
+        if (config.header_bg_color) dynStyles.push(`.main-nav { background: ${config.header_bg_color} !important; }`);
+        if (config.header_text_color) dynStyles.push(`.main-nav .nav-link, .main-nav .logo-text { color: ${config.header_text_color} !important; }`);
+        if (config.header_topbar_bg) dynStyles.push(`.top-bar { background: ${config.header_topbar_bg} !important; }`);
+        if (config.header_topbar_text) dynStyles.push(`.top-bar, .top-bar a, .top-bar .top-bar-info { color: ${config.header_topbar_text} !important; }`);
+        if (config.footer_bg_color) dynStyles.push(`footer, .site-footer { background: ${config.footer_bg_color} !important; }`);
+        if (config.footer_text_color) dynStyles.push(`footer, .site-footer, .site-footer a, .site-footer h4, .site-footer p { color: ${config.footer_text_color} !important; }`);
+        if (config.hero_bg_image) dynStyles.push(`.hero { background-image: url('${config.hero_bg_image}') !important; background-size: cover; background-position: center; }`);
+        if (config.hero_bg_overlay) dynStyles.push(`.hero::before { background: ${config.hero_bg_overlay} !important; }`);
+
+        if (dynStyles.length > 0) {
+            let styleEl = document.getElementById('dynamic-config-styles');
+            if (!styleEl) { styleEl = document.createElement('style'); styleEl.id = 'dynamic-config-styles'; document.head.appendChild(styleEl); }
+            styleEl.textContent = dynStyles.join('\n');
+        }
+
+        // Header CTA button
+        if (config.header_cta_text) {
+            document.querySelectorAll('.nav-cta, .header-cta').forEach(btn => {
+                const link = btn.closest('a') || btn;
+                link.textContent = config.header_cta_text;
+                if (config.header_cta_url) link.href = config.header_cta_url;
+            });
+        }
+
+        // Header topbar info
+        if (config.header_topbar_info) {
+            const tbInfo = document.querySelector('.top-bar-info');
+            if (tbInfo) tbInfo.innerHTML = config.header_topbar_info;
+        }
+
+        // Footer extra links
+        const footerExtra = document.getElementById('footerExtraLinks');
+        if (footerExtra) {
+            let linksHtml = '';
+            if (config.footer_link1_text && config.footer_link1_url) linksHtml += `<li><a href="${config.footer_link1_url}">${config.footer_link1_text}</a></li>`;
+            if (config.footer_link2_text && config.footer_link2_url) linksHtml += `<li><a href="${config.footer_link2_url}">${config.footer_link2_text}</a></li>`;
+            if (linksHtml) footerExtra.innerHTML = linksHtml;
         }
 
         // Atualizar embed do Google Maps (contato.html)

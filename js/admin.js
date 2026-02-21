@@ -1935,50 +1935,174 @@ async function loadConfiguracoes() {
     try {
         const configs = await AdminAPI.get('/configuracoes');
         const el = document.getElementById('configForm');
-
-        // Agrupar configurações por categoria
-        const grupos = {
-            'Informações do Site': ['nome_site', 'meta_description', 'site_logo_url'],
-            'Contato': ['site_telefone', 'site_email', 'site_email_atendimento', 'site_whatsapp', 'site_whatsapp_display', 'site_endereco', 'site_horario', 'site_maps_embed'],
-            'Hero (Página Inicial)': ['hero_badge', 'hero_titulo', 'hero_descricao'],
-            'Rodapé': ['footer_sobre', 'footer_copyright'],
-            'Estatísticas': ['stat_igrejas', 'stat_ministros', 'stat_estados', 'stat_convencoes']
-        };
-
         const configMap = {};
         configs.forEach(c => { configMap[c.chave] = c; });
+
+        // Definição completa de seções
+        const sections = [
+            {
+                id: 'site-info',
+                title: 'Identidade do Site',
+                subtitle: 'Nome, logo, favicon e informações gerais',
+                icon: 'fas fa-globe',
+                iconClass: 'icon-site',
+                fields: [
+                    { chave: 'nome_site', label: 'Nome do Site', type: 'text', full: true },
+                    { chave: 'site_logo_url', label: 'URL do Logo', type: 'text', placeholder: 'https://... ou /uploads/logo.png' },
+                    { chave: 'site_favicon_url', label: 'URL do Favicon', type: 'text', placeholder: 'https://... ou /favicon.svg' },
+                ]
+            },
+            {
+                id: 'seo',
+                title: 'SEO e Metadados',
+                subtitle: 'Otimização para motores de busca',
+                icon: 'fas fa-search',
+                iconClass: 'icon-seo',
+                fields: [
+                    { chave: 'meta_description', label: 'Meta Description', type: 'textarea', full: true },
+                    { chave: 'meta_keywords', label: 'Meta Keywords', type: 'text', full: true, placeholder: 'igreja, evangélica, convenção, CIEIB...' },
+                    { chave: 'meta_og_image', label: 'OG Image (compartilhamento social)', type: 'text', full: true, placeholder: 'URL da imagem para redes sociais' },
+                ]
+            },
+            {
+                id: 'header',
+                title: 'Cabeçalho (Header)',
+                subtitle: 'Personalização completa do topo do site',
+                icon: 'fas fa-heading',
+                iconClass: 'icon-header',
+                fields: [
+                    { chave: 'header_bg_color', label: 'Cor de Fundo do Header', type: 'color', placeholder: '#1a3a5c' },
+                    { chave: 'header_text_color', label: 'Cor do Texto do Header', type: 'color', placeholder: '#ffffff' },
+                    { chave: 'header_topbar_bg', label: 'Cor da Top Bar', type: 'color', placeholder: '#0f2440' },
+                    { chave: 'header_topbar_text', label: 'Cor do Texto Top Bar', type: 'color', placeholder: '#c8a951' },
+                    { chave: 'header_topbar_info', label: 'Info da Top Bar (horário etc)', type: 'text', full: true, placeholder: 'Seg a Sex: 09h às 17h | Atendimento Online' },
+                    { chave: 'header_cta_text', label: 'Texto do Botão CTA', type: 'text', placeholder: 'Área do Ministro' },
+                    { chave: 'header_cta_url', label: 'URL do Botão CTA', type: 'text', placeholder: '/painel-ministro.html' },
+                ]
+            },
+            {
+                id: 'hero',
+                title: 'Hero (Página Inicial)',
+                subtitle: 'Banner principal da home page',
+                icon: 'fas fa-image',
+                iconClass: 'icon-hero',
+                fields: [
+                    { chave: 'hero_badge', label: 'Badge / Subtítulo', type: 'text', full: true },
+                    { chave: 'hero_titulo', label: 'Título Principal (aceita HTML)', type: 'textarea', full: true },
+                    { chave: 'hero_descricao', label: 'Descrição', type: 'textarea', full: true },
+                    { chave: 'hero_bg_image', label: 'Imagem de Fundo do Hero', type: 'text', full: true, placeholder: 'URL da imagem de fundo' },
+                    { chave: 'hero_bg_overlay', label: 'Cor do Overlay', type: 'color', placeholder: 'rgba(15,36,64,0.85)' },
+                ]
+            },
+            {
+                id: 'contact',
+                title: 'Informações de Contato',
+                subtitle: 'Telefone, email, endereço e mapa',
+                icon: 'fas fa-phone-alt',
+                iconClass: 'icon-contact',
+                fields: [
+                    { chave: 'site_telefone', label: 'Telefone Principal', type: 'text' },
+                    { chave: 'site_email', label: 'Email Principal', type: 'text' },
+                    { chave: 'site_email_atendimento', label: 'Email de Atendimento', type: 'text' },
+                    { chave: 'site_whatsapp', label: 'WhatsApp (com DDI)', type: 'text', placeholder: '5511999999999' },
+                    { chave: 'site_whatsapp_display', label: 'WhatsApp para Exibição', type: 'text', placeholder: '(11) 99999-9999' },
+                    { chave: 'site_endereco', label: 'Endereço Completo (aceita HTML)', type: 'textarea', full: true },
+                    { chave: 'site_horario', label: 'Horário de Funcionamento', type: 'text', full: true },
+                    { chave: 'site_maps_embed', label: 'Embed do Google Maps (iframe)', type: 'textarea', full: true },
+                ]
+            },
+            {
+                id: 'footer',
+                title: 'Rodapé (Footer)',
+                subtitle: 'Personalização completa do rodapé',
+                icon: 'fas fa-grip-lines',
+                iconClass: 'icon-footer',
+                fields: [
+                    { chave: 'footer_sobre', label: 'Texto "Sobre" no Rodapé', type: 'textarea', full: true },
+                    { chave: 'footer_copyright', label: 'Texto de Copyright', type: 'text', full: true },
+                    { chave: 'footer_bg_color', label: 'Cor de Fundo do Rodapé', type: 'color', placeholder: '#0f2440' },
+                    { chave: 'footer_text_color', label: 'Cor do Texto do Rodapé', type: 'color', placeholder: '#c8a951' },
+                    { chave: 'footer_link1_text', label: 'Link Extra 1 — Texto', type: 'text' },
+                    { chave: 'footer_link1_url', label: 'Link Extra 1 — URL', type: 'text' },
+                    { chave: 'footer_link2_text', label: 'Link Extra 2 — Texto', type: 'text' },
+                    { chave: 'footer_link2_url', label: 'Link Extra 2 — URL', type: 'text' },
+                ]
+            },
+            {
+                id: 'stats',
+                title: 'Estatísticas / Contadores',
+                subtitle: 'Números exibidos na home page',
+                icon: 'fas fa-chart-bar',
+                iconClass: 'icon-stats',
+                fields: [
+                    { chave: 'stat_igrejas', label: 'Igrejas Afiliadas', type: 'text' },
+                    { chave: 'stat_ministros', label: 'Ministros Credenciados', type: 'text' },
+                    { chave: 'stat_estados', label: 'Estados Alcançados', type: 'text' },
+                    { chave: 'stat_convencoes', label: 'Convenções Regionais', type: 'text' },
+                ]
+            },
+        ];
 
         let html = '';
         const rendered = new Set();
 
-        for (const [grupo, chaves] of Object.entries(grupos)) {
-            const items = chaves.filter(k => configMap[k]).map(k => configMap[k]);
-            if (items.length === 0) continue;
-            html += `<div style="margin-bottom:8px;margin-top:18px;"><strong style="color:var(--admin-primary);font-size:0.85rem;text-transform:uppercase;letter-spacing:0.5px;"><i class="fas fa-layer-group" style="margin-right:6px;color:var(--admin-secondary);"></i>${grupo}</strong></div>`;
-            html += items.map(c => {
-                rendered.add(c.chave);
-                const isTextarea = ['site_endereco', 'hero_descricao', 'footer_sobre', 'meta_description', 'hero_titulo', 'site_maps_embed'].includes(c.chave);
-                if (isTextarea) {
-                    return `<div class="admin-form-group">
-                        <label>${c.descricao || c.chave} <span style="font-size:0.65rem;color:#bbb;">(${c.chave})</span></label>
-                        <textarea class="config-input" data-chave="${c.chave}" rows="3" style="width:100%;padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:0.9rem;resize:vertical;">${c.valor || ''}</textarea>
+        for (const sec of sections) {
+            html += `<div class="config-section" id="configSec-${sec.id}">
+                <div class="config-section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+                    <div class="config-section-icon ${sec.iconClass}"><i class="${sec.icon}"></i></div>
+                    <h4>${sec.title}<small>${sec.subtitle}</small></h4>
+                    <span class="config-section-toggle"><i class="fas fa-chevron-down"></i></span>
+                </div>
+                <div class="config-section-body">`;
+
+            for (const f of sec.fields) {
+                rendered.add(f.chave);
+                const val = configMap[f.chave]?.valor || '';
+                const desc = configMap[f.chave]?.descricao || f.label;
+                const fullClass = f.full ? ' full-width' : '';
+                const ph = f.placeholder ? ` placeholder="${f.placeholder}"` : '';
+
+                if (f.type === 'textarea') {
+                    html += `<div class="admin-form-group${fullClass}">
+                        <label>${desc} <span class="config-key">(${f.chave})</span></label>
+                        <textarea class="config-input" data-chave="${f.chave}" rows="3"${ph}>${val}</textarea>
+                    </div>`;
+                } else if (f.type === 'color') {
+                    html += `<div class="admin-form-group${fullClass}">
+                        <label>${desc} <span class="config-key">(${f.chave})</span></label>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <input type="text" class="config-input" data-chave="${f.chave}" value="${val.replace(/"/g, '&quot;')}" style="flex:1;"${ph}>
+                            <input type="color" value="${val && val.startsWith('#') ? val : '#1a3a5c'}" onchange="this.previousElementSibling.value=this.value" style="width:42px;height:38px;border:1.5px solid #ddd;border-radius:8px;padding:2px;cursor:pointer;">
+                        </div>
+                    </div>`;
+                } else {
+                    html += `<div class="admin-form-group${fullClass}">
+                        <label>${desc} <span class="config-key">(${f.chave})</span></label>
+                        <input type="text" class="config-input" data-chave="${f.chave}" value="${val.replace(/"/g, '&quot;')}"${ph}>
                     </div>`;
                 }
-                return `<div class="admin-form-group">
-                    <label>${c.descricao || c.chave} <span style="font-size:0.65rem;color:#bbb;">(${c.chave})</span></label>
-                    <input type="text" class="config-input" data-chave="${c.chave}" value="${(c.valor || '').replace(/"/g, '&quot;')}">
-                </div>`;
-            }).join('');
+            }
+
+            html += '</div></div>';
         }
 
-        // Renderizar qualquer chave restante não agrupada
+        // Qualquer chave restante não agrupada
         const extras = configs.filter(c => !rendered.has(c.chave));
         if (extras.length > 0) {
-            html += `<div style="margin-bottom:8px;margin-top:18px;"><strong style="color:var(--admin-primary);font-size:0.85rem;text-transform:uppercase;letter-spacing:0.5px;"><i class="fas fa-cog" style="margin-right:6px;color:var(--admin-secondary);"></i>Outras Configurações</strong></div>`;
-            html += extras.map(c => `<div class="admin-form-group">
-                <label>${c.descricao || c.chave} <span style="font-size:0.65rem;color:#bbb;">(${c.chave})</span></label>
-                <input type="text" class="config-input" data-chave="${c.chave}" value="${(c.valor || '').replace(/"/g, '&quot;')}">
-            </div>`).join('');
+            html += `<div class="config-section">
+                <div class="config-section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+                    <div class="config-section-icon icon-site"><i class="fas fa-cog"></i></div>
+                    <h4>Outras Configurações<small>Chaves personalizadas</small></h4>
+                    <span class="config-section-toggle"><i class="fas fa-chevron-down"></i></span>
+                </div>
+                <div class="config-section-body">`;
+            for (const c of extras) {
+                html += `<div class="admin-form-group">
+                    <label>${c.descricao || c.chave} <span class="config-key">(${c.chave})</span></label>
+                    <input type="text" class="config-input" data-chave="${c.chave}" value="${(c.valor || '').replace(/"/g, '&quot;')}">
+                </div>`;
+            }
+            html += '</div></div>';
         }
 
         el.innerHTML = html;

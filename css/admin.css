@@ -739,6 +739,7 @@ body.admin-body {
 .badge-ativo { background: #e6f9ee; color: #0f9d58; }
 .badge-inativo { background: #fce8e8; color: #d93025; }
 .badge-aberto { background: #fff3e0; color: #e65100; }
+.badge-warning { background: #fef9e7; color: #b7950b; }
 .badge-destaque { background: rgba(200,169,81,0.15); color: var(--admin-secondary-dark); }
 
 /* ==== CMS FILTERS ==== */

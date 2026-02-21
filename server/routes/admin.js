@@ -149,17 +149,22 @@ router.delete('/noticias/:id', adminAuth, async (req, res) => {
 // ================================================================
 router.get('/eventos', adminAuth, async (req, res) => {
     try {
-        const r = await pool.query('SELECT * FROM eventos ORDER BY data_evento DESC');
+        const r = await pool.query(`
+            SELECT e.*,
+                (SELECT COUNT(*) FROM evento_inscricoes WHERE evento_id = e.id) as total_inscritos
+            FROM eventos e ORDER BY e.data_evento DESC
+        `);
         res.json(r.rows);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 router.post('/eventos', adminAuth, async (req, res) => {
     try {
-        const { titulo, descricao, local, data_evento, hora_inicio, data_termino, status, categoria, valor } = req.body;
+        const { titulo, descricao, local, data_evento, hora_inicio, hora_termino, data_termino, status, categoria, valor, convencao, imagem_url, max_inscritos } = req.body;
         const r = await pool.query(
-            'INSERT INTO eventos (titulo, descricao, local, data_evento, hora_inicio, data_termino, status, categoria, valor) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *',
-            [titulo, descricao, local, data_evento, hora_inicio, data_termino, status || 'Aberto', categoria, valor || 0]
+            `INSERT INTO eventos (titulo, descricao, local, data_evento, hora_inicio, hora_termino, data_termino, status, categoria, valor, convencao, imagem_url, max_inscritos)
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *`,
+            [titulo, descricao, local, data_evento || null, hora_inicio || null, hora_termino || null, data_termino || null, status || 'Aberto', categoria || null, valor || 0, convencao || 'CIEIB', imagem_url || null, max_inscritos || 0]
         );
         res.status(201).json(r.rows[0]);
     } catch (err) { res.status(500).json({ error: err.message }); }
@@ -167,10 +172,11 @@ router.post('/eventos', adminAuth, async (req, res) => {
 
 router.put('/eventos/:id', adminAuth, async (req, res) => {
     try {
-        const { titulo, descricao, local, data_evento, hora_inicio, data_termino, status, categoria, valor } = req.body;
+        const { titulo, descricao, local, data_evento, hora_inicio, hora_termino, data_termino, status, categoria, valor, convencao, imagem_url, max_inscritos } = req.body;
         const r = await pool.query(
-            `UPDATE eventos SET titulo=$1, descricao=$2, local=$3, data_evento=$4, hora_inicio=$5, data_termino=$6, status=$7, categoria=$8, valor=$9 WHERE id=$10 RETURNING *`,
-            [titulo, descricao, local, data_evento, hora_inicio, data_termino, status, categoria, valor, req.params.id]
+            `UPDATE eventos SET titulo=$1, descricao=$2, local=$3, data_evento=$4, hora_inicio=$5, hora_termino=$6, data_termino=$7,
+             status=$8, categoria=$9, valor=$10, convencao=$11, imagem_url=$12, max_inscritos=$13 WHERE id=$14 RETURNING *`,
+            [titulo, descricao, local, data_evento || null, hora_inicio || null, hora_termino || null, data_termino || null, status, categoria || null, valor, convencao || 'CIEIB', imagem_url || null, max_inscritos || 0, req.params.id]
         );
         res.json(r.rows[0]);
     } catch (err) { res.status(500).json({ error: err.message }); }

@@ -366,43 +366,104 @@ async function loadAdminEventos() {
 function renderEventosTable() {
     const el = document.getElementById('eventosTable');
     if (allEventos.length === 0) { el.innerHTML = '<p style="text-align:center;color:#aaa;padding:40px;">Nenhum evento cadastrado</p>'; return; }
-    el.innerHTML = `<table class="admin-table"><thead><tr><th>Título</th><th>Data</th><th>Local</th><th>Status</th><th>Valor</th><th>Ações</th></tr></thead><tbody>
-        ${allEventos.map(e => `<tr>
-            <td>${e.titulo}</td>
-            <td>${formatDate(e.data_evento)}</td>
+    el.innerHTML = `<table class="admin-table"><thead><tr><th>Título</th><th>Data</th><th>Categoria</th><th>Local</th><th>Inscritos</th><th>Status</th><th>Valor</th><th>Ações</th></tr></thead><tbody>
+        ${allEventos.map(e => {
+            const statusClass = e.status === 'Aberto' ? 'badge-ativo' : e.status === 'Em Andamento' ? 'badge-warning' : 'badge-inativo';
+            const inscritos = parseInt(e.total_inscritos || 0);
+            const maxInsc = parseInt(e.max_inscritos || 0);
+            const inscLabel = maxInsc > 0 ? `${inscritos}/${maxInsc}` : `${inscritos}`;
+            return `<tr>
+            <td><strong>${e.titulo}</strong>${e.convencao && e.convencao !== 'CIEIB' ? ` <small style="color:#888">(${e.convencao})</small>` : ''}</td>
+            <td>${formatDate(e.data_evento)}${e.data_termino ? ' — ' + formatDate(e.data_termino) : ''}</td>
+            <td>${e.categoria || '-'}</td>
             <td>${e.local || '-'}</td>
-            <td><span class="badge ${e.status === 'Aberto' ? 'badge-ativo' : 'badge-inativo'}">${e.status}</span></td>
+            <td><span class="badge ${maxInsc > 0 && inscritos >= maxInsc ? 'badge-inativo' : 'badge-ativo'}">${inscLabel}</span></td>
+            <td><span class="badge ${statusClass}">${e.status}</span></td>
             <td>R$ ${parseFloat(e.valor || 0).toFixed(2)}</td>
             <td class="actions-cell">
                 <button class="btn-table-action btn-table-edit" onclick="openEventoModal(${e.id})"><i class="fas fa-edit"></i></button>
                 <button class="btn-table-action btn-table-delete" onclick="deleteItem('eventos', ${e.id})"><i class="fas fa-trash"></i></button>
             </td>
-        </tr>`).join('')}
+        </tr>`;
+        }).join('')}
     </tbody></table>`;
 }
 
 function openEventoModal(id) {
     const item = id ? allEventos.find(e => e.id === id) : null;
+    const inscritos = parseInt(item?.total_inscritos || 0);
     document.getElementById('modalTitle').textContent = item ? 'Editar Evento' : 'Novo Evento';
     document.getElementById('modalBody').innerHTML = `
-        <div class="admin-form-group"><label>Título</label><input type="text" id="mEventoTitle" value="${item?.titulo || ''}"></div>
-        <div class="admin-form-group"><label>Descrição</label><textarea id="mEventoDesc">${item?.descricao || ''}</textarea></div>
+        ${item ? `<div style="display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:120px;background:#f0f4f8;border-radius:8px;padding:12px;text-align:center;">
+                <div style="font-size:22px;font-weight:700;color:var(--admin-primary)">${inscritos}</div>
+                <div style="font-size:11px;color:#888;margin-top:2px;">Inscritos</div>
+            </div>
+            <div style="flex:1;min-width:120px;background:#f0f4f8;border-radius:8px;padding:12px;text-align:center;">
+                <div style="font-size:22px;font-weight:700;color:var(--admin-secondary)">R$ ${parseFloat(item?.valor || 0).toFixed(2)}</div>
+                <div style="font-size:11px;color:#888;margin-top:2px;">Valor</div>
+            </div>
+            <div style="flex:1;min-width:120px;background:#f0f4f8;border-radius:8px;padding:12px;text-align:center;">
+                <div style="font-size:22px;font-weight:700;color:${item?.status === 'Aberto' ? '#27ae60' : item?.status === 'Em Andamento' ? '#f39c12' : '#e74c3c'}">${item?.status || '-'}</div>
+                <div style="font-size:11px;color:#888;margin-top:2px;">Status</div>
+            </div>
+            <div style="flex:1;min-width:120px;background:#f0f4f8;border-radius:8px;padding:12px;text-align:center;">
+                <div style="font-size:22px;font-weight:700;color:#555">${formatDate(item?.created_at)}</div>
+                <div style="font-size:11px;color:#888;margin-top:2px;">Criado em</div>
+            </div>
+        </div>` : ''}
+        <div class="admin-form-group"><label>Título *</label><input type="text" id="mEventoTitle" value="${item?.titulo || ''}" placeholder="Ex: 38ª Convenção Nacional CIEIB"></div>
+        <div class="admin-form-group"><label>Descrição</label><textarea id="mEventoDesc" rows="3" placeholder="Descrição detalhada do evento...">${item?.descricao || ''}</textarea></div>
+        <div class="form-grid">
+            <div class="admin-form-group"><label>Categoria</label>
+                <select id="mEventoCat">
+                    <option value="">— Selecione —</option>
+                    <option value="Convenção" ${item?.categoria === 'Convenção' ? 'selected' : ''}>Convenção</option>
+                    <option value="Congresso" ${item?.categoria === 'Congresso' ? 'selected' : ''}>Congresso</option>
+                    <option value="Seminário" ${item?.categoria === 'Seminário' ? 'selected' : ''}>Seminário</option>
+                    <option value="Conferência" ${item?.categoria === 'Conferência' ? 'selected' : ''}>Conferência</option>
+                    <option value="Retiro" ${item?.categoria === 'Retiro' ? 'selected' : ''}>Retiro</option>
+                    <option value="Encontro" ${item?.categoria === 'Encontro' ? 'selected' : ''}>Encontro</option>
+                    <option value="Culto Especial" ${item?.categoria === 'Culto Especial' ? 'selected' : ''}>Culto Especial</option>
+                    <option value="Workshop" ${item?.categoria === 'Workshop' ? 'selected' : ''}>Workshop</option>
+                    <option value="Outro" ${item?.categoria === 'Outro' ? 'selected' : ''}>Outro</option>
+                </select>
+            </div>
+            <div class="admin-form-group"><label>Convenção</label>
+                <select id="mEventoConv">
+                    <option value="CIEIB" ${(!item?.convencao || item?.convencao === 'CIEIB') ? 'selected' : ''}>CIEIB — Nacional</option>
+                    <option value="CIEIBN" ${item?.convencao === 'CIEIBN' ? 'selected' : ''}>CIEIBN — Norte</option>
+                    <option value="CIEIBNE" ${item?.convencao === 'CIEIBNE' ? 'selected' : ''}>CIEIBNE — Nordeste</option>
+                    <option value="CIEIBCO" ${item?.convencao === 'CIEIBCO' ? 'selected' : ''}>CIEIBCO — Centro-Oeste</option>
+                    <option value="CIEIBSE" ${item?.convencao === 'CIEIBSE' ? 'selected' : ''}>CIEIBSE — Sudeste</option>
+                    <option value="CIEIBS" ${item?.convencao === 'CIEIBS' ? 'selected' : ''}>CIEIBS — Sul</option>
+                </select>
+            </div>
+        </div>
         <div class="form-grid">
             <div class="admin-form-group"><label>Data Início</label><input type="date" id="mEventoData" value="${item?.data_evento?.split('T')[0] || ''}"></div>
             <div class="admin-form-group"><label>Data Término</label><input type="date" id="mEventoFim" value="${item?.data_termino?.split('T')[0] || ''}"></div>
-            <div class="admin-form-group"><label>Hora Início</label><input type="time" id="mEventoHora" value="${item?.hora_inicio || ''}"></div>
-            <div class="admin-form-group"><label>Valor (R$)</label><input type="number" id="mEventoValor" step="0.01" value="${item?.valor || '0'}"></div>
         </div>
         <div class="form-grid">
-            <div class="admin-form-group"><label>Local</label><input type="text" id="mEventoLocal" value="${item?.local || ''}"></div>
+            <div class="admin-form-group"><label>Hora Início</label><input type="time" id="mEventoHora" value="${item?.hora_inicio || ''}"></div>
+            <div class="admin-form-group"><label>Hora Término</label><input type="time" id="mEventoHoraFim" value="${item?.hora_termino || ''}"></div>
+        </div>
+        <div class="form-grid">
+            <div class="admin-form-group"><label>Local</label><input type="text" id="mEventoLocal" value="${item?.local || ''}" placeholder="Ex: Centro de Convenções, São Paulo - SP"></div>
+            <div class="admin-form-group"><label>Valor (R$)</label><input type="number" id="mEventoValor" step="0.01" min="0" value="${item?.valor || '0'}"></div>
+        </div>
+        <div class="form-grid">
+            <div class="admin-form-group"><label>Máx. Inscritos</label><input type="number" id="mEventoMax" min="0" value="${item?.max_inscritos || '0'}" placeholder="0 = ilimitado"></div>
             <div class="admin-form-group"><label>Status</label>
                 <select id="mEventoStatus">
                     <option value="Aberto" ${item?.status === 'Aberto' ? 'selected' : ''}>Aberto</option>
+                    <option value="Em Andamento" ${item?.status === 'Em Andamento' ? 'selected' : ''}>Em Andamento</option>
                     <option value="Encerrado" ${item?.status === 'Encerrado' ? 'selected' : ''}>Encerrado</option>
                     <option value="Cancelado" ${item?.status === 'Cancelado' ? 'selected' : ''}>Cancelado</option>
                 </select>
             </div>
         </div>
+        ${adminUploadField('mEventoImg', 'Imagem / Banner do Evento (800×400px)', item?.imagem_url)}
     `;
     document.getElementById('modalFooter').innerHTML = `
         <button class="btn-admin-secondary" onclick="closeModal()">Cancelar</button>
@@ -412,15 +473,22 @@ function openEventoModal(id) {
 }
 
 async function saveEvento(id) {
+    const titulo = document.getElementById('mEventoTitle').value.trim();
+    if (!titulo) { showToast('Título é obrigatório', 'error'); return; }
     const body = {
-        titulo: document.getElementById('mEventoTitle').value,
+        titulo,
         descricao: document.getElementById('mEventoDesc').value,
-        data_evento: document.getElementById('mEventoData').value,
-        data_termino: document.getElementById('mEventoFim').value,
-        hora_inicio: document.getElementById('mEventoHora').value,
+        categoria: document.getElementById('mEventoCat').value,
+        convencao: document.getElementById('mEventoConv').value,
+        data_evento: document.getElementById('mEventoData').value || null,
+        data_termino: document.getElementById('mEventoFim').value || null,
+        hora_inicio: document.getElementById('mEventoHora').value || null,
+        hora_termino: document.getElementById('mEventoHoraFim').value || null,
         valor: parseFloat(document.getElementById('mEventoValor').value) || 0,
         local: document.getElementById('mEventoLocal').value,
+        max_inscritos: parseInt(document.getElementById('mEventoMax').value) || 0,
         status: document.getElementById('mEventoStatus').value,
+        imagem_url: document.getElementById('mEventoImg')?.value || null,
     };
     try {
         if (id) await AdminAPI.put(`/eventos/${id}`, body);

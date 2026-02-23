@@ -715,3 +715,223 @@ async function loadSiteConfig() {
         // Falha silenciosa — conteúdo estático do HTML permanece como fallback
     }
 }
+
+// ================================================================
+//  WIDGET DE ACESSIBILIDADE
+// ================================================================
+function initAccessibilityWidget() {
+    // Não injetar no painel admin/ministro
+    const path = window.location.pathname;
+    if (path.includes('painel-admin') || path.includes('painel-ministro')) return;
+
+    // Estado salvo
+    const state = JSON.parse(localStorage.getItem('cieib_a11y') || '{}');
+    let zoomLevel = state.zoom || 100;
+
+    // ---- Criar FAB ----
+    const fab = document.createElement('button');
+    fab.className = 'a11y-fab';
+    fab.setAttribute('aria-label', 'Abrir painel de acessibilidade');
+    fab.setAttribute('title', 'Acessibilidade');
+    fab.innerHTML = '<i class="fas fa-universal-access"></i>';
+    document.body.appendChild(fab);
+
+    // ---- Criar painel ----
+    const panel = document.createElement('div');
+    panel.className = 'a11y-panel';
+    panel.setAttribute('role', 'dialog');
+    panel.setAttribute('aria-label', 'Opções de acessibilidade');
+    panel.innerHTML = `
+        <div class="a11y-panel-header">
+            <h3><i class="fas fa-universal-access"></i> Acessibilidade</h3>
+            <button class="a11y-panel-close" aria-label="Fechar painel"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="a11y-panel-body">
+            <div class="a11y-section">
+                <div class="a11y-section-title">Tamanho do Texto</div>
+                <div class="a11y-zoom-row">
+                    <button data-a11y-zoom="-" aria-label="Diminuir texto"><i class="fas fa-minus"></i></button>
+                    <span id="a11yZoomLabel">${zoomLevel}%</span>
+                    <button data-a11y-zoom="+" aria-label="Aumentar texto"><i class="fas fa-plus"></i></button>
+                </div>
+            </div>
+            <div class="a11y-section">
+                <div class="a11y-section-title">Visual</div>
+                <div class="a11y-btns">
+                    <button class="a11y-btn" data-a11y="high-contrast">
+                        <i class="fas fa-adjust"></i>Alto Contraste
+                    </button>
+                    <button class="a11y-btn" data-a11y="grayscale">
+                        <i class="fas fa-palette"></i>Tons de Cinza
+                    </button>
+                    <button class="a11y-btn" data-a11y="invert">
+                        <i class="fas fa-exchange-alt"></i>Inverter Cores
+                    </button>
+                    <button class="a11y-btn" data-a11y="underline-links">
+                        <i class="fas fa-underline"></i>Sublinhar Links
+                    </button>
+                </div>
+            </div>
+            <div class="a11y-section">
+                <div class="a11y-section-title">Navegação</div>
+                <div class="a11y-btns">
+                    <button class="a11y-btn" data-a11y="big-cursor">
+                        <i class="fas fa-mouse-pointer"></i>Cursor Grande
+                    </button>
+                    <button class="a11y-btn" data-a11y="stop-animations">
+                        <i class="fas fa-ban"></i>Parar Animações
+                    </button>
+                    <button class="a11y-btn" data-a11y="reading-guide">
+                        <i class="fas fa-grip-lines"></i>Guia de Leitura
+                    </button>
+                    <button class="a11y-btn" data-a11y="focus-mode">
+                        <i class="fas fa-eye"></i>Foco na Leitura
+                    </button>
+                </div>
+            </div>
+            <button class="a11y-reset" id="a11yReset">
+                <i class="fas fa-undo"></i> Restaurar Padrão
+            </button>
+        </div>
+    `;
+    document.body.appendChild(panel);
+
+    // ---- Guia de leitura (barra horizontal que segue o mouse) ----
+    let readingGuide = null;
+
+    function createReadingGuide() {
+        if (readingGuide) return;
+        readingGuide = document.createElement('div');
+        readingGuide.className = 'a11y-reading-guide';
+        document.body.appendChild(readingGuide);
+        document.addEventListener('mousemove', moveReadingGuide);
+    }
+    function removeReadingGuide() {
+        if (readingGuide) {
+            document.removeEventListener('mousemove', moveReadingGuide);
+            readingGuide.remove();
+            readingGuide = null;
+        }
+    }
+    function moveReadingGuide(e) {
+        if (readingGuide) readingGuide.style.top = (e.clientY - 6) + 'px';
+    }
+
+    // ---- Aplicar / remover opção ----
+    const toggles = ['high-contrast', 'grayscale', 'invert', 'underline-links', 'big-cursor', 'stop-animations', 'reading-guide', 'focus-mode'];
+
+    function applyOption(key, active) {
+        const cls = `a11y-${key}`;
+        if (key === 'reading-guide') {
+            active ? createReadingGuide() : removeReadingGuide();
+        } else if (key === 'focus-mode') {
+            // Focus mode: escurece tudo e destaca o hover
+            let overlay = document.getElementById('a11yFocusOverlay');
+            if (active && !overlay) {
+                overlay = document.createElement('style');
+                overlay.id = 'a11yFocusOverlay';
+                overlay.textContent = `
+                    body.a11y-focus-mode *:not(:hover):not(.a11y-panel):not(.a11y-panel *):not(.a11y-fab):not(script):not(style):not(meta):not(link):not(head):not(html):not(body) {
+                        opacity: 0.4 !important;
+                    }
+                    body.a11y-focus-mode *:hover {
+                        opacity: 1 !important;
+                    }
+                `;
+                document.head.appendChild(overlay);
+            } else if (!active && overlay) {
+                overlay.remove();
+            }
+        }
+        document.body.classList.toggle(cls, active);
+        // Update button state
+        const btn = panel.querySelector(`[data-a11y="${key}"]`);
+        if (btn) btn.classList.toggle('active', active);
+    }
+
+    function applyZoom(level) {
+        zoomLevel = Math.max(80, Math.min(150, level));
+        document.documentElement.style.fontSize = zoomLevel + '%';
+        const label = document.getElementById('a11yZoomLabel');
+        if (label) label.textContent = zoomLevel + '%';
+        saveState();
+    }
+
+    function saveState() {
+        const s = { zoom: zoomLevel };
+        toggles.forEach(k => { if (document.body.classList.contains(`a11y-${k}`)) s[k] = true; });
+        localStorage.setItem('cieib_a11y', JSON.stringify(s));
+    }
+
+    function resetAll() {
+        zoomLevel = 100;
+        document.documentElement.style.fontSize = '';
+        toggles.forEach(k => applyOption(k, false));
+        const label = document.getElementById('a11yZoomLabel');
+        if (label) label.textContent = '100%';
+        localStorage.removeItem('cieib_a11y');
+    }
+
+    // ---- Restaurar estado salvo ----
+    if (state.zoom && state.zoom !== 100) applyZoom(state.zoom);
+    toggles.forEach(k => { if (state[k]) applyOption(k, true); });
+
+    // ---- Event listeners ----
+    fab.addEventListener('click', () => {
+        const isOpen = panel.classList.toggle('open');
+        fab.classList.toggle('active', isOpen);
+        fab.setAttribute('aria-expanded', isOpen);
+    });
+
+    panel.querySelector('.a11y-panel-close').addEventListener('click', () => {
+        panel.classList.remove('open');
+        fab.classList.remove('active');
+        fab.setAttribute('aria-expanded', 'false');
+    });
+
+    // Toggle buttons
+    panel.querySelectorAll('[data-a11y]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const key = btn.dataset.a11y;
+            const nowActive = !btn.classList.contains('active');
+
+            // Visual filters are mutually exclusive
+            const visualGroup = ['high-contrast', 'grayscale', 'invert'];
+            if (visualGroup.includes(key) && nowActive) {
+                visualGroup.filter(k => k !== key).forEach(k => applyOption(k, false));
+            }
+
+            applyOption(key, nowActive);
+            saveState();
+        });
+    });
+
+    // Zoom buttons
+    panel.querySelectorAll('[data-a11y-zoom]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            applyZoom(zoomLevel + (btn.dataset.a11yZoom === '+' ? 10 : -10));
+        });
+    });
+
+    // Reset
+    document.getElementById('a11yReset').addEventListener('click', resetAll);
+
+    // Fechar ao clicar fora
+    document.addEventListener('click', (e) => {
+        if (!panel.contains(e.target) && !fab.contains(e.target) && panel.classList.contains('open')) {
+            panel.classList.remove('open');
+            fab.classList.remove('active');
+        }
+    });
+
+    // Fechar com Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && panel.classList.contains('open')) {
+            panel.classList.remove('open');
+            fab.classList.remove('active');
+        }
+    });
+}
+
+// Iniciar widget de acessibilidade
+initAccessibilityWidget();

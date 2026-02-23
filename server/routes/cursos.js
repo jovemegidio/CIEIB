@@ -26,43 +26,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-// GET /api/cursos/:id — Detalhes de um curso com módulos e aulas
-router.get('/:id', async (req, res) => {
-    try {
-        const curso = await pool.query('SELECT * FROM cursos WHERE id = $1 AND ativo = TRUE', [req.params.id]);
-        if (curso.rows.length === 0) {
-            return res.status(404).json({ error: 'Curso não encontrado' });
-        }
-
-        const modulos = await pool.query(
-            'SELECT * FROM curso_modulos WHERE curso_id = $1 ORDER BY ordem ASC',
-            [req.params.id]
-        );
-
-        // Buscar aulas de cada módulo
-        for (let mod of modulos.rows) {
-            const aulas = await pool.query(
-                'SELECT id, titulo, descricao, tipo, duracao_minutos, ordem FROM curso_aulas WHERE modulo_id = $1 ORDER BY ordem ASC',
-                [mod.id]
-            );
-            mod.aulas = aulas.rows;
-        }
-
-        const avaliacoes = await pool.query(
-            'SELECT id, titulo, descricao, nota_minima, tentativas_max FROM curso_avaliacoes WHERE curso_id = $1',
-            [req.params.id]
-        );
-
-        res.json({
-            ...curso.rows[0],
-            modulos: modulos.rows,
-            avaliacoes: avaliacoes.rows
-        });
-    } catch (err) {
-        console.error('Erro ao buscar curso:', err);
-        res.status(500).json({ error: 'Erro ao buscar curso' });
-    }
-});
+// ⚠ IMPORTANTE: Rotas específicas ANTES de /:id para evitar conflito de parâmetros
 
 // GET /api/cursos/minhas/matriculas — Matrículas do ministro logado
 router.get('/minhas/matriculas', auth, async (req, res) => {
@@ -82,86 +46,53 @@ router.get('/minhas/matriculas', auth, async (req, res) => {
     }
 });
 
-// POST /api/cursos/:id/matricular — Matricular no curso
-router.post('/:id/matricular', auth, async (req, res) => {
+// GET /api/cursos/meus/certificados — Certificados do ministro
+router.get('/meus/certificados', auth, async (req, res) => {
     try {
-        const cursoId = req.params.id;
-
-        // Verificar se curso existe
-        const curso = await pool.query('SELECT * FROM cursos WHERE id = $1 AND ativo = TRUE', [cursoId]);
-        if (curso.rows.length === 0) {
-            return res.status(404).json({ error: 'Curso não encontrado' });
-        }
-
-        // Verificar se já está matriculado
-        const existe = await pool.query(
-            'SELECT id FROM curso_matriculas WHERE curso_id = $1 AND ministro_id = $2',
-            [cursoId, req.userId]
-        );
-        if (existe.rows.length > 0) {
-            return res.status(400).json({ error: 'Você já está matriculado neste curso' });
-        }
-
         const result = await pool.query(`
-            INSERT INTO curso_matriculas (curso_id, ministro_id, status, progresso)
-            VALUES ($1, $2, 'ativo', 0) RETURNING *
-        `, [cursoId, req.userId]);
+            SELECT cc.*, c.titulo, c.area, c.carga_horaria, c.nivel
+            FROM curso_certificados cc
+            JOIN cursos c ON c.id = cc.curso_id
+            WHERE cc.ministro_id = $1
+            ORDER BY cc.data_emissao DESC
+        `, [req.userId]);
 
-        // Notificação
-        await pool.query(`
-            INSERT INTO notificacoes (ministro_id, titulo, mensagem, tipo, link)
-            VALUES ($1, $2, $3, 'success', $4)
-        `, [
-            req.userId,
-            'Matrícula realizada!',
-            `Você se matriculou no curso: ${curso.rows[0].titulo}`,
-            '/painel-ministro.html#cursos'
-        ]);
-
-        res.json({ message: 'Matrícula realizada com sucesso!', matricula: result.rows[0] });
+        res.json(result.rows);
     } catch (err) {
-        console.error('Erro na matrícula:', err);
-        res.status(500).json({ error: 'Erro ao realizar matrícula' });
+        console.error('Erro ao buscar certificados:', err);
+        res.status(500).json({ error: 'Erro ao buscar certificados' });
     }
 });
 
-// GET /api/cursos/:id/aulas — Aulas do curso (requer matrícula)
-router.get('/:id/aulas', auth, async (req, res) => {
+// GET /api/cursos/certificado/verificar/:codigo — Verificar certificado (público)
+router.get('/certificado/verificar/:codigo', async (req, res) => {
     try {
-        // Verificar matrícula
-        const matricula = await pool.query(
-            'SELECT id FROM curso_matriculas WHERE curso_id = $1 AND ministro_id = $2',
-            [req.params.id, req.userId]
-        );
-        if (matricula.rows.length === 0) {
-            return res.status(403).json({ error: 'Você não está matriculado neste curso' });
+        const result = await pool.query(`
+            SELECT cc.*, c.titulo as curso_titulo, c.carga_horaria, c.nivel,
+                   m.nome as ministro_nome, m.cpf
+            FROM curso_certificados cc
+            JOIN cursos c ON c.id = cc.curso_id
+            JOIN ministros m ON m.id = cc.ministro_id
+            WHERE cc.codigo_validacao = $1
+        `, [req.params.codigo]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Certificado não encontrado', valido: false });
         }
 
-        const matriculaId = matricula.rows[0].id;
-
-        const modulos = await pool.query(
-            'SELECT * FROM curso_modulos WHERE curso_id = $1 ORDER BY ordem ASC',
-            [req.params.id]
-        );
-
-        for (let mod of modulos.rows) {
-            const aulas = await pool.query(
-                `SELECT ca.*, 
-                    COALESCE(cp.concluida, FALSE) as concluida,
-                    cp.data_conclusao as data_conclusao_aula
-                 FROM curso_aulas ca
-                 LEFT JOIN curso_progresso cp ON cp.aula_id = ca.id AND cp.matricula_id = $1
-                 WHERE ca.modulo_id = $2
-                 ORDER BY ca.ordem ASC`,
-                [matriculaId, mod.id]
-            );
-            mod.aulas = aulas.rows;
-        }
-
-        res.json({ modulos: modulos.rows, matricula_id: matriculaId });
+        const cert = result.rows[0];
+        res.json({
+            valido: true,
+            curso: cert.curso_titulo,
+            carga_horaria: cert.carga_horaria,
+            nivel: cert.nivel,
+            ministro: cert.ministro_nome,
+            cpf: cert.cpf ? cert.cpf.substring(0, 3) + '.***.***-' + cert.cpf.substring(9) : '',
+            data_emissao: cert.data_emissao,
+            codigo: cert.codigo_validacao
+        });
     } catch (err) {
-        console.error('Erro ao buscar aulas:', err);
-        res.status(500).json({ error: 'Erro ao buscar aulas' });
+        res.status(500).json({ error: 'Erro ao verificar certificado' });
     }
 });
 
@@ -293,21 +224,125 @@ router.post('/avaliacoes/:id/responder', auth, async (req, res) => {
     }
 });
 
-// GET /api/cursos/meus/certificados — Certificados do ministro
-router.get('/meus/certificados', auth, async (req, res) => {
+// GET /api/cursos/:id — Detalhes de um curso com módulos e aulas
+// ⚠ Esta rota DEVE ficar DEPOIS das rotas específicas acima
+router.get('/:id', async (req, res) => {
     try {
-        const result = await pool.query(`
-            SELECT cc.*, c.titulo, c.area, c.carga_horaria, c.nivel
-            FROM curso_certificados cc
-            JOIN cursos c ON c.id = cc.curso_id
-            WHERE cc.ministro_id = $1
-            ORDER BY cc.data_emissao DESC
-        `, [req.userId]);
+        const curso = await pool.query('SELECT * FROM cursos WHERE id = $1 AND ativo = TRUE', [req.params.id]);
+        if (curso.rows.length === 0) {
+            return res.status(404).json({ error: 'Curso não encontrado' });
+        }
 
-        res.json(result.rows);
+        const modulos = await pool.query(
+            'SELECT * FROM curso_modulos WHERE curso_id = $1 ORDER BY ordem ASC',
+            [req.params.id]
+        );
+
+        // Buscar aulas de cada módulo
+        for (let mod of modulos.rows) {
+            const aulas = await pool.query(
+                'SELECT id, titulo, descricao, tipo, duracao_minutos, ordem FROM curso_aulas WHERE modulo_id = $1 ORDER BY ordem ASC',
+                [mod.id]
+            );
+            mod.aulas = aulas.rows;
+        }
+
+        const avaliacoes = await pool.query(
+            'SELECT id, titulo, descricao, nota_minima, tentativas_max FROM curso_avaliacoes WHERE curso_id = $1',
+            [req.params.id]
+        );
+
+        res.json({
+            ...curso.rows[0],
+            modulos: modulos.rows,
+            avaliacoes: avaliacoes.rows
+        });
     } catch (err) {
-        console.error('Erro ao buscar certificados:', err);
-        res.status(500).json({ error: 'Erro ao buscar certificados' });
+        console.error('Erro ao buscar curso:', err);
+        res.status(500).json({ error: 'Erro ao buscar curso' });
+    }
+});
+
+// POST /api/cursos/:id/matricular — Matricular no curso
+router.post('/:id/matricular', auth, async (req, res) => {
+    try {
+        const cursoId = req.params.id;
+
+        // Verificar se curso existe
+        const curso = await pool.query('SELECT * FROM cursos WHERE id = $1 AND ativo = TRUE', [cursoId]);
+        if (curso.rows.length === 0) {
+            return res.status(404).json({ error: 'Curso não encontrado' });
+        }
+
+        // Verificar se já está matriculado
+        const existe = await pool.query(
+            'SELECT id FROM curso_matriculas WHERE curso_id = $1 AND ministro_id = $2',
+            [cursoId, req.userId]
+        );
+        if (existe.rows.length > 0) {
+            return res.status(400).json({ error: 'Você já está matriculado neste curso' });
+        }
+
+        const result = await pool.query(`
+            INSERT INTO curso_matriculas (curso_id, ministro_id, status, progresso)
+            VALUES ($1, $2, 'ativo', 0) RETURNING *
+        `, [cursoId, req.userId]);
+
+        // Notificação
+        await pool.query(`
+            INSERT INTO notificacoes (ministro_id, titulo, mensagem, tipo, link)
+            VALUES ($1, $2, $3, 'success', $4)
+        `, [
+            req.userId,
+            'Matrícula realizada!',
+            `Você se matriculou no curso: ${curso.rows[0].titulo}`,
+            '/painel-ministro.html#cursos'
+        ]);
+
+        res.json({ message: 'Matrícula realizada com sucesso!', matricula: result.rows[0] });
+    } catch (err) {
+        console.error('Erro na matrícula:', err);
+        res.status(500).json({ error: 'Erro ao realizar matrícula' });
+    }
+});
+
+// GET /api/cursos/:id/aulas — Aulas do curso (requer matrícula)
+router.get('/:id/aulas', auth, async (req, res) => {
+    try {
+        // Verificar matrícula
+        const matricula = await pool.query(
+            'SELECT id FROM curso_matriculas WHERE curso_id = $1 AND ministro_id = $2',
+            [req.params.id, req.userId]
+        );
+        if (matricula.rows.length === 0) {
+            return res.status(403).json({ error: 'Você não está matriculado neste curso' });
+        }
+
+        const matriculaId = matricula.rows[0].id;
+
+        const modulos = await pool.query(
+            'SELECT * FROM curso_modulos WHERE curso_id = $1 ORDER BY ordem ASC',
+            [req.params.id]
+        );
+
+        for (let mod of modulos.rows) {
+            const aulas = await pool.query(
+                `SELECT ca.*, 
+                    COALESCE(cp.concluida, FALSE) as concluida,
+                    cp.data_conclusao as data_conclusao_aula
+                 FROM curso_aulas ca
+                 LEFT JOIN curso_progresso cp ON cp.aula_id = ca.id AND cp.matricula_id = $1
+                 WHERE ca.modulo_id = $2
+                 ORDER BY ca.ordem ASC`,
+                [matriculaId, mod.id]
+            );
+            mod.aulas = aulas.rows;
+        }
+
+        res.json({ modulos: modulos.rows, matricula_id: matriculaId });
+    } catch (err) {
+        console.error('Erro ao buscar aulas:', err);
+        res.status(500).json({ error: 'Erro ao buscar aulas' });
     }
 });
 
@@ -347,38 +382,6 @@ router.post('/:id/certificado', auth, async (req, res) => {
     } catch (err) {
         console.error('Erro ao emitir certificado:', err);
         res.status(500).json({ error: 'Erro ao emitir certificado' });
-    }
-});
-
-// GET /api/cursos/certificado/verificar/:codigo — Verificar certificado (público)
-router.get('/certificado/verificar/:codigo', async (req, res) => {
-    try {
-        const result = await pool.query(`
-            SELECT cc.*, c.titulo as curso_titulo, c.carga_horaria, c.nivel,
-                   m.nome as ministro_nome, m.cpf
-            FROM curso_certificados cc
-            JOIN cursos c ON c.id = cc.curso_id
-            JOIN ministros m ON m.id = cc.ministro_id
-            WHERE cc.codigo_validacao = $1
-        `, [req.params.codigo]);
-
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Certificado não encontrado', valido: false });
-        }
-
-        const cert = result.rows[0];
-        res.json({
-            valido: true,
-            curso: cert.curso_titulo,
-            carga_horaria: cert.carga_horaria,
-            nivel: cert.nivel,
-            ministro: cert.ministro_nome,
-            cpf: cert.cpf ? cert.cpf.substring(0, 3) + '.***.***-' + cert.cpf.substring(9) : '',
-            data_emissao: cert.data_emissao,
-            codigo: cert.codigo_validacao
-        });
-    } catch (err) {
-        res.status(500).json({ error: 'Erro ao verificar certificado' });
     }
 });
 

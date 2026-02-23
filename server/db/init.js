@@ -453,6 +453,9 @@ ALTER TABLE contas_receber ADD COLUMN IF NOT EXISTS comprovante_pix_url VARCHAR(
 -- Colunas extras em eventos
 ALTER TABLE eventos ADD COLUMN IF NOT EXISTS tipo VARCHAR(50);
 ALTER TABLE eventos ADD COLUMN IF NOT EXISTS hora_fim TIME;
+ALTER TABLE eventos ADD COLUMN IF NOT EXISTS hora_termino TIME;
+ALTER TABLE eventos ADD COLUMN IF NOT EXISTS imagem_url VARCHAR(500);
+ALTER TABLE eventos ADD COLUMN IF NOT EXISTS max_inscritos INTEGER DEFAULT 0;
 
 ALTER TABLE ministros ADD COLUMN IF NOT EXISTS telefone VARCHAR(20);
 ALTER TABLE ministros ADD COLUMN IF NOT EXISTS whatsapp VARCHAR(20);
@@ -530,6 +533,15 @@ ALTER TABLE ministro_documentos ADD COLUMN IF NOT EXISTS foto_3x4_url VARCHAR(50
 ALTER TABLE ministro_documentos ADD COLUMN IF NOT EXISTS certidao_casamento_url VARCHAR(500);
 ALTER TABLE ministro_documentos ADD COLUMN IF NOT EXISTS diploma_teologia_url VARCHAR(500);
 ALTER TABLE ministro_documentos ADD COLUMN IF NOT EXISTS carta_recomendacao_url VARCHAR(500);
+
+-- ===== ALERTAS DINÂMICOS DISPENSADOS (persistência) =====
+CREATE TABLE IF NOT EXISTS notificacoes_dismissed (
+    id SERIAL PRIMARY KEY,
+    ministro_id INTEGER REFERENCES ministros(id) ON DELETE CASCADE,
+    alerta_key VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    UNIQUE(ministro_id, alerta_key)
+);
 
 `;
 

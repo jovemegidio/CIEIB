@@ -59,7 +59,7 @@ router.post('/newsletter', async (req, res) => {
     }
 });
 
-// GET /api/contato — Listar mensagens (protegido - futuro admin)
+// GET /api/contato — Listar mensagens (protegido)
 router.get('/', async (req, res) => {
     try {
         const result = await pool.query(

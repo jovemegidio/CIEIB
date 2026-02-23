@@ -93,6 +93,18 @@ const API = {
         return this.upload('/ministros/foto', formData);
     },
 
+    // =============== ENDEREÇO ===============
+    getEndereco() { return this.get('/ministros/endereco'); },
+    updateEndereco(dados) { return this.put('/ministros/endereco', dados); },
+
+    // =============== FILHOS ===============
+    getFilhos() { return this.get('/ministros/filhos'); },
+    addFilho(dados) { return this.post('/ministros/filhos', dados); },
+    removeFilho(id) { return this.delete(`/ministros/filhos/${id}`); },
+
+    // =============== DOCUMENTOS ===============
+    getDocumentos() { return this.get('/ministros/documentos'); },
+
     // =============== CONVENÇÕES ===============
     getConvencoes() { return this.get('/convencoes'); },
 
@@ -191,7 +203,9 @@ const API = {
 
     // =============== NOTIFICAÇÕES ===============
     getNotificacoes() { return this.get('/notificacoes'); },
-    marcarNotificacaoLida(id) { return this.put(`/notificacoes/${id}/lida`); },
+    marcarNotificacaoLida(id, alertaKey) {
+        return this.put(`/notificacoes/${id}/lida`, alertaKey ? { alertaKey } : {});
+    },
     marcarTodasNotificacoesLidas() { return this.put('/notificacoes/ler-todas'); },
     getNotificacoesNaoLidas() { return this.get('/notificacoes/nao-lidas'); },
     getNotificacoesSite() { return this.get('/notificacoes/site'); }

@@ -166,4 +166,122 @@ router.post('/foto', auth, upload.single('foto'), async (req, res) => {
     }
 });
 
+// ================================================================
+// ENDEREÇO DO MINISTRO
+// ================================================================
+
+// GET /api/ministros/endereco — Endereço do ministro logado
+router.get('/endereco', auth, async (req, res) => {
+    try {
+        const result = await pool.query(
+            'SELECT * FROM ministro_endereco WHERE ministro_id = $1',
+            [req.userId]
+        );
+        res.json(result.rows[0] || null);
+    } catch (err) {
+        console.error('Erro ao buscar endereço:', err);
+        res.status(500).json({ error: 'Erro ao buscar endereço' });
+    }
+});
+
+// PUT /api/ministros/endereco — Criar ou atualizar endereço
+router.put('/endereco', auth, async (req, res) => {
+    try {
+        const { cep, endereco, numero, complemento, bairro, cidade, uf } = req.body;
+
+        const exists = await pool.query(
+            'SELECT id FROM ministro_endereco WHERE ministro_id = $1',
+            [req.userId]
+        );
+
+        if (exists.rows.length > 0) {
+            await pool.query(`
+                UPDATE ministro_endereco SET
+                    cep = COALESCE($1, cep), endereco = COALESCE($2, endereco),
+                    numero = COALESCE($3, numero), complemento = $4,
+                    bairro = COALESCE($5, bairro), cidade = COALESCE($6, cidade),
+                    uf = COALESCE($7, uf), updated_at = NOW()
+                WHERE ministro_id = $8
+            `, [cep, endereco, numero, complemento || null, bairro, cidade, uf, req.userId]);
+        } else {
+            await pool.query(`
+                INSERT INTO ministro_endereco (ministro_id, cep, endereco, numero, complemento, bairro, cidade, uf)
+                VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+            `, [req.userId, cep, endereco, numero, complemento || null, bairro, cidade, uf]);
+        }
+
+        res.json({ message: 'Endereço atualizado com sucesso' });
+    } catch (err) {
+        console.error('Erro ao atualizar endereço:', err);
+        res.status(500).json({ error: 'Erro ao atualizar endereço' });
+    }
+});
+
+// ================================================================
+// FILHOS DO MINISTRO
+// ================================================================
+
+// GET /api/ministros/filhos — Filhos do ministro logado
+router.get('/filhos', auth, async (req, res) => {
+    try {
+        const result = await pool.query(
+            'SELECT * FROM ministro_filhos WHERE ministro_id = $1 ORDER BY nome',
+            [req.userId]
+        );
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Erro ao buscar filhos:', err);
+        res.status(500).json({ error: 'Erro ao buscar filhos' });
+    }
+});
+
+// POST /api/ministros/filhos — Adicionar filho
+router.post('/filhos', auth, async (req, res) => {
+    try {
+        const { nome, data_nascimento } = req.body;
+        if (!nome) return res.status(400).json({ error: 'Nome é obrigatório' });
+
+        const result = await pool.query(
+            'INSERT INTO ministro_filhos (ministro_id, nome, data_nascimento) VALUES ($1,$2,$3) RETURNING *',
+            [req.userId, nome, data_nascimento || null]
+        );
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Erro ao adicionar filho:', err);
+        res.status(500).json({ error: 'Erro ao adicionar filho' });
+    }
+});
+
+// DELETE /api/ministros/filhos/:id — Remover filho
+router.delete('/filhos/:id', auth, async (req, res) => {
+    try {
+        await pool.query(
+            'DELETE FROM ministro_filhos WHERE id = $1 AND ministro_id = $2',
+            [req.params.id, req.userId]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Erro ao remover filho:', err);
+        res.status(500).json({ error: 'Erro ao remover filho' });
+    }
+});
+
+// ================================================================
+// DOCUMENTOS DO MINISTRO
+// ================================================================
+
+// GET /api/ministros/documentos — Documentos do ministro logado
+router.get('/documentos', auth, async (req, res) => {
+    try {
+        const result = await pool.query(
+            'SELECT * FROM ministro_documentos WHERE ministro_id = $1',
+            [req.userId]
+        );
+        res.json(result.rows[0] || null);
+    } catch (err) {
+        console.error('Erro ao buscar documentos:', err);
+        res.status(500).json({ error: 'Erro ao buscar documentos' });
+    }
+});
+
 module.exports = router;

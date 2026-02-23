@@ -207,10 +207,10 @@ router.get('/cursos', adminAuth, async (req, res) => {
 
 router.post('/cursos', adminAuth, async (req, res) => {
     try {
-        const { titulo, descricao, categoria, nivel, carga_horaria, certificado, imagem_url } = req.body;
+        const { titulo, descricao, area, nivel, carga_horaria, certificado, imagem_url } = req.body;
         const r = await pool.query(
-            'INSERT INTO cursos (titulo, descricao, categoria, nivel, carga_horaria, certificado, imagem_url, status) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *',
-            [titulo, descricao, categoria, nivel, carga_horaria || 0, certificado !== false, imagem_url, 'ativo']
+            'INSERT INTO cursos (titulo, descricao, area, nivel, carga_horaria, certificado, imagem_url, ativo) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *',
+            [titulo, descricao, area || 'teologica', nivel, carga_horaria || 0, certificado !== false, imagem_url, true]
         );
         res.status(201).json(r.rows[0]);
     } catch (err) { res.status(500).json({ error: err.message }); }
@@ -218,10 +218,10 @@ router.post('/cursos', adminAuth, async (req, res) => {
 
 router.put('/cursos/:id', adminAuth, async (req, res) => {
     try {
-        const { titulo, descricao, categoria, nivel, carga_horaria, certificado, imagem_url, status } = req.body;
+        const { titulo, descricao, area, nivel, carga_horaria, certificado, imagem_url, ativo } = req.body;
         const r = await pool.query(
-            `UPDATE cursos SET titulo=$1, descricao=$2, categoria=$3, nivel=$4, carga_horaria=$5, certificado=$6, imagem_url=$7, status=$8 WHERE id=$9 RETURNING *`,
-            [titulo, descricao, categoria, nivel, carga_horaria, certificado, imagem_url, status, req.params.id]
+            `UPDATE cursos SET titulo=$1, descricao=$2, area=$3, nivel=$4, carga_horaria=$5, certificado=$6, imagem_url=$7, ativo=$8 WHERE id=$9 RETURNING *`,
+            [titulo, descricao, area || 'teologica', nivel, carga_horaria, certificado, imagem_url, ativo !== false, req.params.id]
         );
         res.json(r.rows[0]);
     } catch (err) { res.status(500).json({ error: err.message }); }

@@ -529,7 +529,9 @@
         async function loadMidias() {
             const grid = document.getElementById('midiasGrid');
             try {
-                const res = await fetch(`${API.BASE_URL}/dashboard/midias`);
+                const url = (typeof API !== 'undefined' && API.baseUrl) ? `${API.baseUrl}/dashboard/midias` : '/api/dashboard/midias';
+                const res = await fetch(url);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 allMidias = await res.json();
                 renderMidias();
             } catch (err) {

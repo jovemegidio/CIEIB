@@ -3245,41 +3245,47 @@ img {
    ============================================ */
 
 /* ---- Botão principal (FAB) ---- */
-.a11y-fab {
-    position: fixed;
-    bottom: 170px;
-    right: 30px;
-    width: 48px;
-    height: 48px;
+/* ---- Wrapper na top-bar ---- */
+.a11y-topbar-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-left: 8px;
+    padding-left: 12px;
+    border-left: 1px solid rgba(255,255,255,0.2);
+}
+
+.a11y-topbar-btn {
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
-    background: var(--primary);
-    color: var(--white);
-    border: 2px solid var(--white);
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.7);
+    border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.25rem;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
-    z-index: 1000;
+    font-size: 0.85rem;
     transition: var(--transition);
 }
-.a11y-fab:hover {
-    background: var(--primary-light);
-    transform: scale(1.08);
-}
-.a11y-fab.active {
+.a11y-topbar-btn:hover {
     background: var(--secondary);
-    color: var(--primary-dark);
+    color: var(--white);
+    transform: translateY(-2px);
+}
+.a11y-topbar-btn.active {
+    background: var(--secondary);
+    color: var(--white);
 }
 
-/* ---- Painel ---- */
+/* ---- Painel dropdown ---- */
 .a11y-panel {
-    position: fixed;
-    bottom: 230px;
-    right: 30px;
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
     width: 300px;
-    max-height: calc(100vh - 260px);
+    max-height: calc(100vh - 120px);
     background: var(--white);
     border-radius: var(--radius-lg);
     box-shadow: 0 12px 48px rgba(0,0,0,0.18);
@@ -3287,7 +3293,7 @@ img {
     overflow: hidden;
     opacity: 0;
     visibility: hidden;
-    transform: translateY(16px) scale(0.95);
+    transform: translateY(-8px) scale(0.95);
     transition: opacity 0.25s ease, visibility 0.25s ease, transform 0.25s ease;
 }
 .a11y-panel.open {
@@ -3508,20 +3514,49 @@ body.a11y-stop-animations * {
     transition: top 0.05s linear;
 }
 
+/* ---- Botão mobile flutuante (oculto no desktop) ---- */
+.a11y-mobile-fab {
+    display: none;
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: var(--white);
+    border: none;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    z-index: 1100;
+    transition: var(--transition);
+}
+.a11y-mobile-fab:hover,
+.a11y-mobile-fab.active {
+    background: var(--secondary);
+    color: var(--white);
+}
+
 /* ---- Responsivo ---- */
-@media (max-width: 480px) {
-    .a11y-fab {
-        bottom: 160px;
-        right: 16px;
-        width: 44px;
-        height: 44px;
-        font-size: 1.1rem;
+@media (max-width: 768px) {
+    .a11y-topbar-wrapper {
+        margin-left: 4px;
+        padding-left: 8px;
+    }
+    .a11y-mobile-fab {
+        display: flex;
     }
     .a11y-panel {
-        right: 10px;
-        left: 10px;
-        width: auto;
-        bottom: 215px;
-        max-height: calc(100vh - 240px);
+        position: fixed;
+        top: auto;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        width: 100%;
+        max-height: 80vh;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     }
 }

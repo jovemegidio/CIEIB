@@ -724,19 +724,27 @@ function initAccessibilityWidget() {
     const path = window.location.pathname;
     if (path.includes('painel-admin') || path.includes('painel-ministro')) return;
 
+    // Encontrar o top-bar-content para injetar o botão
+    const topBarContent = document.querySelector('.top-bar-content');
+    if (!topBarContent) return;
+
     // Estado salvo
     const state = JSON.parse(localStorage.getItem('cieib_a11y') || '{}');
     let zoomLevel = state.zoom || 100;
 
-    // ---- Criar FAB ----
-    const fab = document.createElement('button');
-    fab.className = 'a11y-fab';
-    fab.setAttribute('aria-label', 'Abrir painel de acessibilidade');
-    fab.setAttribute('title', 'Acessibilidade');
-    fab.innerHTML = '<i class="fas fa-universal-access"></i>';
-    document.body.appendChild(fab);
+    // ---- Criar wrapper na top-bar ----
+    const wrapper = document.createElement('div');
+    wrapper.className = 'a11y-topbar-wrapper';
 
-    // ---- Criar painel ----
+    // ---- Botão na top-bar ----
+    const btn = document.createElement('button');
+    btn.className = 'a11y-topbar-btn';
+    btn.setAttribute('aria-label', 'Abrir painel de acessibilidade');
+    btn.setAttribute('title', 'Acessibilidade');
+    btn.innerHTML = '<i class="fas fa-universal-access"></i>';
+    wrapper.appendChild(btn);
+
+    // ---- Criar painel dropdown ----
     const panel = document.createElement('div');
     panel.className = 'a11y-panel';
     panel.setAttribute('role', 'dialog');
@@ -794,7 +802,23 @@ function initAccessibilityWidget() {
             </button>
         </div>
     `;
-    document.body.appendChild(panel);
+    wrapper.appendChild(panel);
+
+    // Injetar na top-bar, após as redes sociais
+    topBarContent.appendChild(wrapper);
+
+    // ---- Botão mobile flutuante (top-bar fica oculta em ≤768px) ----
+    const mobileFab = document.createElement('button');
+    mobileFab.className = 'a11y-mobile-fab';
+    mobileFab.setAttribute('aria-label', 'Acessibilidade');
+    mobileFab.innerHTML = '<i class="fas fa-universal-access"></i>';
+    document.body.appendChild(mobileFab);
+    mobileFab.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = panel.classList.toggle('open');
+        btn.classList.toggle('active', isOpen);
+        mobileFab.classList.toggle('active', isOpen);
+    });
 
     // ---- Guia de leitura (barra horizontal que segue o mouse) ----
     let readingGuide = null;
@@ -877,16 +901,17 @@ function initAccessibilityWidget() {
     toggles.forEach(k => { if (state[k]) applyOption(k, true); });
 
     // ---- Event listeners ----
-    fab.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
         const isOpen = panel.classList.toggle('open');
-        fab.classList.toggle('active', isOpen);
-        fab.setAttribute('aria-expanded', isOpen);
+        btn.classList.toggle('active', isOpen);
+        btn.setAttribute('aria-expanded', isOpen);
     });
 
     panel.querySelector('.a11y-panel-close').addEventListener('click', () => {
         panel.classList.remove('open');
-        fab.classList.remove('active');
-        fab.setAttribute('aria-expanded', 'false');
+        btn.classList.remove('active');
+        btn.setAttribute('aria-expanded', 'false');
     });
 
     // Toggle buttons
@@ -918,9 +943,10 @@ function initAccessibilityWidget() {
 
     // Fechar ao clicar fora
     document.addEventListener('click', (e) => {
-        if (!panel.contains(e.target) && !fab.contains(e.target) && panel.classList.contains('open')) {
+        if (!wrapper.contains(e.target) && !mobileFab.contains(e.target) && panel.classList.contains('open')) {
             panel.classList.remove('open');
-            fab.classList.remove('active');
+            btn.classList.remove('active');
+            mobileFab.classList.remove('active');
         }
     });
 
@@ -928,7 +954,8 @@ function initAccessibilityWidget() {
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && panel.classList.contains('open')) {
             panel.classList.remove('open');
-            fab.classList.remove('active');
+            btn.classList.remove('active');
+            mobileFab.classList.remove('active');
         }
     });
 }

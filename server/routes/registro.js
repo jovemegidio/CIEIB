@@ -187,21 +187,17 @@ router.post('/documentos', upload.array('documentos', 10), async (req, res) => {
     try {
         let { ministro_id, tipos } = req.body;
 
-        // Verificar autenticação via token (header ou body)
+        // Verificar autenticação via token (OBRIGATÓRIO)
         const authHeader = req.headers.authorization;
-        if (authHeader && authHeader.startsWith('Bearer ')) {
-            try {
-                const decoded = jwt.verify(authHeader.split(' ')[1], process.env.JWT_SECRET);
-                // Garantir que o ministro_id do body corresponde ao token
-                if (ministro_id && parseInt(ministro_id) !== decoded.id) {
-                    return res.status(403).json({ error: 'ID do ministro não corresponde ao token.' });
-                }
-                ministro_id = decoded.id;
-            } catch (e) {
-                return res.status(401).json({ error: 'Token inválido.' });
-            }
-        } else if (!ministro_id) {
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return res.status(401).json({ error: 'Autenticação necessária.' });
+        }
+
+        try {
+            const decoded = jwt.verify(authHeader.split(' ')[1], process.env.JWT_SECRET);
+            ministro_id = decoded.id;
+        } catch (e) {
+            return res.status(401).json({ error: 'Token inválido.' });
         }
 
         if (!req.files || req.files.length === 0) {

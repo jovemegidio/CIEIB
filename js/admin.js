@@ -511,10 +511,10 @@ async function loadAdminCursos() {
 function renderCursosTable() {
     const el = document.getElementById('cursosTable');
     if (allCursos.length === 0) { el.innerHTML = '<p style="text-align:center;color:#aaa;padding:40px;">Nenhum curso cadastrado</p>'; return; }
-    el.innerHTML = `<table class="admin-table"><thead><tr><th>Título</th><th>Categoria</th><th>Nível</th><th>Carga H.</th><th>Módulos</th><th>Matrículas</th><th>Ações</th></tr></thead><tbody>
+    el.innerHTML = `<table class="admin-table"><thead><tr><th>Título</th><th>Área</th><th>Nível</th><th>Carga H.</th><th>Módulos</th><th>Matrículas</th><th>Ações</th></tr></thead><tbody>
         ${allCursos.map(c => `<tr>
             <td>${c.titulo}</td>
-            <td>${c.categoria || '-'}</td>
+            <td>${c.area || '-'}</td>
             <td>${c.nivel || '-'}</td>
             <td>${c.carga_horaria || 0}h</td>
             <td>${c.total_modulos || 0}</td>
@@ -535,7 +535,7 @@ function openCursoModal(id) {
         <div class="admin-form-group"><label>Título</label><input type="text" id="mCursoTitle" value="${item?.titulo || ''}"></div>
         <div class="admin-form-group"><label>Descrição</label><textarea id="mCursoDesc">${item?.descricao || ''}</textarea></div>
         <div class="form-grid">
-            <div class="admin-form-group"><label>Categoria</label><input type="text" id="mCursoCat" value="${item?.categoria || ''}"></div>
+            <div class="admin-form-group"><label>Área</label><input type="text" id="mCursoCat" value="${item?.area || ''}"></div>
             <div class="admin-form-group"><label>Nível</label>
                 <select id="mCursoNivel">
                     <option value="Básico" ${item?.nivel === 'Básico' ? 'selected' : ''}>Básico</option>
@@ -559,12 +559,12 @@ async function saveCurso(id) {
     const body = {
         titulo: document.getElementById('mCursoTitle').value,
         descricao: document.getElementById('mCursoDesc').value,
-        categoria: document.getElementById('mCursoCat').value,
+        area: document.getElementById('mCursoCat').value,
         nivel: document.getElementById('mCursoNivel').value,
         carga_horaria: parseInt(document.getElementById('mCursoCH').value) || 0,
         imagem_url: document.getElementById('mCursoImg').value,
         certificado: document.getElementById('mCursoCert').checked,
-        status: 'ativo'
+        ativo: true
     };
     try {
         if (id) await AdminAPI.put(`/cursos/${id}`, body);
@@ -812,7 +812,7 @@ async function loadConteudos() {
 
 function filterCMS(pagina) {
     document.querySelectorAll('.cms-filter-btn').forEach(b => b.classList.remove('active'));
-    event.target.classList.add('active');
+    if (window.event && window.event.target) window.event.target.classList.add('active');
     renderConteudosTable(pagina === 'todos' ? null : pagina);
 }
 

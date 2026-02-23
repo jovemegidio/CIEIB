@@ -122,7 +122,7 @@ function fillDadosPessoais(m) {
         'campo-orgao': m.orgao_expedidor,
         'campo-email': m.email,
         'campo-biometria': m.biometria,
-        'campo-registro': m.data_registro ? new Date(m.data_registro).toLocaleDateString('pt-BR') : '',
+        'campo-registro': m.registro || '',
         'campo-igrejaordenacao': m.igreja_ordenacao,
         'campo-cidadeordenacao': m.cidade_ordenacao
     };
@@ -191,10 +191,10 @@ function fillContasResumo(data) {
         if (!grouped[c.servico]) {
             grouped[c.servico] = { total: 0, desc: 0, pago: 0, aberto: 0 };
         }
-        grouped[c.servico].total += parseFloat(c.valor);
-        grouped[c.servico].desc += parseFloat(c.desconto);
-        grouped[c.servico].pago += parseFloat(c.valor_pago);
-        grouped[c.servico].aberto += parseFloat(c.saldo);
+        grouped[c.servico].total += parseFloat(c.valor) || 0;
+        grouped[c.servico].desc += parseFloat(c.desconto) || 0;
+        grouped[c.servico].pago += parseFloat(c.valor_pago) || 0;
+        grouped[c.servico].aberto += parseFloat(c.saldo) || 0;
     });
 
     tbody.innerHTML = Object.entries(grouped).map(([servico, v]) => `
@@ -344,7 +344,7 @@ function fillEventos(inscricoes) {
             <td>R$${parseFloat(i.valor).toFixed(2)}</td>
             <td>R$${parseFloat(i.valor_baixa).toFixed(2)}</td>
             <td>${i.participou}</td>
-            <td><span class="status-badge status-${i.status_inscricao === 'Quitado' ? 'quitado-badge' : 'aberto-badge'}">${i.status_inscricao}</span></td>
+            <td><span class="status-badge status-${(i.status_inscricao || '').toUpperCase() === 'QUITADO' ? 'quitado-badge' : 'aberto-badge'}">${i.status_inscricao}</span></td>
             <td>${formatDate(i.data_evento)}</td>
             <td>${i.hora_inicio || ''}</td>
             <td>${formatDate(i.data_termino)}</td>
@@ -985,16 +985,15 @@ let credencialLoaded = false;
 function initLazyTabs() {
     const tabs = document.querySelectorAll('.ptab');
     tabs.forEach(tab => {
-        tab.addEventListener('click', function() {
+        tab.addEventListener('click', async function() {
             const target = this.getAttribute('data-tab');
             if (target === 'cursos' && !cursosLoaded) {
-                loadCursos();
-                cursosLoaded = true;
+                try { await loadCursos(); cursosLoaded = true; }
+                catch { cursosLoaded = false; }
             }
             if (target === 'credencial' && !credencialLoaded) {
-                loadCredencial();
-                loadCarteirinhaStatus();
-                credencialLoaded = true;
+                try { await loadCredencial(); await loadCarteirinhaStatus(); credencialLoaded = true; }
+                catch { credencialLoaded = false; }
             }
         });
     });

@@ -20,7 +20,11 @@ router.get('/', async (req, res) => {
         query += ' ORDER BY data_evento DESC';
 
         if (limit) {
-            query += ` LIMIT ${parseInt(limit)}`;
+            const parsedLimit = parseInt(limit);
+            if (!isNaN(parsedLimit) && parsedLimit > 0) {
+                params.push(parsedLimit);
+                query += ` LIMIT $${params.length}`;
+            }
         }
 
         const result = await pool.query(query, params);

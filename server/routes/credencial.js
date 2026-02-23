@@ -29,12 +29,22 @@ router.get('/', auth, async (req, res) => {
             const validade = new Date();
             validade.setFullYear(validade.getFullYear() + 1);
 
-            await pool.query(`
-                UPDATE ministros SET credencial_codigo = $1, data_validade = $2 WHERE id = $3
+            // WHERE credencial_codigo IS NULL previne race condition
+            const upd = await pool.query(`
+                UPDATE ministros SET credencial_codigo = $1, data_validade = $2
+                WHERE id = $3 AND credencial_codigo IS NULL
+                RETURNING credencial_codigo, data_validade
             `, [codigo, validade, req.userId]);
 
-            ministro.credencial_codigo = codigo;
-            ministro.data_validade = validade;
+            if (upd.rows.length > 0) {
+                ministro.credencial_codigo = upd.rows[0].credencial_codigo;
+                ministro.data_validade = upd.rows[0].data_validade;
+            } else {
+                // Outro request já gerou o código — recarregar
+                const reload = await pool.query('SELECT credencial_codigo, data_validade FROM ministros WHERE id = $1', [req.userId]);
+                ministro.credencial_codigo = reload.rows[0].credencial_codigo;
+                ministro.data_validade = reload.rows[0].data_validade;
+            }
         }
 
         // URL pública de verificação

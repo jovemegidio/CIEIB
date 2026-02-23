@@ -2,6 +2,17 @@
    CIEIB - Main JavaScript
    ============================================ */
 
+// ---- Utilitário global: escapar HTML para prevenir XSS ----
+function escHtml(str) {
+    if (str == null) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // ===== Mobile Navigation =====
     const mobileToggle = document.getElementById('mobileToggle');
@@ -215,11 +226,12 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.disabled = true;
 
             try {
-                await fetch('/api/contato/newsletter', {
+                const resp = await fetch('/api/contato/newsletter', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: email.value })
                 });
+                if (!resp.ok) throw new Error('Erro ao cadastrar');
                 btn.innerHTML = '<i class="fas fa-check"></i> Cadastrado!';
                 btn.style.background = '#28a745';
                 btn.style.borderColor = '#28a745';
@@ -246,11 +258,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===== Smooth Scroll for Anchor Links =====
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                e.preventDefault();
-                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
+            const href = this.getAttribute('href');
+            if (!href || href === '#') return; // ignorar links vazios
+            try {
+                const target = document.querySelector(href);
+                if (target) {
+                    e.preventDefault();
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            } catch { /* seletor inválido */ }
         });
     });
 
@@ -327,13 +343,13 @@ async function loadSiteNotifications() {
             bar.innerHTML = `
                 <div class="container">
                     <div class="snb-inner">
-                        <div class="snb-icon-wrap"><i class="fas ${cfg.icon}"></i></div>
-                        <span class="snb-badge">${cfg.badge}</span>
+                        <div class="snb-icon-wrap"><i class="fas ${escHtml(cfg.icon)}"></i></div>
+                        <span class="snb-badge">${escHtml(cfg.badge)}</span>
                         <div class="snb-text">
-                            <strong>${n.titulo}</strong>
-                            <span>${n.mensagem || ''}</span>
+                            <strong>${escHtml(n.titulo)}</strong>
+                            <span>${escHtml(n.mensagem || '')}</span>
                         </div>
-                        ${n.link ? `<a href="${n.link}" class="snb-cta">Saiba mais <i class="fas fa-arrow-right"></i></a>` : ''}
+                        ${n.link ? `<a href="${escHtml(n.link)}" class="snb-cta">Saiba mais <i class="fas fa-arrow-right"></i></a>` : ''}
                         ${dotsHtml}
                         <button class="snb-close" aria-label="Fechar notificação" data-id="${n.id}">
                             <i class="fas fa-times"></i>
@@ -500,7 +516,7 @@ async function loadSiteConfig() {
         document.querySelectorAll('[data-config]').forEach(el => {
             const key = el.dataset.config;
             if (config[key] !== undefined && config[key] !== null && config[key] !== '') {
-                el.innerHTML = config[key];
+                el.textContent = config[key];
             }
         });
 

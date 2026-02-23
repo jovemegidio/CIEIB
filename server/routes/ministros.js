@@ -41,7 +41,8 @@ router.get('/me', auth, async (req, res) => {
                    telefone, whatsapp, escolaridade,
                    biometria, data_registro, registro, foto_url, status,
                    data_batismo, data_ordenacao, igreja_ordenacao, cidade_ordenacao,
-                   funcao_ministerial, nome_igreja, tempo_ministerio, data_consagracao
+                   funcao_ministerial, nome_igreja, tempo_ministerio, data_consagracao,
+                   credencial_aprovada
             FROM ministros WHERE id = $1
         `, [req.userId]);
 
@@ -63,7 +64,7 @@ router.put('/me', auth, async (req, res) => {
             nome_social, doc_estrangeiro, sexo, data_nascimento,
             pais_nascimento, estado_nascimento, cidade_nascimento,
             nacionalidade, estado_civil, nome_conjuge, data_nasc_conjuge,
-            pai, mae, rg, orgao_expedidor, email, escolaridade,
+            pai, mae, rg, orgao_expedidor, email, telefone, whatsapp, escolaridade,
             data_batismo, data_ordenacao, igreja_ordenacao, cidade_ordenacao,
             funcao_ministerial, nome_igreja, tempo_ministerio, data_consagracao
         } = req.body;
@@ -80,32 +81,34 @@ router.put('/me', auth, async (req, res) => {
                 nacionalidade = COALESCE($8, nacionalidade),
                 estado_civil = COALESCE($9, estado_civil),
                 nome_conjuge = COALESCE($10, nome_conjuge),
-                data_nasc_conjuge = $11,
+                data_nasc_conjuge = COALESCE($11, data_nasc_conjuge),
                 pai = COALESCE($12, pai),
                 mae = COALESCE($13, mae),
                 rg = COALESCE($14, rg),
                 orgao_expedidor = COALESCE($15, orgao_expedidor),
                 email = COALESCE($16, email),
                 escolaridade = COALESCE($17, escolaridade),
-                data_batismo = $18,
-                data_ordenacao = $19,
+                data_batismo = COALESCE($18, data_batismo),
+                data_ordenacao = COALESCE($19, data_ordenacao),
                 igreja_ordenacao = COALESCE($20, igreja_ordenacao),
                 cidade_ordenacao = COALESCE($21, cidade_ordenacao),
                 funcao_ministerial = COALESCE($22, funcao_ministerial),
                 nome_igreja = COALESCE($23, nome_igreja),
                 tempo_ministerio = COALESCE($24, tempo_ministerio),
-                data_consagracao = $25,
+                data_consagracao = COALESCE($25, data_consagracao),
+                telefone = COALESCE($26, telefone),
+                whatsapp = COALESCE($27, whatsapp),
                 updated_at = NOW()
-            WHERE id = $26
+            WHERE id = $28
         `, [
-            nome_social, doc_estrangeiro, sexo, data_nascimento || null,
-            pais_nascimento, estado_nascimento, cidade_nascimento,
-            nacionalidade, estado_civil, nome_conjuge, data_nasc_conjuge || null,
-            pai, mae, rg, orgao_expedidor, email, escolaridade,
+            nome_social || null, doc_estrangeiro || null, sexo || null, data_nascimento || null,
+            pais_nascimento || null, estado_nascimento || null, cidade_nascimento || null,
+            nacionalidade || null, estado_civil || null, nome_conjuge || null, data_nasc_conjuge || null,
+            pai || null, mae || null, rg || null, orgao_expedidor || null, email || null, escolaridade || null,
             data_batismo || null, data_ordenacao || null,
-            igreja_ordenacao, cidade_ordenacao,
-            funcao_ministerial, nome_igreja, tempo_ministerio,
-            data_consagracao || null, req.userId
+            igreja_ordenacao || null, cidade_ordenacao || null,
+            funcao_ministerial || null, nome_igreja || null, tempo_ministerio || null,
+            data_consagracao || null, telefone || null, whatsapp || null, req.userId
         ]);
 
         // Log

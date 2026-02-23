@@ -77,8 +77,12 @@ const API = {
             if (!this.token) return false;
             await this.get('/auth/verify');
             return true;
-        } catch {
-            this.logout();
+        } catch (err) {
+            // Só deslogar se o servidor respondeu com erro de autenticação
+            // Erros de rede (offline, 502, etc.) não devem deslogar
+            if (err.message && (err.message.includes('Token') || err.message.includes('autenticação') || err.message.includes('não encontrado'))) {
+                this.logout();
+            }
             return false;
         }
     },

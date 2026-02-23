@@ -10,6 +10,7 @@ const path = require('path');
 const rateLimit = require('express-rate-limit');
 
 const crypto = require('crypto');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -58,7 +59,6 @@ app.get('/favicon.ico', (req, res) => {
 });
 
 // ---- Helper: servir HTML com cache-busting automático ----
-const fs = require('fs');
 
 // Calcular versão inicial e observar mudanças nos arquivos
 APP_VERSION = computeVersion();
@@ -99,19 +99,34 @@ app.use((req, res, next) => {
 });
 
 // ---- Servir arquivos estáticos (CSS, JS, imagens — NÃO HTML) ----
-app.use(express.static(__dirname, {
+// SEGURANÇA: servir apenas diretórios públicos, NUNCA a raiz do projeto
+const staticOpts = {
     etag: true,
     lastModified: true,
-    index: false, // Não servir index.html automaticamente
+    index: false,
     setHeaders: (res, filePath) => {
         if (filePath.endsWith('.css') || filePath.endsWith('.js')) {
             res.set('Cache-Control', 'no-cache, must-revalidate');
         }
-    },
-    // Redirecionar .html para nossas rotas com cache-busting
-    extensions: []
+    }
+};
+app.use('/css', express.static(path.join(__dirname, 'css'), staticOpts));
+app.use('/js', express.static(path.join(__dirname, 'js'), staticOpts));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), staticOpts));
+// Arquivos avulsos na raiz (favicon, imagens do site)
+app.use(express.static(__dirname, {
+    ...staticOpts,
+    dotfiles: 'ignore',
+    extensions: [],
+    // Bloquear acesso a todos os arquivos exceto imagens e favicon
+    setHeaders: (res, fp) => {
+        const ext = path.extname(fp).toLowerCase();
+        const allowed = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.ico', '.woff', '.woff2', '.ttf', '.eot'];
+        if (!allowed.includes(ext)) {
+            res.status(403).end();
+        }
+    }
 }));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ---- Rotas da API ----
 const authRoutes = require('./server/routes/auth');
@@ -167,10 +182,6 @@ app.get('/', (req, res) => {
     sendHtmlWithCacheBust(res, path.join(__dirname, 'index.html'));
 });
 
-app.get('/index.html', (req, res) => {
-    sendHtmlWithCacheBust(res, path.join(__dirname, 'index.html'));
-});
-
 // ---- Health Check ----
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', env: process.env.NODE_ENV || 'dev', timestamp: new Date().toISOString() });
@@ -187,6 +198,11 @@ app.use((err, req, res, next) => {
 });
 
 // ---- Start ----
+if (!process.env.JWT_SECRET) {
+    console.error('❌ FATAL: JWT_SECRET não está definido no .env');
+    process.exit(1);
+}
+
 const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`✅ CIEIB Server rodando na porta ${PORT} [${process.env.NODE_ENV || 'dev'}]`);
     if (!isProd) console.log(`🌐 http://localhost:${PORT}`);

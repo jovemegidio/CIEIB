@@ -3,6 +3,7 @@
    ============================================================== */
 const router = require('express').Router();
 const pool = require('../db/connection');
+const adminAuth = require('../middleware/adminAuth');
 
 // POST /api/contato — Enviar mensagem de contato (público)
 router.post('/', async (req, res) => {
@@ -59,8 +60,8 @@ router.post('/newsletter', async (req, res) => {
     }
 });
 
-// GET /api/contato — Listar mensagens (protegido)
-router.get('/', async (req, res) => {
+// GET /api/contato — Listar mensagens (protegido — somente admin)
+router.get('/', adminAuth, async (req, res) => {
     try {
         const result = await pool.query(
             'SELECT * FROM contatos ORDER BY created_at DESC LIMIT 50'

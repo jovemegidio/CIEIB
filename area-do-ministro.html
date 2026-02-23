@@ -665,7 +665,7 @@
                     </div>
 
                     <div class="reg-actions">
-                        <button type="button" class="reg-btn-prev" onclick="regNextStep(3)"><i class="fas fa-arrow-left"></i> Voltar</button>
+                        <!-- Sem voltar: cadastro já foi salvo no passo 3 -->
                         <button type="button" class="reg-btn-next" id="regUploadBtn" onclick="regUploadDocs()">
                             <i class="fas fa-cloud-upload-alt"></i> Enviar Documentos
                         </button>
@@ -811,7 +811,11 @@
                 btn.disabled = true;
                 try {
                     const data = await API.login(cpf, senha);
-                    btn.innerHTML = '<i class="fas fa-check"></i> Bem-vindo, ' + data.ministro.nome + '!';
+                    btn.textContent = '';
+                    const icon = document.createElement('i');
+                    icon.className = 'fas fa-check';
+                    btn.appendChild(icon);
+                    btn.appendChild(document.createTextNode(' Bem-vindo, ' + data.ministro.nome + '!'));
                     btn.style.background = '#28a745';
                     btn.style.borderColor = '#28a745';
                     setTimeout(() => { window.location.href = 'painel-ministro.html'; }, 1200);
@@ -821,7 +825,7 @@
                     const errorDiv = document.createElement('div');
                     errorDiv.className = 'login-error';
                     errorDiv.setAttribute('role', 'alert');
-                    errorDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + (err.message || 'CPF ou senha incorretos.');
+                    errorDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + escHtml(err.message || 'CPF ou senha incorretos.');
                     errorDiv.style.cssText = 'background:#fef2f2;color:#d93025;padding:12px 16px;border-radius:8px;font-size:0.85rem;margin-top:12px;display:flex;align-items:center;gap:8px;border:1px solid #fecdd3;';
                     loginForm.appendChild(errorDiv);
                     loginForm.style.animation = 'shake 0.5s ease';
@@ -1110,13 +1114,13 @@
                 <div class="welcome-popup-backdrop" onclick="closeWelcomePopup()"></div>
                 <div class="welcome-popup-card">
                     <div class="welcome-popup-icon"><i class="fas fa-check-circle"></i></div>
-                    <h3>Olá, ${nome}!</h3>
+                    <h3>Olá, ${escHtml(nome)}!</h3>
                     <p class="welcome-popup-subtitle">Seja Bem-Vindo(a) à CIEIB!</p>
                     <p>Seu cadastro foi realizado com sucesso. Abaixo estão seus dados de acesso:</p>
                     <div class="welcome-popup-credentials">
                         <div class="welcome-popup-field">
                             <span class="welcome-popup-label"><i class="fas fa-user"></i> Login (CPF):</span>
-                            <span class="welcome-popup-value">${cpf}</span>
+                            <span class="welcome-popup-value">${escHtml(cpf)}</span>
                         </div>
                         <div class="welcome-popup-field">
                             <span class="welcome-popup-label"><i class="fas fa-lock"></i> Senha:</span>

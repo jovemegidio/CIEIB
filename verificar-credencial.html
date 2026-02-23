@@ -516,7 +516,11 @@
 
                     const foto = document.getElementById('resultadoFoto');
                     if (data.foto_url) {
-                        foto.innerHTML = `<img src="${data.foto_url}" alt="${data.nome}">`;
+                        const img = document.createElement('img');
+                        img.src = data.foto_url;
+                        img.alt = data.nome || '';
+                        foto.innerHTML = '';
+                        foto.appendChild(img);
                     }
                 }
 

@@ -227,6 +227,14 @@ router.post('/documentos', upload.array('documentos', 10), async (req, res) => {
                 VALUES ($1, $2, $3, $4, $5)
             `, [ministro_id, tipo, file.originalname, caminho, file.size]);
 
+            // Se for foto 3x4, também definir como foto de perfil do ministro
+            if (tipo === 'foto_3x4') {
+                await pool.query(
+                    'UPDATE ministros SET foto_url = $1, updated_at = NOW() WHERE id = $2',
+                    [caminho, ministro_id]
+                );
+            }
+
             uploaded.push({ tipo, nome: file.originalname, caminho });
         }
 

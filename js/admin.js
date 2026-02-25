@@ -1672,17 +1672,28 @@ function switchMdpTab(tab) {
             ` : '<p style="color:#aaa;font-size:0.82rem;padding:8px;">Endereço não cadastrado</p>'}
 
             <div class="mdp-section-title"><i class="fas fa-lock"></i> Acesso / Login</div>
-            <div class="mdp-info-grid">
-                <div class="mdp-info-item"><label>Login (CPF)</label><span style="font-family:monospace;font-weight:700;">${formatCPF(m.cpf)}</span></div>
-                <div class="mdp-info-item"><label>Senha Padrão</label><span style="font-family:monospace;">${m.cpf ? m.cpf.replace(/\D/g,'').substring(0,6) : '—'} <small style="color:#94a3b8;">(6 primeiros dígitos do CPF)</small></span></div>
-                <div class="mdp-info-item"><label>Ações</label><span>
-                    <button class="mdp-btn-edit" style="background:#fee2e2;color:#dc2626;font-size:0.72rem;padding:4px 10px;" onclick="resetSenhaMembro(${m.id})">
-                        <i class="fas fa-key"></i> Resetar Senha
-                    </button>
-                    <button class="mdp-btn-edit" style="background:#e0f2fe;color:#0369a1;font-size:0.72rem;padding:4px 10px;margin-left:6px;" onclick="alterarSenhaMembro(${m.id})">
-                        <i class="fas fa-edit"></i> Definir Nova Senha
-                    </button>
-                </span></div>
+            <div style="background:linear-gradient(135deg,#f8fafc 0%,#f1f5f9 100%);border:1px solid #e2e8f0;border-radius:10px;padding:18px 20px;margin-bottom:8px;">
+                <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:center;">
+                    <div style="flex:1;min-width:160px;">
+                        <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:#64748b;font-weight:600;margin-bottom:4px;">Login (CPF)</div>
+                        <div style="font-family:'Courier New',monospace;font-size:0.95rem;font-weight:700;color:#1e293b;background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:8px 12px;letter-spacing:0.5px;">${formatCPF(m.cpf)}</div>
+                    </div>
+                    <div style="flex:1;min-width:180px;">
+                        <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:#64748b;font-weight:600;margin-bottom:4px;">Senha Padrão</div>
+                        <div style="font-family:'Courier New',monospace;font-size:0.95rem;font-weight:700;color:#1e293b;background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:8px 12px;">
+                            ${m.cpf ? m.cpf.replace(/\\D/g,'').substring(0,6) : '—'}
+                            <span style="font-family:sans-serif;font-size:0.68rem;color:#94a3b8;font-weight:400;margin-left:6px;">6 primeiros dígitos</span>
+                        </div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:8px;min-width:160px;">
+                        <button onclick="resetSenhaMembro(${m.id})" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:none;border-radius:8px;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all .2s;background:linear-gradient(135deg,#fef2f2,#fee2e2);color:#b91c1c;border:1px solid #fecaca;box-shadow:0 1px 2px rgba(185,28,28,.08);" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 3px 8px rgba(185,28,28,.15)'" onmouseout="this.style.transform='';this.style.boxShadow='0 1px 2px rgba(185,28,28,.08)'">
+                            <i class="fas fa-undo-alt" style="font-size:0.72rem;"></i> Resetar Senha
+                        </button>
+                        <button onclick="alterarSenhaMembro(${m.id})" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:none;border-radius:8px;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all .2s;background:linear-gradient(135deg,#eff6ff,#dbeafe);color:#1d4ed8;border:1px solid #bfdbfe;box-shadow:0 1px 2px rgba(29,78,216,.08);" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 3px 8px rgba(29,78,216,.15)'" onmouseout="this.style.transform='';this.style.boxShadow='0 1px 2px rgba(29,78,216,.08)'">
+                            <i class="fas fa-pen-alt" style="font-size:0.72rem;"></i> Definir Nova Senha
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <div class="mdp-section-title"><i class="fas fa-church"></i> Dados Ministeriais</div>

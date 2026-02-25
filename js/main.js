@@ -1070,10 +1070,10 @@ initAccessibilityWidget();
             <div class="pwa-install-content">
                 <img src="/fav.jpg" alt="CIEIB" class="pwa-install-icon" style="border-radius:50%;object-fit:cover;">
                 <div class="pwa-install-text">
-                    <strong>Instalar CIEIB</strong>
-                    <span>Acesse como um app no seu celular</span>
+                    <strong>📲 Tenha a CIEIB na palma da mão!</strong>
+                    <span>Acesse sua credencial, documentos e boletos direto do celular — rápido e sem navegador.</span>
                 </div>
-                <button class="pwa-install-btn" id="pwaInstallBtn">Instalar</button>
+                <button class="pwa-install-btn" id="pwaInstallBtn">Quero instalar</button>
                 <button class="pwa-install-close" id="pwaInstallClose" aria-label="Fechar">&times;</button>
             </div>
         `;

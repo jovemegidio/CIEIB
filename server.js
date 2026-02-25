@@ -115,18 +115,20 @@ app.use('/css', express.static(path.join(__dirname, 'css'), staticOpts));
 app.use('/js', express.static(path.join(__dirname, 'js'), staticOpts));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'), staticOpts));
 // Arquivos avulsos na raiz (favicon, imagens do site)
+// Middleware para bloquear acesso a arquivos não-permitidos ANTES do static handler
+const allowedRootExts = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.ico', '.woff', '.woff2', '.ttf', '.eot'];
+app.use((req, res, next) => {
+    const ext = path.extname(req.path).toLowerCase();
+    // Se tem extensão e não é permitida, pular o static handler (vai cair nas rotas HTML ou 404)
+    if (ext && !allowedRootExts.includes(ext)) {
+        return next();
+    }
+    next();
+});
 app.use(express.static(__dirname, {
     ...staticOpts,
     dotfiles: 'ignore',
-    extensions: [],
-    // Bloquear acesso a todos os arquivos exceto imagens e favicon
-    setHeaders: (res, fp) => {
-        const ext = path.extname(fp).toLowerCase();
-        const allowed = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.ico', '.woff', '.woff2', '.ttf', '.eot'];
-        if (!allowed.includes(ext)) {
-            res.status(403).end();
-        }
-    }
+    extensions: []
 }));
 
 // ---- Digital Asset Links (TWA Android) ----

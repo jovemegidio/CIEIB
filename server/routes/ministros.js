@@ -274,18 +274,6 @@ router.delete('/filhos/:id', auth, async (req, res) => {
 // ================================================================
 
 // GET /api/ministros/documentos — Documentos do ministro logado
-    try {
-        const result = await pool.query(
-            'SELECT * FROM ministro_documentos WHERE ministro_id = $1',
-            [req.userId]
-        );
-        res.json(result.rows[0] || null);
-    } catch (err) {
-        console.error('Erro ao buscar documentos:', err);
-        res.status(500).json({ error: 'Erro ao buscar documentos' });
-    }
-});
-
 router.get('/documentos', auth, async (req, res) => {
     try {
         const docs = await pool.query('SELECT * FROM ministro_documentos WHERE ministro_id = $1', [req.userId]);

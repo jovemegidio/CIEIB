@@ -1068,7 +1068,7 @@ initAccessibilityWidget();
         banner.className = 'pwa-install-banner';
         banner.innerHTML = `
             <div class="pwa-install-content">
-                <img src="/icons/icon-96x96.png" alt="CIEIB" class="pwa-install-icon">
+                <img src="/fav.jpg" alt="CIEIB" class="pwa-install-icon" style="border-radius:50%;object-fit:cover;">
                 <div class="pwa-install-text">
                     <strong>Instalar CIEIB</strong>
                     <span>Acesse como um app no seu celular</span>

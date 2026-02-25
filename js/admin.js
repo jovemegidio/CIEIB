@@ -1762,7 +1762,7 @@ function switchMdpTab(tab) {
                             <h5>${dt.label}</h5>
                             <p>${hasFile ? '✓ Arquivo enviado' : 'Não enviado'}</p>
                             <div class="mdp-doc-actions">
-                                ${hasFile ? `<a href="${url}" target="_blank" class="mdp-btn-view" style="color:#1565c0;background:#e3f2fd;"><i class="fas fa-eye"></i> Ver</a>` : ''}
+                                ${hasFile ? `<button class="mdp-btn-view" style="color:#1565c0;background:#e3f2fd;border:none;cursor:pointer;" onclick="previewDocumento('${url}', '${dt.label}')"><i class="fas fa-eye"></i> Ver</button>` : ''}
                                 <button class="mdp-btn-edit" style="background:#fff3e0;color:#e65100;" onclick="uploadDocumentoMembro(${m.id}, '${dt.key}', '${dt.label}')"><i class="fas fa-upload"></i> ${hasFile ? 'Trocar' : 'Enviar'}</button>
                             </div>
                         </div>
@@ -1944,6 +1944,55 @@ function switchMdpTab(tab) {
             </div>
         `;
     }
+}
+
+// ---- Preview de Documento (modal) ----
+function previewDocumento(url, label) {
+    // Remover modal anterior se existir
+    const existing = document.getElementById('docPreviewOverlay');
+    if (existing) existing.remove();
+
+    const isPdf = url.toLowerCase().endsWith('.pdf');
+
+    const overlay = document.createElement('div');
+    overlay.id = 'docPreviewOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;animation:fadeIn .2s ease;';
+
+    overlay.innerHTML = `
+        <div style="position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:16px 24px;background:linear-gradient(180deg,rgba(0,0,0,.6) 0%,transparent 100%);">
+            <span style="color:#fff;font-size:0.95rem;font-weight:600;"><i class="fas fa-file-alt" style="margin-right:8px;"></i>${label}</span>
+            <div style="display:flex;gap:10px;">
+                <a href="${url}" download style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:rgba(255,255,255,.15);backdrop-filter:blur(4px);color:#fff;border-radius:8px;font-size:0.78rem;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,.2);cursor:pointer;transition:background .2s;" onmouseover="this.style.background='rgba(255,255,255,.25)'" onmouseout="this.style.background='rgba(255,255,255,.15)'">
+                    <i class="fas fa-download"></i> Baixar
+                </a>
+                <a href="${url}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:rgba(255,255,255,.15);backdrop-filter:blur(4px);color:#fff;border-radius:8px;font-size:0.78rem;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,.2);cursor:pointer;transition:background .2s;" onmouseover="this.style.background='rgba(255,255,255,.25)'" onmouseout="this.style.background='rgba(255,255,255,.15)'">
+                    <i class="fas fa-external-link-alt"></i> Nova aba
+                </a>
+                <button onclick="document.getElementById('docPreviewOverlay').remove()" style="display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;background:rgba(255,255,255,.15);backdrop-filter:blur(4px);color:#fff;border-radius:50%;font-size:1.2rem;border:1px solid rgba(255,255,255,.2);cursor:pointer;transition:background .2s;" onmouseover="this.style.background='rgba(239,68,68,.7)'" onmouseout="this.style.background='rgba(255,255,255,.15)'">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;width:100%;padding:70px 20px 20px;overflow:auto;">
+            ${isPdf
+                ? `<iframe src="${url}" style="width:90%;max-width:900px;height:85vh;border:none;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.4);"></iframe>`
+                : `<img src="${url}" alt="${label}" style="max-width:92%;max-height:85vh;object-fit:contain;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.4);background:#fff;" ondblclick="this.style.maxWidth=this.style.maxWidth==='100%'?'92%':'100%'">`
+            }
+        </div>
+    `;
+
+    // Fechar ao clicar no fundo
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.remove();
+    });
+
+    // Fechar com ESC
+    const escHandler = (e) => {
+        if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', escHandler); }
+    };
+    document.addEventListener('keydown', escHandler);
+
+    document.body.appendChild(overlay);
 }
 
 // ---- Upload de documento para membro ----

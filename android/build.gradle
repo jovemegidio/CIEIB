@@ -1,0 +1,18 @@
+// Top-level build file
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.7.3'
+    }
+}
+
+allprojects {
+    // Repositories are configured in settings.gradle
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}

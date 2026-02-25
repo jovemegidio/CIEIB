@@ -1,0 +1,83 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'br.org.cieib.app'
+    compileSdk 36
+
+    defaultConfig {
+        applicationId "br.org.cieib.app"
+        minSdk 24
+        targetSdk 36
+        versionCode 1
+        versionName "1.0.0"
+
+        // TWA Metadata
+        manifestPlaceholders = [
+            hostName          : "cieib.org.br",
+            defaultUrl        : "https://cieib.org.br",
+            launcherName      : "CIEIB",
+            assetStatements   : '[{"relation": ["delegate_permission/common.handle_all_urls"], "target": {"namespace": "web", "site": "https://cieib.org.br"}}]',
+            themeColor        : "#1a3a5c",
+            navigationColor   : "#0f2440",
+            navigationColorDark: "#0f2440",
+            navigationDividerColor: "#00000000",
+            navigationDividerColorDark: "#00000000",
+            backgroundColor   : "#1a3a5c",
+            enableNotifications: "true",
+            splashScreenFadeOutDuration: "300",
+            // Digital Asset Links fingerprint (SHA-256) - update after signing
+            fingerprint       : ""
+        ]
+    }
+
+    signingConfigs {
+        release {
+            def keystoreFile = file("../keystore/cieib-release.jks")
+            if (keystoreFile.exists()) {
+                storeFile keystoreFile
+                storePassword System.getenv("KEYSTORE_PASSWORD") ?: "cieib2026"
+                keyAlias System.getenv("KEY_ALIAS") ?: "cieib"
+                keyPassword System.getenv("KEY_PASSWORD") ?: "cieib2026"
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            def keystoreFile = file("../keystore/cieib-release.jks")
+            if (keystoreFile.exists()) {
+                signingConfig signingConfigs.release
+            }
+        }
+        debug {
+            // Debug uses default debug keystore
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    lint {
+        abortOnError false
+    }
+}
+
+dependencies {
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.5.0'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.browser:browser:1.8.0'
+}
+
+configurations.all {
+    resolutionStrategy {
+        force 'org.jetbrains.kotlin:kotlin-stdlib:1.8.22'
+        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22'
+        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22'
+    }
+}

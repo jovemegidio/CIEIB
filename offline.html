@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <title>CIEIB — Sem Conexão</title>
+    <link rel="icon" type="image/jpeg" href="/fav.jpg">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1a3a5c">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Open+Sans:wght@400;500;600&display=swap');
+
+        :root {
+            --primary: #1a3a5c;
+            --primary-dark: #0f2440;
+            --secondary: #c8a951;
+            --white: #ffffff;
+            --light: #f8f9fa;
+            --text: #333333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, #2a5a8c 100%);
+            color: var(--white);
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .offline-container {
+            max-width: 480px;
+            width: 100%;
+        }
+
+        .offline-icon {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .offline-icon svg {
+            width: 60px;
+            height: 60px;
+            fill: var(--secondary);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+        }
+
+        .offline-logo {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: 3px;
+            margin-bottom: 0.5rem;
+            color: var(--secondary);
+        }
+
+        .offline-subtitle {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 2rem;
+            letter-spacing: 1px;
+        }
+
+        h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.85);
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .btn-retry {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 32px;
+            background: var(--secondary);
+            color: var(--primary-dark);
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            text-decoration: none;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(200, 169, 81, 0.3);
+        }
+
+        .btn-retry:hover {
+            background: #e0c76e;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(200, 169, 81, 0.4);
+        }
+
+        .btn-retry:active {
+            transform: translateY(0);
+        }
+
+        .btn-retry svg {
+            width: 18px;
+            height: 18px;
+            fill: var(--primary-dark);
+        }
+
+        .offline-tips {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .offline-tips h3 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .offline-tips ul {
+            list-style: none;
+            text-align: left;
+        }
+
+        .offline-tips li {
+            padding: 6px 0;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .offline-tips li::before {
+            content: '•';
+            color: var(--secondary);
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .cached-pages {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .cached-pages h3 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .cached-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .cached-links a {
+            padding: 6px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+        }
+
+        .cached-links a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--white);
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="offline-icon">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M24 8.98C20.93 5.9 16.69 4 12 4C10.32 4 8.72 4.3 7.19 4.83L9.05 6.69C10 6.25 11 6 12 6C16.04 6 19.73 7.69 22.36 10.42L24 8.98ZM1 1.27L4.36 4.63C2.77 5.69 1.38 7.03 0.24 8.62L2 10.09C3.06 8.78 4.32 7.68 5.73 6.82L7.6 8.69C6.27 9.42 5.07 10.37 4.06 11.51L5.82 12.97C6.73 12 7.82 11.19 9 10.6L10.87 12.47C9.74 13.07 8.73 13.91 7.94 14.92L10 17L12 14.99L14.01 17.01L9.73 21.29L11.14 22.7L23.73 10.12L22.32 8.71L1 1.27ZM20 10.95L18.17 12.42C18.92 13.03 19.58 13.73 20.13 14.5L21.88 13.03C21.38 12.28 20.73 11.57 20 10.95Z"/>
+            </svg>
+        </div>
+
+        <div class="offline-logo">CIEIB</div>
+        <div class="offline-subtitle">Convenção das Igrejas Evangélicas Interdenominacional do Brasil</div>
+
+        <h1>Você está sem conexão</h1>
+        <p>Não foi possível carregar esta página. Verifique sua conexão com a internet e tente novamente.</p>
+
+        <button class="btn-retry" onclick="window.location.reload()">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+            </svg>
+            Tentar novamente
+        </button>
+
+        <div class="offline-tips">
+            <h3>O que você pode fazer:</h3>
+            <ul>
+                <li>Verifique se o Wi-Fi ou dados móveis estão ativos</li>
+                <li>Tente se aproximar do roteador Wi-Fi</li>
+                <li>Ative e desative o modo avião</li>
+                <li>Reinicie seu dispositivo</li>
+            </ul>
+        </div>
+
+        <div class="cached-pages" id="cachedPages" style="display:none;">
+            <h3>Páginas disponíveis offline:</h3>
+            <div class="cached-links" id="cachedLinks"></div>
+        </div>
+    </div>
+
+    <script>
+        // Verificar se há páginas cacheadas e exibir links
+        if ('caches' in window) {
+            caches.open('cieib-v1').then(cache => {
+                cache.keys().then(requests => {
+                    const htmlPages = requests
+                        .filter(req => {
+                            const url = new URL(req.url);
+                            return url.pathname.endsWith('.html') || url.pathname === '/';
+                        })
+                        .map(req => {
+                            const url = new URL(req.url);
+                            const names = {
+                                '/': 'Home',
+                                '/index.html': 'Home',
+                                '/quem-somos.html': 'Quem Somos',
+                                '/diretoria.html': 'Diretoria',
+                                '/noticias.html': 'Notícias',
+                                '/midias.html': 'Mídias',
+                                '/contato.html': 'Contato',
+                                '/area-do-ministro.html': 'Área do Ministro',
+                                '/verificar-credencial.html': 'Verificar Credencial',
+                                '/lgpd.html': 'LGPD'
+                            };
+                            return { url: url.pathname, name: names[url.pathname] };
+                        })
+                        .filter(p => p.name);
+
+                    if (htmlPages.length > 0) {
+                        const container = document.getElementById('cachedPages');
+                        const links = document.getElementById('cachedLinks');
+                        // Remover duplicatas
+                        const unique = [...new Map(htmlPages.map(p => [p.name, p])).values()];
+                        links.innerHTML = unique.map(p => `<a href="${p.url}">${p.name}</a>`).join('');
+                        container.style.display = 'block';
+                    }
+                });
+            });
+        }
+
+        // Auto-retry quando a conexão voltar
+        window.addEventListener('online', () => {
+            window.location.reload();
+        });
+    </script>
+</body>
+</html>

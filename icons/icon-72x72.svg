@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 72 72">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a3a5c;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0f2440;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e0c76e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#c8a951;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="72" height="72" rx="11" fill="url(#bg)" />
+  <!-- Dove icon -->
+  <g transform="translate(28, 12.96)" fill="url(#gold)">
+    <path d="M8 0 C4.8 1.6 1.6 4.8 0 8 L3.2 6.4 C2.4 8.8 4 11.2 6.4 12.8 L4.8 16 L8 13.6 L11.2 16 L9.6 12.8 C12 11.2 13.6 8.8 12.8 6.4 L16 8 C14.4 4.8 11.2 1.6 8 0Z" />
+  </g>
+  <!-- Text CIEIB -->
+  <text x="36" y="44.64" font-family="'Montserrat', 'Arial', sans-serif" font-weight="800" font-size="20" fill="#FFFFFF" text-anchor="middle" dominant-baseline="middle">CIEIB</text>
+  <!-- Subtitle -->
+  <text x="36" y="57.599999999999994" font-family="'Montserrat', 'Arial', sans-serif" font-weight="400" font-size="4" fill="url(#gold)" text-anchor="middle" dominant-baseline="middle">CONVENÇÃO DAS IGREJAS</text>
+  <text x="36" y="63.36" font-family="'Montserrat', 'Arial', sans-serif" font-weight="400" font-size="4" fill="url(#gold)" text-anchor="middle" dominant-baseline="middle">EVANGÉLICAS DO BRASIL</text>
+</svg>

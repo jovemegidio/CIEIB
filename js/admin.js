@@ -1671,6 +1671,20 @@ function switchMdpTab(tab) {
                 </div>
             ` : '<p style="color:#aaa;font-size:0.82rem;padding:8px;">Endereço não cadastrado</p>'}
 
+            <div class="mdp-section-title"><i class="fas fa-lock"></i> Acesso / Login</div>
+            <div class="mdp-info-grid">
+                <div class="mdp-info-item"><label>Login (CPF)</label><span style="font-family:monospace;font-weight:700;">${formatCPF(m.cpf)}</span></div>
+                <div class="mdp-info-item"><label>Senha Padrão</label><span style="font-family:monospace;">${m.cpf ? m.cpf.replace(/\D/g,'').substring(0,6) : '—'} <small style="color:#94a3b8;">(6 primeiros dígitos do CPF)</small></span></div>
+                <div class="mdp-info-item"><label>Ações</label><span>
+                    <button class="mdp-btn-edit" style="background:#fee2e2;color:#dc2626;font-size:0.72rem;padding:4px 10px;" onclick="resetSenhaMembro(${m.id})">
+                        <i class="fas fa-key"></i> Resetar Senha
+                    </button>
+                    <button class="mdp-btn-edit" style="background:#e0f2fe;color:#0369a1;font-size:0.72rem;padding:4px 10px;margin-left:6px;" onclick="alterarSenhaMembro(${m.id})">
+                        <i class="fas fa-edit"></i> Definir Nova Senha
+                    </button>
+                </span></div>
+            </div>
+
             <div class="mdp-section-title"><i class="fas fa-church"></i> Dados Ministeriais</div>
             <div class="mdp-info-grid">
                 <div class="mdp-info-item"><label>Cargo</label><span>${formatCargo(m.cargo)}</span></div>
@@ -1682,7 +1696,7 @@ function switchMdpTab(tab) {
                 <div class="mdp-info-item"><label>Data da Ordenação</label><span>${fmtDate(m.data_ordenacao)}</span></div>
                 <div class="mdp-info-item"><label>Igreja onde foi Ordenado</label><span>${m.igreja_ordenacao || '—'}</span></div>
                 <div class="mdp-info-item"><label>Cidade da Ordenação</label><span>${m.cidade_ordenacao || '—'}</span></div>
-                <div class="mdp-info-item"><label>Registro</label><span>${m.registro || '—'}</span></div>
+                <div class="mdp-info-item"><label>Registro</label><span style="font-weight:700;color:#1a3a5c;">${m.registro || '—'}</span></div>
                 <div class="mdp-info-item"><label>Data Registro</label><span>${fmtDate(m.data_registro)}</span></div>
                 <div class="mdp-info-item"><label>Cadastrado em</label><span>${fmtDate(m.created_at)}</span></div>
             </div>
@@ -1703,6 +1717,7 @@ function switchMdpTab(tab) {
 
     else if (tab === 'documentos') {
         const docs = m.documentos || {};
+        const uploadsMap = m.documentos_uploads || {};
         const docTypes = [
             { key: 'documento_identidade', label: 'RG / Identidade', icon: 'fa-id-card' },
             { key: 'cpf_documento', label: 'CPF', icon: 'fa-file-alt' },
@@ -1711,6 +1726,7 @@ function switchMdpTab(tab) {
             { key: 'foto_3x4', label: 'Foto 3x4', icon: 'fa-camera' },
             { key: 'certidao_casamento', label: 'Certidão de Casamento', icon: 'fa-ring' },
             { key: 'diploma_teologia', label: 'Diploma de Teologia', icon: 'fa-graduation-cap' },
+            { key: 'certificado_teologico', label: 'Certificado Teológico', icon: 'fa-graduation-cap' },
             { key: 'carta_recomendacao', label: 'Carta de Recomendação', icon: 'fa-envelope-open-text' },
         ];
 
@@ -1719,7 +1735,7 @@ function switchMdpTab(tab) {
             <p style="font-size:0.78rem;color:var(--admin-gray);margin-bottom:16px;">Documentos enviados pelo ministro durante o cadastro. Você pode visualizar e fazer upload de novos documentos.</p>
             <div class="mdp-docs-grid">
                 ${docTypes.map(dt => {
-                    const url = docs[dt.key + '_url'] || docs[dt.key] || null;
+                    const url = docs[dt.key + '_url'] || docs[dt.key] || (uploadsMap[dt.key] ? uploadsMap[dt.key].url : null);
                     const hasFile = !!url;
                     return `
                         <div class="mdp-doc-card ${hasFile ? 'has-file' : 'no-file'}">
@@ -1973,6 +1989,50 @@ async function salvarObservacoesMembro(membroId) {
     }
 }
 
+// ---- Resetar Senha do Membro ----
+async function resetSenhaMembro(membroId) {
+    const ok = await adminConfirm({
+        title: 'Resetar Senha',
+        message: 'A senha será resetada para os 6 primeiros dígitos do CPF. O membro precisará fazer login novamente. Deseja continuar?',
+        type: 'warning',
+        confirmText: 'Resetar Senha'
+    });
+    if (!ok) return;
+    try {
+        const res = await AdminAPI.put(`/ministros/${membroId}/reset-senha`, {});
+        showToast(`Senha resetada! Nova senha: ${res.nova_senha}`, 'success');
+    } catch (err) { showToast(err.message, 'error'); }
+}
+
+async function alterarSenhaMembro(membroId) {
+    document.getElementById('modalTitle').textContent = 'Definir Nova Senha';
+    document.getElementById('modalBody').innerHTML = `
+        <div class="admin-form-group">
+            <label>Nova Senha</label>
+            <input type="text" id="mNovaSenha" placeholder="Digite a nova senha (mín. 4 caracteres)">
+            <small style="color:#94a3b8;margin-top:4px;display:block;">A senha será definida para o membro. Informe-o sobre a nova senha.</small>
+        </div>
+    `;
+    document.getElementById('modalFooter').innerHTML = `
+        <button class="btn-admin-secondary" onclick="closeModal()">Cancelar</button>
+        <button class="btn-admin-primary" onclick="salvarNovaSenhaMembro(${membroId})"><i class="fas fa-save"></i> Salvar</button>
+    `;
+    openModal();
+}
+
+async function salvarNovaSenhaMembro(membroId) {
+    const senha = document.getElementById('mNovaSenha').value;
+    if (!senha || senha.length < 4) {
+        showToast('A senha deve ter pelo menos 4 caracteres', 'error');
+        return;
+    }
+    try {
+        const res = await AdminAPI.put(`/ministros/${membroId}/reset-senha`, { nova_senha: senha });
+        closeModal();
+        showToast(`Senha alterada com sucesso! Nova senha: ${res.nova_senha}`, 'success');
+    } catch (err) { showToast(err.message, 'error'); }
+}
+
 // ---- Editar Membro (modal) ----
 function editMembroModal() {
     const m = currentMembro;
@@ -1998,9 +2058,33 @@ function editMembroModal() {
             <div class="admin-form-group"><label>Função Ministerial</label><input type="text" id="mEditFuncao" value="${m.funcao_ministerial || ''}"></div>
         </div>
         <div class="form-grid">
+            <div class="admin-form-group"><label>Estado Civil</label>
+                <select id="mEditEstCivil">
+                    <option value="" ${!m.estado_civil ? 'selected' : ''}>—</option>
+                    <option value="Solteiro(a)" ${m.estado_civil === 'Solteiro(a)' ? 'selected' : ''}>Solteiro(a)</option>
+                    <option value="Casado(a)" ${m.estado_civil === 'Casado(a)' ? 'selected' : ''}>Casado(a)</option>
+                    <option value="Divorciado(a)" ${m.estado_civil === 'Divorciado(a)' ? 'selected' : ''}>Divorciado(a)</option>
+                    <option value="Viúvo(a)" ${m.estado_civil === 'Viúvo(a)' ? 'selected' : ''}>Viúvo(a)</option>
+                </select>
+            </div>
+            <div class="admin-form-group"><label>Nome Cônjuge</label><input type="text" id="mEditConjuge" value="${m.nome_conjuge || ''}"></div>
+        </div>
+        <div class="form-grid">
             <div class="admin-form-group"><label>Registro</label><input type="text" id="mEditRegistro" value="${m.registro || ''}"></div>
+            <div class="admin-form-group"><label>Data Registro</label><input type="date" id="mEditDataReg" value="${m.data_registro ? new Date(m.data_registro).toISOString().split('T')[0] : ''}"></div>
             <div class="admin-form-group"><label>Escolaridade</label><input type="text" id="mEditEscol" value="${m.escolaridade || ''}"></div>
+        </div>
+        <div class="form-grid">
             <div class="admin-form-group"><label>Tempo Ministério</label><input type="text" id="mEditTempoMin" value="${m.tempo_ministerio || ''}"></div>
+            <div class="admin-form-group"><label>Data Consagração</label><input type="date" id="mEditConsag" value="${m.data_consagracao ? new Date(m.data_consagracao).toISOString().split('T')[0] : ''}"></div>
+        </div>
+        <div class="form-grid">
+            <div class="admin-form-group"><label>Data Batismo</label><input type="date" id="mEditBatismo" value="${m.data_batismo ? new Date(m.data_batismo).toISOString().split('T')[0] : ''}"></div>
+            <div class="admin-form-group"><label>Data Ordenação</label><input type="date" id="mEditOrdenacao" value="${m.data_ordenacao ? new Date(m.data_ordenacao).toISOString().split('T')[0] : ''}"></div>
+        </div>
+        <div class="form-grid">
+            <div class="admin-form-group"><label>Igreja Ordenação</label><input type="text" id="mEditIgrejaOrd" value="${m.igreja_ordenacao || ''}"></div>
+            <div class="admin-form-group"><label>Cidade Ordenação</label><input type="text" id="mEditCidadeOrd" value="${m.cidade_ordenacao || ''}"></div>
         </div>
         <div class="form-grid">
             <div class="admin-form-group"><label>Status</label>
@@ -2044,8 +2128,16 @@ async function saveMembroEdit(id) {
         nome_igreja: document.getElementById('mEditIgreja').value,
         funcao_ministerial: document.getElementById('mEditFuncao').value,
         registro: document.getElementById('mEditRegistro').value,
+        data_registro: document.getElementById('mEditDataReg').value || null,
         escolaridade: document.getElementById('mEditEscol').value,
         tempo_ministerio: document.getElementById('mEditTempoMin').value,
+        data_consagracao: document.getElementById('mEditConsag').value || null,
+        data_batismo: document.getElementById('mEditBatismo').value || null,
+        data_ordenacao: document.getElementById('mEditOrdenacao').value || null,
+        igreja_ordenacao: document.getElementById('mEditIgrejaOrd').value,
+        cidade_ordenacao: document.getElementById('mEditCidadeOrd').value,
+        estado_civil: document.getElementById('mEditEstCivil').value,
+        nome_conjuge: document.getElementById('mEditConjuge').value,
         status: document.getElementById('mEditStatus').value,
         anuidade_status: document.getElementById('mEditAnuidade').value,
         credencial_status: document.getElementById('mEditCredencial').value,
@@ -2070,6 +2162,10 @@ function openBoletoModal(ministroId) {
                     <option value="anuidade">Anuidade</option>
                     <option value="mensalidade">Mensalidade</option>
                     <option value="taxa">Taxa</option>
+                    <option value="contribuicao">Contribuição</option>
+                    <option value="inscricao">Inscrição</option>
+                    <option value="doacao">Doação</option>
+                    <option value="outro">Outro</option>
                 </select>
             </div>
             <div class="admin-form-group"><label>Referência</label><input type="text" id="mBoletoRef" placeholder="Ex: 2025, Jan/2025"></div>

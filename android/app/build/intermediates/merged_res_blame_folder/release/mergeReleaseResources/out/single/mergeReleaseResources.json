@@ -1,0 +1,94 @@
+[
+    {
+        "merged": "br.org.cieib.app-release-25:/mipmap-mdpi_ic_launcher_foreground.png.flat",
+        "source": "br.org.cieib.app-main-26:/mipmap-mdpi/ic_launcher_foreground.png"
+    },
+    {
+        "merged": "br.org.cieib.app-release-25:/mipmap-hdpi_ic_launcher_foreground.png.flat",
+        "source": "br.org.cieib.app-main-26:/mipmap-hdpi/ic_launcher_foreground.png"
+    },
+    {
+        "merged": "br.org.cieib.app-release-25:/mipmap-xxxhdpi_ic_launcher_foreground.png.flat",
+        "source": "br.org.cieib.app-main-26:/mipmap-xxxhdpi/ic_launcher_foreground.png"
+    },
+    {
+        "merged": "br.org.cieib.app-release-25:/drawable-hdpi_splash.png.flat",
+        "source": "br.org.cieib.app-main-26:/drawable-hdpi/splash.png"
+    },
+    {
+        "merged": "br.org.cieib.app-release-25:/mipmap-mdpi_ic_launcher.png.flat",
+        "source": "br.org.cieib.app-main-26:/mipmap-mdpi/ic_launcher.png"
+    },
+    {
+        "merged": "br.org.cieib.app-release-25:/mipmap-xxxhdpi_ic_launcher_round.png.flat",
+        "source": "br.org.cieib.app-main-26:/mipmap-xxxhdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "br.org.cieib.app-release-25:/mipmap-hdpi_ic_launcher.png.flat",
+        "source": "br.org.cieib.app-main-26:/mipmap-hdpi/ic_launcher.png"
+    },
+    {
+        "merged": "br.org.cieib.app-release-25:/drawable-xhdpi_splash.png.flat",
+        "source": "br.org.cieib.app-main-26:/drawable-xhdpi/splash.png"
+    },
+    {
+        "merged": "br.org.cieib.app-release-25:/mipmap-xxxhdpi_ic_launcher.png.flat",
+        "source": "br.org.cieib.app-main-26:/mipmap-xxxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "br.org.cieib.app-release-25:/mipmap-xxhdpi_ic_launcher_round.png.flat",
+        "source": "br.org.cieib.app-main-26:/mipmap-xxhdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "br.org.cieib.app-release-25:/xml_network_security_config.xml.flat",
+        "source": "br.org.cieib.app-main-26:/xml/network_security_config.xml"
+    },
+    {
+        "merged": "br.org.cieib.app-release-25:/mipmap-xxhdpi_ic_launcher_foreground.png.flat",
+        "source": "br.org.cieib.app-main-26:/mipmap-xxhdpi/ic_launcher_foreground.png"
+    },
+    {
+        "merged": "br.org.cieib.app-release-25:/mipmap-hdpi_ic_launcher_round.png.flat",
+        "source": "br.org.cieib.app-main-26:/mipmap-hdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "br.org.cieib.app-release-25:/mipmap-xhdpi_ic_launcher_round.png.flat",
+        "source": "br.org.cieib.app-main-26:/mipmap-xhdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "br.org.cieib.app-release-25:/mipmap-xhdpi_ic_launcher_foreground.png.flat",
+        "source": "br.org.cieib.app-main-26:/mipmap-xhdpi/ic_launcher_foreground.png"
+    },
+    {
+        "merged": "br.org.cieib.app-release-25:/mipmap-mdpi_ic_launcher_round.png.flat",
+        "source": "br.org.cieib.app-main-26:/mipmap-mdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "br.org.cieib.app-release-25:/drawable-mdpi_splash.png.flat",
+        "source": "br.org.cieib.app-main-26:/drawable-mdpi/splash.png"
+    },
+    {
+        "merged": "br.org.cieib.app-release-25:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "br.org.cieib.app-main-26:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "br.org.cieib.app-release-25:/drawable_splash.png.flat",
+        "source": "br.org.cieib.app-main-26:/drawable/splash.png"
+    },
+    {
+        "merged": "br.org.cieib.app-release-25:/xml_filepaths.xml.flat",
+        "source": "br.org.cieib.app-main-26:/xml/filepaths.xml"
+    },
+    {
+        "merged": "br.org.cieib.app-release-25:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "br.org.cieib.app-main-26:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "br.org.cieib.app-release-25:/mipmap-xxhdpi_ic_launcher.png.flat",
+        "source": "br.org.cieib.app-main-26:/mipmap-xxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "br.org.cieib.app-release-25:/mipmap-xhdpi_ic_launcher.png.flat",
+        "source": "br.org.cieib.app-main-26:/mipmap-xhdpi/ic_launcher.png"
+    }
+]

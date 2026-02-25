@@ -19,7 +19,8 @@ const isProd = process.env.NODE_ENV === 'production';
 // ---- Versão para cache-busting (baseada no conteúdo dos arquivos) ----
 const WATCHED_FILES = [
     'css/style.css', 'css/painel.css', 'css/admin.css',
-    'js/main.js', 'js/api.js', 'js/painel.js', 'js/admin.js'
+    'js/main.js', 'js/api.js', 'js/painel.js', 'js/admin.js',
+    'service-worker.js', 'manifest.json'
 ];
 
 function computeVersion() {
@@ -128,6 +129,41 @@ app.use(express.static(__dirname, {
     }
 }));
 
+// ---- Digital Asset Links (TWA Android) ----
+app.use('/.well-known', express.static(path.join(__dirname, '.well-known'), {
+    setHeaders: (res) => {
+        res.set('Content-Type', 'application/json');
+        res.set('Cache-Control', 'public, max-age=3600');
+    }
+}));
+
+// ---- PWA: Servir manifest.json e service-worker.js ----
+app.get('/manifest.json', (req, res) => {
+    res.set('Content-Type', 'application/manifest+json');
+    res.set('Cache-Control', 'no-cache, must-revalidate');
+    res.sendFile(path.join(__dirname, 'manifest.json'));
+});
+
+app.get('/service-worker.js', (req, res) => {
+    res.set('Content-Type', 'application/javascript');
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.set('Service-Worker-Allowed', '/');
+    res.sendFile(path.join(__dirname, 'service-worker.js'));
+});
+
+app.get('/offline.html', (req, res) => {
+    res.set('Content-Type', 'text/html');
+    res.set('Cache-Control', 'no-cache, must-revalidate');
+    res.sendFile(path.join(__dirname, 'offline.html'));
+});
+
+app.use('/icons', express.static(path.join(__dirname, 'icons'), {
+    etag: true,
+    lastModified: true,
+    maxAge: '7d',
+    immutable: true
+}));
+
 // ---- Rotas da API ----
 const authRoutes = require('./server/routes/auth');
 const ministrosRoutes = require('./server/routes/ministros');
@@ -164,7 +200,7 @@ app.use('/api/suporte', suporteRoutes);
 // ---- SPA Fallback: Rotas HTML com cache-busting ----
 const htmlPages = [
     'index', 'quem-somos', 'diretoria', 'noticias', 'midias',
-    'contato', 'area-do-ministro', 'painel-ministro', 'verificar-credencial', 'painel-admin', 'lgpd'
+    'contato', 'area-do-ministro', 'painel-ministro', 'verificar-credencial', 'painel-admin', 'lgpd', 'offline'
 ];
 
 htmlPages.forEach(page => {

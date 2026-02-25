@@ -398,7 +398,8 @@ router.put('/ministros/:id', adminAuth, async (req, res) => {
         const { nome, cargo, email, telefone, whatsapp, status, nome_igreja, funcao_ministerial,
                 tempo_ministerio, data_consagracao, escolaridade, registro, observacoes_admin,
                 anuidade_status, credencial_status, aprovado,
-                data_batismo, data_ordenacao, igreja_ordenacao, cidade_ordenacao } = req.body;
+                data_batismo, data_ordenacao, igreja_ordenacao, cidade_ordenacao,
+                estado_civil, nome_conjuge, data_registro } = req.body;
         const r = await pool.query(`
             UPDATE ministros SET
                 nome = COALESCE($1, nome), cargo = COALESCE($2, cargo), email = COALESCE($3, email),
@@ -410,12 +411,15 @@ router.put('/ministros/:id', adminAuth, async (req, res) => {
                 credencial_status = COALESCE($15, credencial_status), aprovado = COALESCE($16, aprovado),
                 data_batismo = COALESCE($17, data_batismo), data_ordenacao = COALESCE($18, data_ordenacao),
                 igreja_ordenacao = COALESCE($19, igreja_ordenacao), cidade_ordenacao = COALESCE($20, cidade_ordenacao),
+                estado_civil = COALESCE($21, estado_civil), nome_conjuge = COALESCE($22, nome_conjuge),
+                data_registro = COALESCE($23, data_registro),
                 updated_at = NOW()
-            WHERE id = $21 RETURNING id, nome, status
+            WHERE id = $24 RETURNING id, nome, status
         `, [nome, cargo, email, telefone, whatsapp, status, nome_igreja, funcao_ministerial,
             tempo_ministerio, data_consagracao || null, escolaridade, registro, observacoes_admin,
             anuidade_status, credencial_status, aprovado,
             data_batismo || null, data_ordenacao || null, igreja_ordenacao, cidade_ordenacao,
+            estado_civil || null, nome_conjuge || null, data_registro || null,
             req.params.id]);
 
         // Log histórico
@@ -425,6 +429,29 @@ router.put('/ministros/:id', adminAuth, async (req, res) => {
         );
 
         res.json(r.rows[0]);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// PUT /api/admin/ministros/:id/reset-senha — Resetar senha do membro
+router.put('/ministros/:id/reset-senha', adminAuth, async (req, res) => {
+    try {
+        const { nova_senha } = req.body;
+        const mid = req.params.id;
+        const ministro = await pool.query('SELECT cpf, nome FROM ministros WHERE id = $1', [mid]);
+        if (ministro.rows.length === 0) return res.status(404).json({ error: 'Ministro não encontrado' });
+
+        // Se não informou nova senha, usar os 6 primeiros dígitos do CPF
+        const senha = nova_senha || ministro.rows[0].cpf.replace(/\D/g, '').substring(0, 6);
+        const senhaHash = await bcrypt.hash(senha, 10);
+
+        await pool.query('UPDATE ministros SET senha = $1, updated_at = NOW() WHERE id = $2', [senhaHash, mid]);
+
+        await pool.query(
+            'INSERT INTO ministro_historico (ministro_id, acao, descricao, admin_nome) VALUES ($1, $2, $3, $4)',
+            [mid, 'RESET DE SENHA', `Senha do membro resetada pelo admin`, 'Administrador']
+        );
+
+        res.json({ message: 'Senha alterada com sucesso', nova_senha: senha });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -542,6 +569,7 @@ router.post('/ministros/:id/documentos', adminAuth, upload.single('file'), async
             foto_3x4: 'foto_3x4_url',
             certidao_casamento: 'certidao_casamento_url',
             diploma_teologia: 'diploma_teologia_url',
+            certificado_teologico: 'diploma_teologia_url',
             carta_recomendacao: 'carta_recomendacao_url',
         };
 

@@ -109,6 +109,13 @@ router.post('/', async (req, res) => {
 
         const ministroId = result.rows[0].id;
 
+        // Gerar número de registro automático: CIEIB-ANO-ID
+        const registroNum = `CIEIB-${new Date().getFullYear()}-${String(ministroId).padStart(4, '0')}`;
+        await client.query(
+            'UPDATE ministros SET registro = $1, data_registro = CURRENT_DATE WHERE id = $2',
+            [registroNum, ministroId]
+        );
+
         // Inserir endereço
         if (cep || endereco) {
             await client.query(`

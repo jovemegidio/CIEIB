@@ -3560,3 +3560,233 @@ body.a11y-stop-animations * {
         border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     }
 }
+
+/* ===== PWA — Install Banner ===== */
+.pwa-install-banner {
+    position: fixed;
+    bottom: -120px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 99999;
+    width: calc(100% - 2rem);
+    max-width: 480px;
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
+    transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.pwa-install-banner.show {
+    bottom: 1rem;
+}
+
+.pwa-install-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+}
+
+.pwa-install-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    flex-shrink: 0;
+}
+
+.pwa-install-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.pwa-install-text strong {
+    display: block;
+    font-family: var(--font-primary);
+    font-size: 0.95rem;
+    color: var(--text);
+    margin-bottom: 2px;
+}
+
+.pwa-install-text span {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
+
+.pwa-install-btn {
+    padding: 8px 20px;
+    background: var(--primary);
+    color: var(--white);
+    border: none;
+    border-radius: 50px;
+    font-family: var(--font-primary);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: var(--transition);
+    flex-shrink: 0;
+}
+
+.pwa-install-btn:hover {
+    background: var(--primary-light);
+    transform: scale(1.05);
+}
+
+.pwa-install-close {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    color: var(--gray);
+    cursor: pointer;
+    padding: 4px 8px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.pwa-install-close:hover {
+    color: var(--text);
+}
+
+/* ===== PWA — Update Banner ===== */
+.pwa-update-banner {
+    position: fixed;
+    top: -80px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 99999;
+    width: calc(100% - 2rem);
+    max-width: 480px;
+    background: var(--primary);
+    color: var(--white);
+    border-radius: var(--radius);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    transition: top 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pwa-update-banner.show {
+    top: 1rem;
+}
+
+.pwa-update-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    font-size: 0.9rem;
+}
+
+.pwa-update-content i {
+    color: var(--secondary);
+    font-size: 1.1rem;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.pwa-update-content span {
+    flex: 1;
+    font-family: var(--font-primary);
+    font-weight: 500;
+}
+
+.pwa-update-btn {
+    padding: 6px 16px;
+    background: var(--secondary);
+    color: var(--primary-dark);
+    border: none;
+    border-radius: 50px;
+    font-family: var(--font-primary);
+    font-weight: 700;
+    font-size: 0.8rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: var(--transition);
+}
+
+.pwa-update-btn:hover {
+    background: var(--secondary-light);
+}
+
+.pwa-update-close {
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    padding: 2px 6px;
+    line-height: 1;
+}
+
+.pwa-update-close:hover {
+    color: var(--white);
+}
+
+/* ===== PWA — Toast Notifications ===== */
+.pwa-toast {
+    position: fixed;
+    bottom: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 99998;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-family: var(--font-primary);
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+    transition: bottom 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.pwa-toast.show {
+    bottom: 1.5rem;
+}
+
+.pwa-toast.toast-warning {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffc107;
+}
+
+.pwa-toast.toast-info {
+    background: var(--primary);
+    color: var(--white);
+}
+
+/* ===== PWA — Standalone Mode Adjustments ===== */
+@media (display-mode: standalone) {
+    .top-bar {
+        display: none;
+    }
+
+    .header {
+        padding-top: env(safe-area-inset-top, 0px);
+    }
+
+    body {
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    /* Esconder banner de instalação quando já está instalado */
+    .pwa-install-banner {
+        display: none !important;
+    }
+}
+
+/* Ajuste para safe areas do iOS (notch) */
+@supports (padding: max(0px)) {
+    @media (display-mode: standalone) {
+        .header {
+            padding-top: max(0px, env(safe-area-inset-top));
+        }
+    }
+}

@@ -1,0 +1,73 @@
+<variant
+    name="release"
+    package="br.org.cieib.app"
+    minSdkVersion="24"
+    targetSdkVersion="36"
+    shrinking="true"
+    mergedManifest="build\intermediates\merged_manifest\release\processReleaseMainManifest\AndroidManifest.xml"
+    manifestMergeReport="build\outputs\logs\manifest-merger-release-report.txt"
+    proguardFiles="build\intermediates\default_proguard_files\global\proguard-android-optimize.txt-8.7.3;proguard-rules.pro"
+    partialResultsDir="build\intermediates\lint_vital_partial_results\release\lintVitalAnalyzeRelease\out">
+  <buildFeatures
+      namespacing="REQUIRED"/>
+  <sourceProviders>
+    <sourceProvider
+        manifests="src\main\AndroidManifest.xml"
+        javaDirectories="src\main\java;src\release\java;src\main\kotlin;src\release\kotlin"
+        resDirectories="src\main\res;src\release\res"
+        assetsDirectories="src\main\assets;src\release\assets"/>
+  </sourceProviders>
+  <testSourceProviders>
+  </testSourceProviders>
+  <testFixturesSourceProviders>
+  </testFixturesSourceProviders>
+  <manifestPlaceholders>
+    <placeholder
+        name="assetStatements"
+        value="[{&quot;relation&quot;: [&quot;delegate_permission/common.handle_all_urls&quot;], &quot;target&quot;: {&quot;namespace&quot;: &quot;web&quot;, &quot;site&quot;: &quot;https://cieib.org.br&quot;}}]" />
+    <placeholder
+        name="backgroundColor"
+        value="#1a3a5c" />
+    <placeholder
+        name="defaultUrl"
+        value="https://cieib.org.br" />
+    <placeholder
+        name="enableNotifications"
+        value="true" />
+    <placeholder
+        name="fingerprint"
+        value="" />
+    <placeholder
+        name="hostName"
+        value="cieib.org.br" />
+    <placeholder
+        name="launcherName"
+        value="CIEIB" />
+    <placeholder
+        name="navigationColor"
+        value="#0f2440" />
+    <placeholder
+        name="navigationColorDark"
+        value="#0f2440" />
+    <placeholder
+        name="navigationDividerColor"
+        value="#00000000" />
+    <placeholder
+        name="navigationDividerColorDark"
+        value="#00000000" />
+    <placeholder
+        name="splashScreenFadeOutDuration"
+        value="300" />
+    <placeholder
+        name="themeColor"
+        value="#1a3a5c" />
+  </manifestPlaceholders>
+  <artifact
+      classOutputs="build\intermediates\javac\release\compileReleaseJavaWithJavac\classes;build\intermediates\compile_and_runtime_not_namespaced_r_class_jar\release\processReleaseResources\R.jar"
+      type="MAIN"
+      applicationId="br.org.cieib.app"
+      generatedSourceFolders="build\generated\ap_generated_sources\release\out"
+      generatedResourceFolders="build\generated\res\resValues\release"
+      desugaredMethodsFiles="C:\Users\dev\.gradle\caches\8.11.1\transforms\096ea21f873cbfda7a08183b30130d14\transformed\D8BackportedDesugaredMethods.txt">
+  </artifact>
+</variant>

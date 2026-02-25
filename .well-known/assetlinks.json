@@ -1,0 +1,10 @@
+[{
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+        "namespace": "android_app",
+        "package_name": "br.org.cieib.app",
+        "sha256_cert_fingerprints": [
+            "D3:27:96:69:AD:FD:AD:55:B9:08:53:CA:A5:BA:7A:41:F2:24:F7:DB:B5:49:BE:5B:5C:C1:8F:5F:72:57:61:7A"
+        ]
+    }
+}]

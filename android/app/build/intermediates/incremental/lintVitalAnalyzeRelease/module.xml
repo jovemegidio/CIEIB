@@ -1,0 +1,17 @@
+<lint-module
+    format="1"
+    dir="C:\Users\dev\Desktop\CIEIB\android\app"
+    name=":app"
+    type="APP"
+    maven="CIEIB:app:unspecified"
+    agpVersion="8.7.3"
+    buildFolder="build"
+    bootClassPath="C:\Users\dev\AppData\Local\Android\Sdk\platforms\android-36\android.jar;C:\Users\dev\AppData\Local\Android\Sdk\build-tools\34.0.0\core-lambda-stubs.jar"
+    javaSourceLevel="17"
+    compileTarget="android-36">
+  <lintOptions
+      absolutePaths="true"
+      checkReleaseBuilds="true"
+      explainIssues="true"/>
+  <variant name="release"/>
+</lint-module>

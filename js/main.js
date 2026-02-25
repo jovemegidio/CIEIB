@@ -962,3 +962,180 @@ function initAccessibilityWidget() {
 
 // Iniciar widget de acessibilidade
 initAccessibilityWidget();
+
+// ===== PWA — Service Worker Registration =====
+(function initPWA() {
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/service-worker.js', { scope: '/' })
+                .then((registration) => {
+                    console.log('✅ Service Worker registrado:', registration.scope);
+
+                    // Verificar atualizações periodicamente
+                    setInterval(() => {
+                        registration.update();
+                    }, 60 * 60 * 1000); // A cada 1 hora
+
+                    // Notificar quando houver atualização disponível
+                    registration.addEventListener('updatefound', () => {
+                        const newWorker = registration.installing;
+                        if (!newWorker) return;
+
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                // Novo Service Worker disponível - mostrar notificação de atualização
+                                showPWAUpdateNotification(newWorker);
+                            }
+                        });
+                    });
+                })
+                .catch((error) => {
+                    console.warn('⚠️ Falha ao registrar Service Worker:', error);
+                });
+
+            // Recarregar quando o novo SW assumir
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    refreshing = true;
+                    window.location.reload();
+                }
+            });
+        });
+    }
+
+    // Banner de atualização disponível
+    function showPWAUpdateNotification(worker) {
+        // Criar banner de atualização
+        const banner = document.createElement('div');
+        banner.className = 'pwa-update-banner';
+        banner.innerHTML = `
+            <div class="pwa-update-content">
+                <i class="fas fa-sync-alt"></i>
+                <span>Nova versão disponível!</span>
+                <button class="pwa-update-btn" id="pwaUpdateBtn">Atualizar</button>
+                <button class="pwa-update-close" id="pwaUpdateClose" aria-label="Fechar">&times;</button>
+            </div>
+        `;
+        document.body.appendChild(banner);
+
+        // Mostrar com animação
+        requestAnimationFrame(() => {
+            banner.classList.add('show');
+        });
+
+        document.getElementById('pwaUpdateBtn').addEventListener('click', () => {
+            worker.postMessage({ type: 'SKIP_WAITING' });
+            banner.remove();
+        });
+
+        document.getElementById('pwaUpdateClose').addEventListener('click', () => {
+            banner.classList.remove('show');
+            setTimeout(() => banner.remove(), 300);
+        });
+    }
+
+    // ===== PWA Install Prompt =====
+    let deferredPrompt;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+
+        // Mostrar botão de instalação customizado apenas se não foi dispensado recentemente
+        const dismissed = localStorage.getItem('pwa-install-dismissed');
+        if (dismissed) {
+            const daysSince = (Date.now() - parseInt(dismissed)) / (1000 * 60 * 60 * 24);
+            if (daysSince < 7) return; // Não mostrar por 7 dias após dispensar
+        }
+
+        showInstallBanner();
+    });
+
+    window.addEventListener('appinstalled', () => {
+        console.log('✅ PWA instalado com sucesso!');
+        deferredPrompt = null;
+        const banner = document.querySelector('.pwa-install-banner');
+        if (banner) banner.remove();
+    });
+
+    function showInstallBanner() {
+        // Não mostrar se já está instalado (standalone)
+        if (window.matchMedia('(display-mode: standalone)').matches) return;
+        if (window.navigator.standalone === true) return;
+
+        const banner = document.createElement('div');
+        banner.className = 'pwa-install-banner';
+        banner.innerHTML = `
+            <div class="pwa-install-content">
+                <img src="/icons/icon-96x96.png" alt="CIEIB" class="pwa-install-icon">
+                <div class="pwa-install-text">
+                    <strong>Instalar CIEIB</strong>
+                    <span>Acesse como um app no seu celular</span>
+                </div>
+                <button class="pwa-install-btn" id="pwaInstallBtn">Instalar</button>
+                <button class="pwa-install-close" id="pwaInstallClose" aria-label="Fechar">&times;</button>
+            </div>
+        `;
+        document.body.appendChild(banner);
+
+        // Mostrar com delay
+        setTimeout(() => {
+            banner.classList.add('show');
+        }, 3000);
+
+        document.getElementById('pwaInstallBtn').addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`PWA install: ${outcome}`);
+            deferredPrompt = null;
+            banner.classList.remove('show');
+            setTimeout(() => banner.remove(), 300);
+        });
+
+        document.getElementById('pwaInstallClose').addEventListener('click', () => {
+            localStorage.setItem('pwa-install-dismissed', Date.now().toString());
+            banner.classList.remove('show');
+            setTimeout(() => banner.remove(), 300);
+        });
+    }
+
+    // ===== Detectar modo offline/online =====
+    function updateOnlineStatus() {
+        const isOnline = navigator.onLine;
+        document.body.classList.toggle('is-offline', !isOnline);
+
+        if (!isOnline) {
+            showToast('Você está offline. Algumas funcionalidades podem não estar disponíveis.', 'warning');
+        } else {
+            // Remover toast de offline se existir
+            const offlineToast = document.querySelector('.toast-warning');
+            if (offlineToast) offlineToast.remove();
+        }
+    }
+
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+
+    function showToast(message, type = 'info') {
+        const existing = document.querySelector(`.toast-${type}`);
+        if (existing) existing.remove();
+
+        const toast = document.createElement('div');
+        toast.className = `pwa-toast toast-${type}`;
+        toast.innerHTML = `
+            <i class="fas fa-${type === 'warning' ? 'wifi' : 'info-circle'}"></i>
+            <span>${message}</span>
+        `;
+        document.body.appendChild(toast);
+        requestAnimationFrame(() => toast.classList.add('show'));
+
+        if (type !== 'warning') {
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+    }
+})();

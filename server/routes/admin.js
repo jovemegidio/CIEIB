@@ -353,11 +353,12 @@ router.get('/ministros', adminAuth, async (req, res) => {
 router.get('/ministros/:id', adminAuth, async (req, res) => {
     try {
         const mid = req.params.id;
-        const [ministro, endereco, filhos, docs, convencoes, boletos, credenciais, historico, contas] = await Promise.all([
+        const [ministro, endereco, filhos, docs, uploads, convencoes, boletos, credenciais, historico, contas] = await Promise.all([
             pool.query('SELECT * FROM ministros WHERE id = $1', [mid]),
             pool.query('SELECT * FROM ministro_endereco WHERE ministro_id = $1', [mid]),
             pool.query('SELECT * FROM ministro_filhos WHERE ministro_id = $1 ORDER BY nome', [mid]),
             pool.query('SELECT * FROM ministro_documentos WHERE ministro_id = $1', [mid]),
+            pool.query('SELECT tipo_documento, caminho, nome_arquivo FROM ministro_uploads WHERE ministro_id = $1', [mid]),
             pool.query('SELECT * FROM ministro_convencoes WHERE ministro_id = $1', [mid]),
             pool.query('SELECT * FROM ministro_boletos WHERE ministro_id = $1 ORDER BY ano DESC, mes DESC', [mid]),
             pool.query('SELECT * FROM ministro_credenciais WHERE ministro_id = $1 ORDER BY created_at DESC', [mid]),
@@ -365,13 +366,23 @@ router.get('/ministros/:id', adminAuth, async (req, res) => {
             pool.query('SELECT * FROM contas_receber WHERE ministro_id = $1 ORDER BY data_vencimento DESC', [mid]),
         ]);
 
-        if (ministro.rows.length === 0) return res.status(404).json({ error: 'Ministro não encontrado' });
+        if (ministro.rows.length === 0) return res.status(404).json({ error: 'Ministro n\u00e3o encontrado' });
+
+        // Mapear uploads para objeto por tipo_documento
+        const uploadsMap = {};
+        uploads.rows.forEach(u => {
+            uploadsMap[u.tipo_documento] = {
+                url: u.caminho,
+                nome: u.nome_arquivo
+            };
+        });
 
         res.json({
             ...ministro.rows[0],
             endereco: endereco.rows[0] || null,
             filhos: filhos.rows,
             documentos: docs.rows[0] || null,
+            documentos_uploads: uploadsMap,
             convencoes: convencoes.rows,
             boletos: boletos.rows,
             credenciais: credenciais.rows,

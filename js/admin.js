@@ -1151,6 +1151,11 @@ async function toggleMinistroStatus(id, currentStatus) {
         await AdminAPI.put(`/ministros/${id}/status`, { status: newStatus });
         showToast('Status alterado!', 'success');
         loadAdminMinistros();
+        // Se o painel de detalhes estiver aberto, recarregar
+        const mdp = document.getElementById('membroDetailPanel');
+        if (mdp && mdp.classList.contains('open')) {
+            openMembroDetail(id);
+        }
     } catch (err) { showToast(err.message, 'error'); }
 }
 
@@ -1357,6 +1362,9 @@ async function openMembroDetail(id) {
                 <div class="mdp-profile-quick-actions">
                     <button class="mdp-quick-btn" onclick="openBoletoModal(${m.id})"><i class="fas fa-plus-circle"></i> Novo Boleto</button>
                     <button class="mdp-quick-btn" onclick="openCredencialModal(${m.id})"><i class="fas fa-id-badge"></i> Nova Credencial</button>
+                    <button class="mdp-quick-btn" style="background:${m.status === 'ATIVO' ? 'linear-gradient(135deg,#fef2f2,#fee2e2)' : 'linear-gradient(135deg,#f0fdf4,#dcfce7)'};color:${m.status === 'ATIVO' ? '#b91c1c' : '#15803d'};border:1px solid ${m.status === 'ATIVO' ? '#fecaca' : '#bbf7d0'};" onclick="toggleMinistroStatus(${m.id}, '${m.status}')">
+                        <i class="fas fa-${m.status === 'ATIVO' ? 'user-slash' : 'user-check'}"></i> ${m.status === 'ATIVO' ? 'Desativar' : 'Ativar'}
+                    </button>
                 </div>
             </div>
         `;

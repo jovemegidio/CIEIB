@@ -35,3 +35,10 @@ android/keystore/
 android/app/build/
 *.jks
 *.keystore
+
+# Deploy script (contém credenciais — manter local)
+deploy_vps.py
+
+# Editor AI
+.claude/
+
